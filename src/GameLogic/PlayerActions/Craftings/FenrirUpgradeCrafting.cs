@@ -15,7 +15,7 @@ using MUnique.OpenMU.GameLogic.Views.NPC;
 /// </summary>
 public class FenrirUpgradeCrafting : BaseItemCraftingHandler
 {
-    private readonly ItemPriceCalculator _priceCalculator = new ();
+    private readonly ItemPriceCalculator _priceCalculator = new();
 
     /// <inheritdoc />
     protected override int GetPrice(byte successRate, IList<CraftingRequiredItemLink> requiredItems)

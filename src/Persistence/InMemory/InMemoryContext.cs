@@ -5,7 +5,9 @@
 namespace MUnique.OpenMU.Persistence.InMemory;
 
 using System.Collections;
+using System.Threading;
 using Nito.AsyncEx.Synchronous;
+using Nito.Disposables;
 
 /// <summary>
 /// An in-memory context which get it's data from the repositories of the <see cref="InMemoryPersistenceContextProvider"/>.
@@ -43,7 +45,10 @@ public class InMemoryContext : IContext
         this.SavedChanges = null;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Saves the changes of the context.
+    /// </summary>
+    /// <returns><c>True</c>, if the saving was successful; <c>false</c>, otherwise.</returns>
     public bool SaveChanges()
     {
         foreach (var repository in this.Provider.MemoryRepositories)
@@ -55,7 +60,7 @@ public class InMemoryContext : IContext
     }
 
     /// <inheritdoc/>
-    public async ValueTask<bool> SaveChangesAsync()
+    public async ValueTask<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = this.SaveChanges();
         if (result)
@@ -64,6 +69,12 @@ public class InMemoryContext : IContext
         }
 
         return result;
+    }
+
+    /// <inheritdoc />
+    public IDisposable SuspendChangeNotifications()
+    {
+        return new Disposable(() => { });
     }
 
     /// <inheritdoc/>
@@ -97,7 +108,7 @@ public class InMemoryContext : IContext
         {
             if (identifiable.Id == Guid.Empty)
             {
-                identifiable.Id = Guid.NewGuid();
+                identifiable.Id = GuidV7.NewGuid();
             }
 
             var repository = this.Provider.GetRepository<T>() as IMemoryRepository;
@@ -115,7 +126,7 @@ public class InMemoryContext : IContext
         {
             if (identifiable.Id == Guid.Empty)
             {
-                identifiable.Id = Guid.NewGuid();
+                identifiable.Id = GuidV7.NewGuid();
             }
 
             var repository = this.Provider.GetRepository(type) as IMemoryRepository;

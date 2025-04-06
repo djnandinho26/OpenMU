@@ -7858,14 +7858,14 @@ public readonly ref struct MoneyDroppedExtendedRef
             var header = this.Header;
             header.Type = HeaderType;
             header.Code = Code;
-            header.Length = (ushort)Math.Min(data.Length, Length);
+            header.Length = (byte)Math.Min(data.Length, Length);
         }
     }
 
     /// <summary>
     /// Gets the header type of this data packet.
     /// </summary>
-    public static byte HeaderType => 0xC2;
+    public static byte HeaderType => 0xC1;
 
     /// <summary>
     /// Gets the operation code of this data packet.
@@ -7880,7 +7880,7 @@ public readonly ref struct MoneyDroppedExtendedRef
     /// <summary>
     /// Gets the header of this packet.
     /// </summary>
-    public C2HeaderRef Header => new (this._data);
+    public C1HeaderRef Header => new (this._data);
 
     /// <summary>
     /// Gets or sets if this flag is set, the money is added to the map with an animation and sound. Otherwise, it's just added like it was already on the ground before.
@@ -9345,6 +9345,128 @@ public readonly ref struct ItemConsumptionFailedExtendedRef
     /// <param name="packet">The packet as struct.</param>
     /// <returns>The packet as byte span.</returns>
     public static implicit operator Span<byte>(ItemConsumptionFailedExtendedRef packet) => packet._data; 
+}
+
+
+/// <summary>
+/// Is sent by the server when: Setting the base stats of a character, e.g. set stats command or after a reset.
+/// Causes reaction on client side: The values are updated on the game client user interface.
+/// </summary>
+public readonly ref struct BaseStatsExtendedRef
+{
+    private readonly Span<byte> _data;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseStatsExtendedRef"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    public BaseStatsExtendedRef(Span<byte> data)
+        : this(data, true)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseStatsExtendedRef"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    /// <param name="initialize">If set to <c>true</c>, the header data is automatically initialized and written to the underlying span.</param>
+    private BaseStatsExtendedRef(Span<byte> data, bool initialize)
+    {
+        this._data = data;
+        if (initialize)
+        {
+            var header = this.Header;
+            header.Type = HeaderType;
+            header.Code = Code;
+            header.Length = (byte)Math.Min(data.Length, Length);
+            header.SubCode = SubCode;
+        }
+    }
+
+    /// <summary>
+    /// Gets the header type of this data packet.
+    /// </summary>
+    public static byte HeaderType => 0xC1;
+
+    /// <summary>
+    /// Gets the operation code of this data packet.
+    /// </summary>
+    public static byte Code => 0xF3;
+
+    /// <summary>
+    /// Gets the operation sub-code of this data packet.
+    /// The <see cref="Code" /> is used as a grouping key.
+    /// </summary>
+    public static byte SubCode => 0x32;
+
+    /// <summary>
+    /// Gets the initial length of this data packet. When the size is dynamic, this value may be bigger than actually needed.
+    /// </summary>
+    public static int Length => 24;
+
+    /// <summary>
+    /// Gets the header of this packet.
+    /// </summary>
+    public C1HeaderWithSubCodeRef Header => new (this._data);
+
+    /// <summary>
+    /// Gets or sets the strength.
+    /// </summary>
+    public uint Strength
+    {
+        get => ReadUInt32LittleEndian(this._data[4..]);
+        set => WriteUInt32LittleEndian(this._data[4..], value);
+    }
+
+    /// <summary>
+    /// Gets or sets the agility.
+    /// </summary>
+    public uint Agility
+    {
+        get => ReadUInt32LittleEndian(this._data[8..]);
+        set => WriteUInt32LittleEndian(this._data[8..], value);
+    }
+
+    /// <summary>
+    /// Gets or sets the vitality.
+    /// </summary>
+    public uint Vitality
+    {
+        get => ReadUInt32LittleEndian(this._data[12..]);
+        set => WriteUInt32LittleEndian(this._data[12..], value);
+    }
+
+    /// <summary>
+    /// Gets or sets the energy.
+    /// </summary>
+    public uint Energy
+    {
+        get => ReadUInt32LittleEndian(this._data[16..]);
+        set => WriteUInt32LittleEndian(this._data[16..], value);
+    }
+
+    /// <summary>
+    /// Gets or sets the command.
+    /// </summary>
+    public uint Command
+    {
+        get => ReadUInt32LittleEndian(this._data[20..]);
+        set => WriteUInt32LittleEndian(this._data[20..], value);
+    }
+
+    /// <summary>
+    /// Performs an implicit conversion from a Span of bytes to a <see cref="BaseStatsExtended"/>.
+    /// </summary>
+    /// <param name="packet">The packet as span.</param>
+    /// <returns>The packet as struct.</returns>
+    public static implicit operator BaseStatsExtendedRef(Span<byte> packet) => new (packet, false);
+
+    /// <summary>
+    /// Performs an implicit conversion from <see cref="BaseStatsExtended"/> to a Span of bytes.
+    /// </summary>
+    /// <param name="packet">The packet as struct.</param>
+    /// <returns>The packet as byte span.</returns>
+    public static implicit operator Span<byte>(BaseStatsExtendedRef packet) => packet._data; 
 }
 
 
@@ -11048,7 +11170,7 @@ public readonly ref struct PlayerShopBuyResultRef
     /// </summary>
     public Span<byte> ItemData
     {
-        get => this._data.Slice(8, 13);
+        get => this._data.Slice(7, 13);
     }
 
     /// <summary>
@@ -11155,8 +11277,8 @@ public readonly ref struct PlayerShopBuyResultExtendedRef
     /// </summary>
     public byte ItemSlot
     {
-        get => this._data[8];
-        set => this._data[8] = value;
+        get => this._data[7];
+        set => this._data[7] = value;
     }
 
     /// <summary>
@@ -11164,7 +11286,7 @@ public readonly ref struct PlayerShopBuyResultExtendedRef
     /// </summary>
     public Span<byte> ItemData
     {
-        get => this._data.Slice(9);
+        get => this._data.Slice(8);
     }
 
     /// <summary>
@@ -11186,7 +11308,7 @@ public readonly ref struct PlayerShopBuyResultExtendedRef
     /// </summary>
     /// <param name="itemDataLength">The length in bytes of <see cref="ItemData"/> on which the required size depends.</param>
         
-    public static int GetRequiredSize(int itemDataLength) => itemDataLength + 9;
+    public static int GetRequiredSize(int itemDataLength) => itemDataLength + 8;
 }
 
 
@@ -25507,6 +25629,127 @@ public readonly ref struct OpenLetterRef
     /// </summary>
     /// <param name="contentLength">The content length in bytes of the variable 'Message' field from which the size will be calculated.</param>
     public static int GetRequiredSize(int contentLength) => contentLength + 1 + 28;
+}
+
+
+/// <summary>
+/// Is sent by the server when: After the player requested to read a letter.
+/// Causes reaction on client side: The letter is opened in a new dialog.
+/// </summary>
+public readonly ref struct OpenLetterExtendedRef
+{
+    private readonly Span<byte> _data;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OpenLetterExtendedRef"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    public OpenLetterExtendedRef(Span<byte> data)
+        : this(data, true)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OpenLetterExtendedRef"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    /// <param name="initialize">If set to <c>true</c>, the header data is automatically initialized and written to the underlying span.</param>
+    private OpenLetterExtendedRef(Span<byte> data, bool initialize)
+    {
+        this._data = data;
+        if (initialize)
+        {
+            var header = this.Header;
+            header.Type = HeaderType;
+            header.Code = Code;
+            header.Length = (ushort)data.Length;
+        }
+    }
+
+    /// <summary>
+    /// Gets the header type of this data packet.
+    /// </summary>
+    public static byte HeaderType => 0xC4;
+
+    /// <summary>
+    /// Gets the operation code of this data packet.
+    /// </summary>
+    public static byte Code => 0xC7;
+
+    /// <summary>
+    /// Gets the header of this packet.
+    /// </summary>
+    public C4HeaderRef Header => new (this._data);
+
+    /// <summary>
+    /// Gets or sets the letter index.
+    /// </summary>
+    public ushort LetterIndex
+    {
+        get => ReadUInt16LittleEndian(this._data[4..]);
+        set => WriteUInt16LittleEndian(this._data[4..], value);
+    }
+
+    /// <summary>
+    /// Gets or sets the sender appearance.
+    /// </summary>
+    public Span<byte> SenderAppearance
+    {
+        get => this._data.Slice(6, 42);
+    }
+
+    /// <summary>
+    /// Gets or sets the rotation.
+    /// </summary>
+    public byte Rotation
+    {
+        get => this._data[48];
+        set => this._data[48] = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the animation.
+    /// </summary>
+    public byte Animation
+    {
+        get => this._data[49];
+        set => this._data[49] = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the message.
+    /// </summary>
+    public string Message
+    {
+        get => this._data.ExtractString(50, this._data.Length - 50, System.Text.Encoding.UTF8);
+        set => this._data.Slice(50).WriteString(value, System.Text.Encoding.UTF8);
+    }
+
+    /// <summary>
+    /// Performs an implicit conversion from a Span of bytes to a <see cref="OpenLetterExtended"/>.
+    /// </summary>
+    /// <param name="packet">The packet as span.</param>
+    /// <returns>The packet as struct.</returns>
+    public static implicit operator OpenLetterExtendedRef(Span<byte> packet) => new (packet, false);
+
+    /// <summary>
+    /// Performs an implicit conversion from <see cref="OpenLetterExtended"/> to a Span of bytes.
+    /// </summary>
+    /// <param name="packet">The packet as struct.</param>
+    /// <returns>The packet as byte span.</returns>
+    public static implicit operator Span<byte>(OpenLetterExtendedRef packet) => packet._data; 
+
+    /// <summary>
+    /// Calculates the size of the packet for the specified field content.
+    /// </summary>
+    /// <param name="content">The content of the variable 'Message' field from which the size will be calculated.</param>
+    public static int GetRequiredSize(string content) => System.Text.Encoding.UTF8.GetByteCount(content) + 1 + 50;
+
+    /// <summary>
+    /// Calculates the size of the packet for the specified field content.
+    /// </summary>
+    /// <param name="contentLength">The content length in bytes of the variable 'Message' field from which the size will be calculated.</param>
+    public static int GetRequiredSize(int contentLength) => contentLength + 1 + 50;
 }
 
 

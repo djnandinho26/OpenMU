@@ -219,4 +219,39 @@ public enum UpdateVersion
     /// The version of the <see cref="FixWingsDmgRatesUpdatePlugInSeason6"/>.
     /// </summary>
     FixWeaponRisePercentageSeason6 = 42,
+
+    /// <summary>
+    /// The version of the <see cref="FixChaosMixesUpdatePlugIn075"/>.
+    /// </summary>
+    FixChaosMixes075 = 43,
+
+    /// <summary>
+    /// The version of the <see cref="FixChaosMixesPlugIn095D"/>.
+    /// </summary>
+    FixChaosMixes095d = 44,
+
+    /// <summary>
+    /// The version of the <see cref="FixChaosMixesPlugInSeason6"/>.
+    /// </summary>
+    FixChaosMixesSeason6 = 45,
+
+    /// <summary>
+    /// The version of the <see cref="FixItemOptionsAndAttackSpeedPlugIn075"/>.
+    /// </summary>
+    FixItemOptionsAndAttackSpeed075 = 46,
+
+    /// <summary>
+    /// The version of the <see cref="FixItemOptionsAndAttackSpeedPlugIn095D"/>.
+    /// </summary>
+    FixItemOptionsAndAttackSpeed095d = 47,
+
+    /// <summary>
+    /// The version of the <see cref="FixItemOptionsAndAttackSpeedPlugInSeason6"/>.
+    /// </summary>
+    FixItemOptionsAndAttackSpeedSeason6 = 48,
+
+    /// <summary>
+    /// The version of the <see cref="FixHorseFenrirOptionsSoulBarrierPlugIn"/>.
+    /// </summary>
+    FixHorseFenrirOptionsSoulBarrierPlugIn = 49,
 }

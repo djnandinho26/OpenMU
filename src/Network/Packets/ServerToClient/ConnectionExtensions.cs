@@ -1198,6 +1198,50 @@ public static class ConnectionExtensions
     }
 
     /// <summary>
+    /// Sends a <see cref="ObjectWalkedExtended" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="headerCode">The header code.</param>
+    /// <param name="objectId">The object id.</param>
+    /// <param name="sourceX">The source x.</param>
+    /// <param name="sourceY">The source y.</param>
+    /// <param name="targetX">The target x.</param>
+    /// <param name="targetY">The target y.</param>
+    /// <param name="targetRotation">The target rotation.</param>
+    /// <param name="stepCount">The step count.</param>
+    /// <param name="stepData">The step data.</param>
+    /// <remarks>
+    /// Is sent by the server when: An object in the observed scope (including the own player) walked to another position.
+    /// Causes reaction on client side: The object is animated to walk to the new position.
+    /// </remarks>
+    public static async ValueTask SendObjectWalkedExtendedAsync(this IConnection? connection, byte @headerCode, ushort @objectId, byte @sourceX, byte @sourceY, byte @targetX, byte @targetY, byte @targetRotation, byte @stepCount, Memory<byte> @stepData)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = ObjectWalkedExtendedRef.GetRequiredSize(stepData.Length);
+            var packet = new ObjectWalkedExtendedRef(connection.Output.GetSpan(length)[..length]);
+            packet.HeaderCode = @headerCode;
+            packet.ObjectId = @objectId;
+            packet.SourceX = @sourceX;
+            packet.SourceY = @sourceY;
+            packet.TargetX = @targetX;
+            packet.TargetY = @targetY;
+            packet.TargetRotation = @targetRotation;
+            packet.StepCount = @stepCount;
+            @stepData.Span.CopyTo(packet.StepData);
+
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Sends a <see cref="ObjectWalked075" /> to this connection.
     /// </summary>
     /// <param name="connection">The connection.</param>
@@ -1880,6 +1924,42 @@ public static class ConnectionExtensions
             var packet = new ItemConsumptionFailedExtendedRef(connection.Output.GetSpan(length)[..length]);
             packet.Health = @health;
             packet.Shield = @shield;
+
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sends a <see cref="BaseStatsExtended" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="strength">The strength.</param>
+    /// <param name="agility">The agility.</param>
+    /// <param name="vitality">The vitality.</param>
+    /// <param name="energy">The energy.</param>
+    /// <param name="command">The command.</param>
+    /// <remarks>
+    /// Is sent by the server when: Setting the base stats of a character, e.g. set stats command or after a reset.
+    /// Causes reaction on client side: The values are updated on the game client user interface.
+    /// </remarks>
+    public static async ValueTask SendBaseStatsExtendedAsync(this IConnection? connection, uint @strength, uint @agility, uint @vitality, uint @energy, uint @command)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = BaseStatsExtendedRef.Length;
+            var packet = new BaseStatsExtendedRef(connection.Output.GetSpan(length)[..length]);
+            packet.Strength = @strength;
+            packet.Agility = @agility;
+            packet.Vitality = @vitality;
+            packet.Energy = @energy;
+            packet.Command = @command;
 
             return packet.Header.Length;
         }
@@ -5491,6 +5571,42 @@ public static class ConnectionExtensions
             var packet = new OpenLetterRef(connection.Output.GetSpan(length)[..length]);
             packet.LetterIndex = @letterIndex;
             packet.MessageSize = @messageSize;
+            @senderAppearance.Span.CopyTo(packet.SenderAppearance);
+            packet.Rotation = @rotation;
+            packet.Animation = @animation;
+            packet.Message = @message;
+
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sends a <see cref="OpenLetterExtended" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="letterIndex">The letter index.</param>
+    /// <param name="senderAppearance">The sender appearance.</param>
+    /// <param name="rotation">The rotation.</param>
+    /// <param name="animation">The animation.</param>
+    /// <param name="message">The message.</param>
+    /// <remarks>
+    /// Is sent by the server when: After the player requested to read a letter.
+    /// Causes reaction on client side: The letter is opened in a new dialog.
+    /// </remarks>
+    public static async ValueTask SendOpenLetterExtendedAsync(this IConnection? connection, ushort @letterIndex, Memory<byte> @senderAppearance, byte @rotation, byte @animation, string @message)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = OpenLetterExtendedRef.GetRequiredSize(message);
+            var packet = new OpenLetterExtendedRef(connection.Output.GetSpan(length)[..length]);
+            packet.LetterIndex = @letterIndex;
             @senderAppearance.Span.CopyTo(packet.SenderAppearance);
             packet.Rotation = @rotation;
             packet.Animation = @animation;

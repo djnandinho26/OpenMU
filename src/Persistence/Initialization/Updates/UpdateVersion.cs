@@ -251,7 +251,37 @@ public enum UpdateVersion
     FixItemOptionsAndAttackSpeedSeason6 = 48,
 
     /// <summary>
-    /// The version of the <see cref="FixHorseFenrirOptionsSoulBarrierPlugIn"/>.
+    /// The version of the <see cref="Updates.FixHorseFenrirOptionsSoulBarrierPlugIn"/>.
     /// </summary>
     FixHorseFenrirOptionsSoulBarrierPlugIn = 49,
+
+    /// <summary>
+    /// The version of the <see cref="FixCharStatsForceWavePlugIn075"/>.
+    /// </summary>
+    FixCharStatsForceWave075 = 50,
+
+    /// <summary>
+    /// The version of the <see cref="FixCharStatsForceWavePlugIn095D"/>.
+    /// </summary>
+    FixCharStatsForceWave095d = 51,
+
+    /// <summary>
+    /// The version of the <see cref="FixCharStatsForceWavePlugInSeason6"/>.
+    /// </summary>
+    FixCharStatsForceWaveSeason6 = 52,
+
+    /// <summary>
+    /// The version of the <see cref="FixDefenseCalcsPlugIn075"/>.
+    /// </summary>
+    FixDefenseCalcs075 = 53,
+
+    /// <summary>
+    /// The version of the <see cref="FixDefenseCalcsPlugIn095D"/>.
+    /// </summary>
+    FixDefenseCalcs095d = 54,
+
+    /// <summary>
+    /// The version of the <see cref="FixDefenseCalcsPlugInSeason6"/>.
+    /// </summary>
+    FixDefenseCalcsSeason6 = 55,
 }

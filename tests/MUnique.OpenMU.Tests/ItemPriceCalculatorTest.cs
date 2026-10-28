@@ -4,11 +4,14 @@
 
 namespace MUnique.OpenMU.Tests;
 
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.DataModel.Configuration.Items;
 using MUnique.OpenMU.DataModel.Entities;
 using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Persistence.InMemory;
 
 /// <summary>
 /// Tests the <see cref="ItemPriceCalculator"/> with some exemplary data.
@@ -16,6 +19,8 @@ using MUnique.OpenMU.GameLogic.Attributes;
 /// <remarks>
 /// The most price values here are directly taken from stores on GMO.
 /// However, I guess they are calculated and shown by the client, if you just show such an item in the merchant store.
+/// The item definitions are mocked, but they get the <see cref="ItemDefinition.PriceDefinition"/> of the item with the
+/// same group and number of the season 6 configuration, so the shipped price definitions are tested.
 /// </remarks>
 [TestFixture]
 public class ItemPriceCalculatorTest
@@ -23,7 +28,26 @@ public class ItemPriceCalculatorTest
     /// <summary>
     /// The calculator which is tested.
     /// </summary>
-    private readonly ItemPriceCalculator _calculator = new ();
+    private readonly ItemPriceCalculator _calculator = new();
+
+    /// <summary>
+    /// The initialized season 6 configuration, which provides the price definitions.
+    /// </summary>
+    private GameConfiguration _gameConfiguration = null!;
+
+    /// <summary>
+    /// Initializes the season 6 configuration.
+    /// </summary>
+    /// <returns>The task.</returns>
+    [OneTimeSetUp]
+    public async Task SetUpAsync()
+    {
+        var contextProvider = new InMemoryPersistenceContextProvider();
+        var dataInitialization = new MUnique.OpenMU.Persistence.Initialization.VersionSeasonSix.DataInitialization(contextProvider, NullLoggerFactory.Instance);
+        await dataInitialization.CreateInitialDataAsync(1, false).ConfigureAwait(false);
+        using var context = contextProvider.CreateNewContext();
+        this._gameConfiguration = (await context.GetAsync<GameConfiguration>().ConfigureAwait(false)).Single();
+    }
 
     /// <summary>
     /// Tests if the apple price is calculated correctly.
@@ -203,7 +227,7 @@ public class ItemPriceCalculatorTest
     /// gloves          290
     /// boots           370.
     /// </remarks>
-    [TestCase(7, 5, 28, 480, Description="Pad Helm")]
+    [TestCase(7, 5, 28, 480, Description = "Pad Helm")]
     [TestCase(8, 10, 28, 1400, Description = "Pad Armor")]
     [TestCase(9, 8, 28, 960, Description = "Pad Pants")]
     [TestCase(10, 3, 28, 290, Description = "Pad Gloves")]
@@ -384,6 +408,7 @@ public class ItemPriceCalculatorTest
         itemDefinition.Group = group;
         itemDefinition.Value = value;
         itemDefinition.Number = id;
+        itemDefinition.PriceDefinition = this._gameConfiguration.Items.FirstOrDefault(d => d.Group == group && d.Number == id)?.PriceDefinition;
         if (group <= 11)
         {
             itemDefinition.ItemSlot = new ItemSlotType();

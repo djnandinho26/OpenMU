@@ -15,7 +15,7 @@ using MUnique.OpenMU.PlugIns;
 /// This update fixes several character stats values and DL Force Wave Strengthener master skill.
 /// </summary>
 [PlugIn]
-[Display(Name = PlugInName, Description = PlugInDescription)]
+[Display(Name = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixCharStatsForceWavePlugInSeason6_Name), Description = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixCharStatsForceWavePlugInSeason6_Description), ResourceType = typeof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources))]
 [Guid("0C1995AB-A1CC-42A8-9EFC-E5FE8F360C53")]
 public class FixCharStatsForceWavePlugInSeason6 : FixCharStatsForceWavePlugInBase
 {
@@ -37,9 +37,6 @@ public class FixCharStatsForceWavePlugInSeason6 : FixCharStatsForceWavePlugInBas
 
     /// <inheritdoc />
     public override string DataInitializationKey => VersionSeasonSix.DataInitialization.Id;
-
-    /// <inheritdoc />
-    public override UpdateVersion Version => UpdateVersion.FixCharStatsForceWaveSeason6;
 
     /// <inheritdoc />
     protected override async ValueTask ApplyAsync(IContext context, GameConfiguration gameConfiguration)
@@ -83,7 +80,8 @@ public class FixCharStatsForceWavePlugInSeason6 : FixCharStatsForceWavePlugInBas
                 }
             }
 
-            if (charClass.Number == 16 || charClass.Number == 17) // Lord classes
+            // Lord classes.
+            if (charClass.Number == 16 || charClass.Number == 17)
             {
                 charClass.StatAttributes.First(attr => attr.Attribute == Stats.CurrentHealth).BaseValue = 90;
                 charClass.StatAttributes.First(attr => attr.Attribute == Stats.CurrentMana).BaseValue = 40;
@@ -103,7 +101,9 @@ public class FixCharStatsForceWavePlugInSeason6 : FixCharStatsForceWavePlugInBas
                     totalVitalityoMaximumHealth.InputOperand = 2;
                 }
             }
-            else if (charClass.Number == 24 || charClass.Number == 25) // RF classes
+
+            // RF classes.
+            else if (charClass.Number == 24 || charClass.Number == 25)
             {
                 if (charClass.AttributeCombinations.FirstOrDefault(attrCombo => attrCombo.TargetAttribute == Stats.DefenseRatePvp && attrCombo.InputAttribute == Stats.TotalAgility) is { } totalAgilityToDefenseRatePvp)
                 {
@@ -150,7 +150,9 @@ public class FixCharStatsForceWavePlugInSeason6 : FixCharStatsForceWavePlugInBas
                     totalVitalityToFenrirBaseDmg.InputOperand = 1.0f / 3;
                 }
             }
-            else if (charClass.Number == 20 || charClass.Number == 22 || charClass.Number == 23) // Summoner classes
+
+            // Summoner classes.
+            else if (charClass.Number == 20 || charClass.Number == 22 || charClass.Number == 23)
             {
                 charClass.StatAttributes.First(attr => attr.Attribute == Stats.CurrentMana).BaseValue = 40;
 

@@ -8,7 +8,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.Persistence;
-using MUnique.OpenMU.Web.AdminPanel.Services;
+using MUnique.OpenMU.Persistence.Initialization;
 
 /// <summary>
 /// A container which takes care of the <see cref="Interfaces.IChatServer"/>.
@@ -61,6 +61,6 @@ public class ChatServerContainer : ServerContainerBase
     protected override async Task StartListenersAsync(CancellationToken cancellationToken)
     {
         // listeners are always started...
-        await this._chatServer.StartAsync(cancellationToken);
+        await this._chatServer.StartAsync(cancellationToken).ConfigureAwait(false);
     }
 }

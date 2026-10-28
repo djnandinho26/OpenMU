@@ -58,6 +58,12 @@ public interface IGameContext
     GameConfiguration Configuration { get; }
 
     /// <summary>
+    /// Gets or sets the server time zone used to interpret the time-of-day entries of periodic
+    /// event schedules (e.g. invasions, Blood Castle, Devil Square). Defaults to <see cref="TimeZoneInfo.Utc"/>.
+    /// </summary>
+    TimeZoneInfo ServerTimeZone { get; set; }
+
+    /// <summary>
     /// Gets the experience table. Index is the player level, value the needed experience to reach that level.
     /// </summary>
     long[] ExperienceTable { get; }
@@ -123,6 +129,11 @@ public interface IGameContext
     IPartyManager PartyManager { get; }
 
     /// <summary>
+    /// Gets the manager which hosts and tracks the mini game instances of the game.
+    /// </summary>
+    IMiniGameManager MiniGames { get; }
+
+    /// <summary>
     /// Gets the initialized maps which are hosted on this context.
     /// </summary>
     ValueTask<IEnumerable<GameMap>> GetMapsAsync();
@@ -139,6 +150,12 @@ public interface IGameContext
     ValueTask AddPlayerAsync(Player player);
 
     /// <summary>
+    /// Removes the player from the game.
+    /// </summary>
+    /// <param name="player">The player.</param>
+    ValueTask RemovePlayerAsync(Player player);
+
+    /// <summary>
     /// Gets the maps which is meant to be hosted by the game.
     /// </summary>
     /// <param name="mapId">The map identifier.</param>
@@ -147,22 +164,6 @@ public interface IGameContext
     /// The hosted GameMap instance.
     /// </returns>
     ValueTask<GameMap?> GetMapAsync(ushort mapId, bool createIfNotExists = true);
-
-    /// <summary>
-    /// Gets the mini game map which is meant to be hosted by the game.
-    /// </summary>
-    /// <param name="miniGameDefinition">The mini game definition.</param>
-    /// <param name="requester">The requesting player.</param>
-    /// <returns>
-    /// The state of the mini game which contains the hosted GameMap instance.
-    /// </returns>
-    ValueTask<MiniGameContext> GetMiniGameAsync(MiniGameDefinition miniGameDefinition, Player requester);
-
-    /// <summary>
-    /// Removes the mini game instance from the context.
-    /// </summary>
-    /// <param name="miniGameContext">The context of the mini game.</param>
-    ValueTask RemoveMiniGameAsync(MiniGameContext miniGameContext);
 
     /// <summary>
     /// Gets the player object by character name.
@@ -199,6 +200,13 @@ public interface IGameContext
     /// </summary>
     /// <param name="message">The message.</param>
     ValueTask SendGlobalNotificationAsync(string message);
+
+    /// <summary>
+    /// Sends a golden global notification to all players of the game, in the language of each player.
+    /// </summary>
+    /// <param name="message">The message, which may contain translations and format placeholders.</param>
+    /// <param name="formatArguments">The arguments for the format placeholders of the message.</param>
+    ValueTask SendGlobalNotificationAsync(LocalizedString message, params object?[] formatArguments);
 
     /// <summary>
     /// Executes an action for each player.

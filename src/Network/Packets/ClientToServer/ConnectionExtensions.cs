@@ -513,6 +513,40 @@ public static class ConnectionExtensions
     }
 
     /// <summary>
+    /// Sends a <see cref="PlayerShopSetItemPriceExtended" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="moneyPrice">The price in zen, or in account coins when PriceItemType is one of the account coin values. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="priceItemType">The item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, when RequiredItemAmount is greater than 0. Otherwise, 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P) and 0xFFF2 = Goblin Points define an account coin price; any other value a zen price. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="requiredItemAmount">The number of pieces of the item which is defined by PriceItemType; 0, if the price is not paid with items. Encoded like the price of PlayerShopItemExtended.</param>
+    /// <param name="itemSlot">The item slot.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to set a price of an item which is inside his personal item shop, in zen or in one of the price types which are allowed by the server (see PlayerShopPriceTypesExtended).
+    /// Causes reaction on server side: The price is set for the specified item, if its price type is allowed and the amount is within the configured limits. Works only if the shop is currently closed. The server responds with a PlayerShopSetItemPriceResponse.
+    /// </remarks>
+    public static async ValueTask SendPlayerShopSetItemPriceExtendedAsync(this IConnection? connection, uint @moneyPrice, ushort @priceItemType, ushort @requiredItemAmount, byte @itemSlot)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = PlayerShopSetItemPriceExtendedRef.Length;
+            var packet = new PlayerShopSetItemPriceExtendedRef(connection.Output.GetSpan(length)[..length]);
+            packet.MoneyPrice = @moneyPrice;
+            packet.PriceItemType = @priceItemType;
+            packet.RequiredItemAmount = @requiredItemAmount;
+            packet.ItemSlot = @itemSlot;
+
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Sends a <see cref="PickupItemRequest" /> to this connection.
     /// </summary>
     /// <param name="connection">The connection.</param>
@@ -1295,13 +1329,13 @@ public static class ConnectionExtensions
     /// Sends a <see cref="CastleSiegeTaxChangeRequest" /> to this connection.
     /// </summary>
     /// <param name="connection">The connection.</param>
-    /// <param name="taxType">0=Undefined, 1=ChaosMachine, 2 = Normal, 3 = EntranceFeeLandOfTrials</param>
-    /// <param name="taxRate">The tax rate.</param>
+    /// <param name="taxType">The tax type.</param>
+    /// <param name="taxValue">The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master wants to change the tax rate in the castle npc.
     /// Causes reaction on server side: The server changes the tax rates accordingly.
     /// </remarks>
-    public static async ValueTask SendCastleSiegeTaxChangeRequestAsync(this IConnection? connection, byte @taxType, uint @taxRate)
+    public static async ValueTask SendCastleSiegeTaxChangeRequestAsync(this IConnection? connection, CastleSiegeTaxType @taxType, uint @taxValue)
     {
         if (connection is null)
         {
@@ -1313,7 +1347,7 @@ public static class ConnectionExtensions
             var length = CastleSiegeTaxChangeRequestRef.Length;
             var packet = new CastleSiegeTaxChangeRequestRef(connection.Output.GetSpan(length)[..length]);
             packet.TaxType = @taxType;
-            packet.TaxRate = @taxRate;
+            packet.TaxValue = @taxValue;
 
             return packet.Header.Length;
         }
@@ -1353,13 +1387,13 @@ public static class ConnectionExtensions
     /// Sends a <see cref="ToggleCastleGateRequest" /> to this connection.
     /// </summary>
     /// <param name="connection">The connection.</param>
-    /// <param name="closeState">The close state.</param>
+    /// <param name="isOpen">The is open.</param>
     /// <param name="gateId">The gate id.</param>
     /// <remarks>
     /// Is sent by the client when: The guild member of the castle owner wants to toggle the gate switch.
     /// Causes reaction on server side: The castle gate is getting opened or closed.
     /// </remarks>
-    public static async ValueTask SendToggleCastleGateRequestAsync(this IConnection? connection, bool @closeState, ushort @gateId)
+    public static async ValueTask SendToggleCastleGateRequestAsync(this IConnection? connection, bool @isOpen, ushort @gateId)
     {
         if (connection is null)
         {
@@ -1370,7 +1404,7 @@ public static class ConnectionExtensions
         {
             var length = ToggleCastleGateRequestRef.Length;
             var packet = new ToggleCastleGateRequestRef(connection.Output.GetSpan(length)[..length]);
-            packet.CloseState = @closeState;
+            packet.IsOpen = @isOpen;
             packet.GateId = @gateId;
 
             return packet.Header.Length;
@@ -1386,12 +1420,12 @@ public static class ConnectionExtensions
     /// <param name="team">Team Number 0 to 7.</param>
     /// <param name="positionX">The position x.</param>
     /// <param name="positionY">The position y.</param>
-    /// <param name="command">0 = Attack, 1 = Defend, 2 = Wait</param>
+    /// <param name="command">The command.</param>
     /// <remarks>
     /// Is sent by the client when: The guild master sent a command to his guild during the castle siege event.
     /// Causes reaction on server side: The command is shown on the mini map of the guild members.
     /// </remarks>
-    public static async ValueTask SendCastleGuildCommandAsync(this IConnection? connection, byte @team, byte @positionX, byte @positionY, byte @command)
+    public static async ValueTask SendCastleGuildCommandAsync(this IConnection? connection, byte @team, byte @positionX, byte @positionY, CastleSiegeGuildCommandType @command)
     {
         if (connection is null)
         {
@@ -3037,7 +3071,7 @@ public static class ConnectionExtensions
     /// <param name="skillId">The skill id.</param>
     /// <param name="playerId">The player id.</param>
     /// <remarks>
-    /// Is sent by the client when: A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardy Enhance'.
+    /// Is sent by the client when: A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardry Enhance'.
     /// Causes reaction on server side: The effect is cancelled and an update is sent to the player and all surrounding players.
     /// </remarks>
     public static async ValueTask SendMagicEffectCancelRequestAsync(this IConnection? connection, ushort @skillId, ushort @playerId)
@@ -5543,6 +5577,106 @@ public static class ConnectionExtensions
         {
             var length = DuelChannelQuitRequestRef.Length;
             var packet = new DuelChannelQuitRequestRef(connection.Output.GetSpan(length)[..length]);
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sends a <see cref="ChatCommandListRequest" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: A client which supports a user interface for chat commands requests the list of commands which are available to the player. It's usually sent after the character entered the game world.
+    /// Causes reaction on server side: The server sends an AvailableChatCommand message for each available chat command.
+    /// </remarks>
+    public static async ValueTask SendChatCommandListRequestAsync(this IConnection? connection)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = ChatCommandListRequestRef.Length;
+            var packet = new ChatCommandListRequestRef(connection.Output.GetSpan(length)[..length]);
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordIntegrationInfoRequest" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: A client which supports the Discord integration requests how the server is connected to Discord. It's usually sent after the character entered the game world, and again when the player opens a Discord dialog. By sending it, the client also announces that it understands the ExternalChatMessage.
+    /// Causes reaction on server side: The server sends a DiscordIntegrationInfo message, and from then on sends messages which were written in Discord as ExternalChatMessage.
+    /// </remarks>
+    public static async ValueTask SendDiscordIntegrationInfoRequestAsync(this IConnection? connection)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = DiscordIntegrationInfoRequestRef.Length;
+            var packet = new DiscordIntegrationInfoRequestRef(connection.Output.GetSpan(length)[..length]);
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordLinkCodeRequest" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to link the account to a Discord user, e.g. with a button of a Discord dialog.
+    /// Causes reaction on server side: The server creates a one-time code and sends it with a DiscordLinkCode message. The player enters the code in Discord to complete the link.
+    /// </remarks>
+    public static async ValueTask SendDiscordLinkCodeRequestAsync(this IConnection? connection)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = DiscordLinkCodeRequestRef.Length;
+            var packet = new DiscordLinkCodeRequestRef(connection.Output.GetSpan(length)[..length]);
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sends a <see cref="DiscordUnlinkRequest" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to remove the link of the account to a Discord user.
+    /// Causes reaction on server side: The server removes the link and sends an updated DiscordIntegrationInfo message.
+    /// </remarks>
+    public static async ValueTask SendDiscordUnlinkRequestAsync(this IConnection? connection)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = DiscordUnlinkRequestRef.Length;
+            var packet = new DiscordUnlinkRequestRef(connection.Output.GetSpan(length)[..length]);
             return packet.Header.Length;
         }
 

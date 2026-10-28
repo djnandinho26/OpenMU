@@ -2,13 +2,13 @@
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using MUnique.OpenMU.AttributeSystem;
-using MUnique.OpenMU.GameLogic.Attributes;
-using MUnique.OpenMU.Persistence.Initialization.Skills;
-
 namespace MUnique.OpenMU.Persistence.Initialization.Version095d.Maps;
 
+using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Configuration;
+using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
+using MUnique.OpenMU.Persistence.Initialization.Skills;
 using MUnique.OpenMU.Persistence.Initialization.Version095d.Events;
 
 /// <summary>
@@ -16,16 +16,10 @@ using MUnique.OpenMU.Persistence.Initialization.Version095d.Events;
 /// </summary>
 internal class DevilSquare3 : BaseMapInitializer
 {
-
     /// <summary>
     /// The default number of the map.
     /// </summary>
     internal const byte Number = 9;
-
-    /// <summary>
-    /// The default name of the map.
-    /// </summary>
-    internal const string Name = "Devil Square 3";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DevilSquare3"/> class.
@@ -37,11 +31,16 @@ internal class DevilSquare3 : BaseMapInitializer
     {
     }
 
+    /// <summary>
+    /// Gets the name of the map.
+    /// </summary>
+    internal static LocalizedString Name => LocalizedString.FromResource(() => MapNames.DevilSquare3);
+
     /// <inheritdoc/>
     protected override byte MapNumber => Number;
 
     /// <inheritdoc/>
-    protected override string MapName => Name;
+    protected override LocalizedString MapName => Name;
 
     /// <inheritdoc/>
     protected override byte Discriminator => 3;
@@ -85,7 +84,7 @@ internal class DevilSquare3 : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 64;
-            monster.Designation = "Orc Archer";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.OrcArcher);
             monster.MoveRange = 3;
             monster.AttackRange = 4;
             monster.ViewRange = 7;
@@ -117,7 +116,7 @@ internal class DevilSquare3 : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 65;
-            monster.Designation = "Elite Orc";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.EliteOrc);
             monster.MoveRange = 3;
             monster.AttackRange = 1;
             monster.ViewRange = 7;
@@ -150,7 +149,7 @@ internal class DevilSquare3 : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 67;
-            monster.Designation = "Metal Balrog";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.MetalBalrog);
             monster.MoveRange = 3;
             monster.AttackRange = 2;
             monster.ViewRange = 7;

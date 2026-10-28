@@ -7,8 +7,8 @@ namespace MUnique.OpenMU.Network;
 using System.Buffers;
 using System.IO.Pipelines;
 using System.Net;
-using Nito.AsyncEx;
 using MUnique.OpenMU.PlugIns;
+using Nito.AsyncEx;
 
 /// <summary>
 /// Interface for a connection.
@@ -28,6 +28,11 @@ public interface IConnection : IDisposable
     /// Occurs when the client disconnected.
     /// </summary>
     event AsyncEventHandler? Disconnected;
+
+    /// <summary>
+    /// Gets the identifier of this connection, which is unique for the lifetime of the process.
+    /// </summary>
+    Guid Id { get; }
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="IConnection"/> is connected.
@@ -70,4 +75,22 @@ public interface IConnection : IDisposable
     /// Disconnects this instance.
     /// </summary>
     ValueTask DisconnectAsync();
+
+    /// <summary>
+    /// Adds a sink which gets all decrypted data packets of this connection, until it's
+    /// removed again by <see cref="RemoveCaptureSink"/>.
+    /// </summary>
+    /// <param name="sink">The sink which should get the data packets.</param>
+    /// <remarks>
+    /// Adding the same sink more than once has no effect. As long as no sink is added, the
+    /// connection doesn't capture anything.
+    /// </remarks>
+    void AddCaptureSink(IPacketCaptureSink sink);
+
+    /// <summary>
+    /// Removes a previously added capture sink. When the last sink is removed, the connection
+    /// stops capturing.
+    /// </summary>
+    /// <param name="sink">The sink which should not get the data packets anymore.</param>
+    void RemoveCaptureSink(IPacketCaptureSink sink);
 }

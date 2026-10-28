@@ -1,4 +1,4 @@
-﻿// <copyright file="ItemConstants.cs" company="MUnique">
+// <copyright file="ItemConstants.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -15,9 +15,54 @@ public class ItemConstants
     public static ItemIdentifier SummonOrb => new(11, 12);
 
     /// <summary>
+    /// Gets the identifier for the angel.
+    /// </summary>
+    public static ItemIdentifier Angel => new(0, 13);
+
+    /// <summary>
+    /// Gets the identifier for the imp.
+    /// </summary>
+    public static ItemIdentifier Imp => new(1, 13);
+
+    /// <summary>
+    /// Gets the identifier for the uniria.
+    /// </summary>
+    public static ItemIdentifier Uniria => new(2, 13);
+
+    /// <summary>
+    /// Gets the identifier for the dinorant.
+    /// </summary>
+    public static ItemIdentifier Dinorant => new(3, 13);
+
+    /// <summary>
+    /// Gets the identifier for the dark horse.
+    /// </summary>
+    public static ItemIdentifier DarkHorse => new(4, 13);
+
+    /// <summary>
+    /// Gets the identifier for the Castle Siege Life Stone.
+    /// </summary>
+    public static ItemIdentifier CastleSiegeLifeStone => new(11, 13);
+
+    /// <summary>
     /// Gets the identifier for the fruits.
     /// </summary>
     public static ItemIdentifier Fruits => new(15, 13);
+
+    /// <summary>
+    /// Gets the identifier for the fenrir.
+    /// </summary>
+    public static ItemIdentifier Fenrir => new(37, 13);
+
+    /// <summary>
+    /// Gets the identifier for the demon.
+    /// </summary>
+    public static ItemIdentifier Demon => new(64, 13);
+
+    /// <summary>
+    /// Gets the identifier for the rudolf pet.
+    /// </summary>
+    public static ItemIdentifier Rudolf => new(67, 13);
 
     /// <summary>
     /// Gets the identifier for the alcohol.
@@ -75,6 +120,11 @@ public class ItemConstants
     public static ItemIdentifier TownPortalScroll => new(10, 14);
 
     /// <summary>
+    /// Gets the identifier for the jewel of chaos.
+    /// </summary>
+    public static ItemIdentifier JewelOfChaos => new(15, 12);
+
+    /// <summary>
     /// Gets the identifier for the jewel of bless.
     /// </summary>
     public static ItemIdentifier JewelOfBless => new(13, 14);
@@ -88,6 +138,21 @@ public class ItemConstants
     /// Gets the identifier for the jewel of life.
     /// </summary>
     public static ItemIdentifier JewelOfLife => new(16, 14);
+
+    /// <summary>
+    /// Gets the identifier for the jewel of creation.
+    /// </summary>
+    public static ItemIdentifier JewelOfCreation => new(22, 14);
+
+    /// <summary>
+    /// Gets the identifier for the jewel of guardian.
+    /// </summary>
+    public static ItemIdentifier JewelOfGuardian => new(31, 14);
+
+    /// <summary>
+    /// Gets the identifier for the gemstone.
+    /// </summary>
+    public static ItemIdentifier Gemstone => new(41, 14);
 
     /// <summary>
     /// Gets the identifier for the small shield potion.
@@ -133,6 +198,16 @@ public class ItemConstants
     /// Gets the identifier for the higher refine stone.
     /// </summary>
     public static ItemIdentifier HigherRefineStone => new(44, 14);
+
+    /// <summary>
+    /// Gets the identifier for the wizard's ring (group 13, number 20).
+    /// </summary>
+    public static ItemIdentifier WizardsRing => new(20, 13);
+
+    /// <summary>
+    /// Gets the identifier for the moonstone pendant (group 13, number 38).
+    /// </summary>
+    public static ItemIdentifier MoonstonePendant => new(38, 13);
 
     /// <summary>
     /// Gets all scrolls.

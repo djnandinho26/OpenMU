@@ -23,12 +23,24 @@ public sealed class OfflinePartyMember : IPartyMember
     {
         this.Name = player.Name;
         this.Id = player.Id;
+        this.CharacterId = player switch
+        {
+            Player p => p.SelectedCharacter?.Id ?? Guid.Empty,
+            OfflinePartyMember o => o.CharacterId,
+            _ => Guid.Empty,
+        };
         this.CurrentHealth = player.CurrentHealth;
         this.MaximumHealth = player.MaximumHealth;
         this.CurrentMap = player.CurrentMap;
         this.Position = player.Position;
         this.Logger = player?.Logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+        this.DisconnectedAtUtc = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// Gets the member disconnected time.
+    /// </summary>
+    public DateTime DisconnectedAtUtc { get; }
 
     /// <inheritdoc />
     public Party? Party { get; set; }
@@ -50,6 +62,12 @@ public sealed class OfflinePartyMember : IPartyMember
 
     /// <inheritdoc />
     public ushort Id { get; }
+
+    /// <summary>
+    /// Gets the id of the character, which stays the same when the character is renamed
+    /// (e.g. by the admin panel) while it is offline.
+    /// </summary>
+    public Guid CharacterId { get; }
 
     /// <inheritdoc />
     public Point Position { get; set; }

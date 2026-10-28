@@ -2,10 +2,9 @@
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using System.ComponentModel;
-
 namespace MUnique.OpenMU.DataModel.Entities;
 
+using System.ComponentModel;
 using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Configuration;
 
@@ -126,10 +125,57 @@ public class Account
     public bool IsVaultExtended { get; set; }
 
     /// <summary>
+    /// Gets or sets the available WCoin (C) of the cash shop.
+    /// </summary>
+    /// <remarks>
+    /// The client shows it as credit cash, which is usually bought with real money.
+    /// Only the game server changes it, because it may hold the account in memory;
+    /// other services add a <see cref="CashShopCoinGrant"/>.
+    /// </remarks>
+    [Browsable(false)]
+    public int WCoinC { get; set; }
+
+    /// <summary>
+    /// Gets or sets the available WCoin (P) of the cash shop.
+    /// </summary>
+    /// <remarks>
+    /// The client shows it as prepaid cash, which is usually bought with prepaid cards.
+    /// Only the game server changes it, because it may hold the account in memory;
+    /// other services add a <see cref="CashShopCoinGrant"/>.
+    /// </remarks>
+    [Browsable(false)]
+    public int WCoinP { get; set; }
+
+    /// <summary>
+    /// Gets or sets the available Goblin Points of the cash shop.
+    /// </summary>
+    /// <remarks>
+    /// The client shows it as mileage, which is usually earned by playing.
+    /// Only the game server changes it, because it may hold the account in memory;
+    /// other services add a <see cref="CashShopCoinGrant"/>.
+    /// </remarks>
+    [Browsable(false)]
+    public int GoblinPoints { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether this instance is a template account
     /// and therefore read-only within the game server.
     /// </summary>
     public bool IsTemplate { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this account is a server-side bot account.
+    /// Bot accounts are generated and maintained by the bot feature; this flag is the reliable
+    /// marker used to load them on startup (instead of regenerating) and to purge them.
+    /// </summary>
+    public bool IsBot { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the network traffic of this account is
+    /// observed. The game server then archives the traffic of each of its sessions, so that
+    /// it can be analyzed later - for example when the account is suspected of cheating.
+    /// </summary>
+    public bool IsNetworkObservationActive { get; set; }
 
     /// <summary>
     /// Gets or sets the characters.

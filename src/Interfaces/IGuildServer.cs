@@ -98,6 +98,54 @@ public interface IGuildServer
     ValueTask<Guild?> GetGuildAsync(uint guildId);
 
     /// <summary>
+    /// Gets the runtime identifier of a persistent guild, loading the guild when necessary.
+    /// </summary>
+    /// <param name="guildId">The persistent guild identifier.</param>
+    /// <returns>The runtime guild identifier, or <c>0</c> if the guild was not found.</returns>
+    ValueTask<uint> GetGuildIdAsync(Guid guildId);
+
+    /// <summary>
+    /// Gets the persistent identifier of a guild by its runtime identifier.
+    /// </summary>
+    /// <param name="guildId">The runtime guild identifier.</param>
+    /// <returns>The persistent guild identifier, or <see langword="null"/> if the guild was not found.</returns>
+    ValueTask<Guid?> GetPersistentGuildIdAsync(uint guildId);
+
+    /// <summary>
+    /// Gets the persistent identifier of a guild by name.
+    /// </summary>
+    /// <param name="guildName">The guild name.</param>
+    /// <returns>The persistent guild identifier, or <see langword="null"/> if the guild was not found.</returns>
+    /// <remarks>This lookup also finds guilds without online members.</remarks>
+    ValueTask<Guid?> GetPersistentGuildIdByNameAsync(string guildName);
+
+    /// <summary>
+    /// Gets the name of a guild by its persistent identifier.
+    /// </summary>
+    /// <param name="guildId">The persistent guild identifier.</param>
+    /// <returns>The canonical guild name, or <see langword="null"/> if the guild was not found.</returns>
+    /// <remarks>This lookup does not load a runtime guild container.</remarks>
+    ValueTask<string?> GetPersistentGuildNameAsync(Guid guildId);
+
+    /// <summary>
+    /// Gets the canonical names of guilds by their persistent identifiers.
+    /// </summary>
+    /// <param name="guildIds">The persistent guild identifiers.</param>
+    /// <returns>The names keyed by persistent guild identifier. Missing guilds are omitted.</returns>
+    /// <remarks>This lookup does not load runtime guild containers.</remarks>
+    ValueTask<IReadOnlyDictionary<Guid, string>> GetPersistentGuildNamesAsync(IReadOnlyCollection<Guid> guildIds);
+
+    /// <summary>
+    /// Gets the persistent identifier under which a guild participates in an alliance event.
+    /// </summary>
+    /// <param name="guildId">The runtime guild identifier.</param>
+    /// <returns>
+    /// The persistent identifier of the alliance master guild, the guild's own persistent identifier when it has no alliance,
+    /// or <see langword="null"/> if the guild was not found.
+    /// </returns>
+    ValueTask<Guid?> GetPersistentAllianceMasterGuildIdAsync(uint guildId);
+
+    /// <summary>
     /// Gets the guild id by the guild name.
     /// </summary>
     /// <param name="guildName">The guild name.</param>
@@ -132,6 +180,18 @@ public interface IGuildServer
     /// <param name="characterId">The id of the character.</param>
     /// <param name="role">The role.</param>
     ValueTask ChangeGuildMemberPositionAsync(uint guildId, Guid characterId, GuildPosition role);
+
+    /// <summary>
+    /// Updates the guild member position, resolved by character name.
+    /// Unlike character-based lookups on a single game server, this also reaches members
+    /// which are online on another game server or offline.
+    /// </summary>
+    /// <param name="guildId">The guild identifier.</param>
+    /// <param name="characterName">The name of the character.</param>
+    /// <param name="role">The role. Only normal member, battle master and assistant master are accepted.</param>
+    /// <param name="masterTotalLevel">The combined normal and master level of the guild master, used for the battle master limit.</param>
+    /// <returns><c>true</c> if the member was found and the position was changed; otherwise, <c>false</c>.</returns>
+    ValueTask<bool> ChangeGuildMemberPositionByNameAsync(uint guildId, string characterName, GuildPosition role, int masterTotalLevel);
 
     /// <summary>
     /// Notifies the guild server that a player (potential guild member) entered the game.
@@ -171,10 +231,11 @@ public interface IGuildServer
     ValueTask<GuildPosition> GetGuildPositionAsync(Guid characterId);
 
     /// <summary>
-    /// Increases the guild score by one.
+    /// Increases the guild score by the specified amount.
     /// </summary>
     /// <param name="guildId">The identifier of the guild.</param>
-    ValueTask IncreaseGuildScoreAsync(uint guildId);
+    /// <param name="amount">The score amount to add.</param>
+    ValueTask IncreaseGuildScoreAsync(uint guildId, int amount);
 
     /// <summary>
     /// Creates an alliance between the master guild and the target guild.

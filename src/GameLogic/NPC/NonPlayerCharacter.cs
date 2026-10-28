@@ -9,10 +9,18 @@ using MUnique.OpenMU.Pathfinding;
 using Nito.AsyncEx;
 
 /// <summary>
-/// The implementation of a non-player-character (Monster) which can not be attacked or attack.
+/// The implementation of a non-player-character (Monster) which cannot be attacked or attack.
 /// </summary>
 public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILocateable, IHasBucketInformation
 {
+    /// <summary>
+    /// The disposables which are disposed together with this instance, see <see cref="RegisterDisposable"/>.
+    /// Guarded by locking on itself.
+    /// </summary>
+    private readonly List<IDisposable> _registrations = new();
+
+    private bool _registrationsReleased;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="NonPlayerCharacter"/> class.
     /// </summary>
@@ -40,6 +48,12 @@ public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILoc
     /// <inheritdoc/>
     public Direction Rotation { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether this instance is invisible, so that it isn't shown to the players,
+    /// e.g. a trap which isn't known by the game client.
+    /// </summary>
+    public bool IsInvisible { get; set; }
+
     /// <inheritdoc/>
     public ISet<IWorldObserver> Observers { get; } = new HashSet<IWorldObserver>();
 
@@ -66,6 +80,11 @@ public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILoc
 
     /// <inheritdoc/>
     public Bucket<ILocateable>? OldBucket { get; set; }
+
+    /// <summary>
+    /// Gets a value indicating whether this instance can spawn in a safe zone.
+    /// </summary>
+    protected virtual bool CanSpawnInSafezone => this.Definition.ObjectKind != NpcObjectKind.Monster && this.Definition.ObjectKind != NpcObjectKind.Trap;
 
     /// <summary>
     /// Initializes this instance.
@@ -106,7 +125,7 @@ public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILoc
     /// <inheritdoc/>
     public async ValueTask AddObserverAsync(IWorldObserver observer)
     {
-        using var writerLock = await this.ObserverLock.WriterLockAsync();
+        using var writerLock = await this.ObserverLock.WriterLockAsync().ConfigureAwait(false);
         this.Observers.Add(observer);
         if (this.Observers.Count == 1)
         {
@@ -119,7 +138,7 @@ public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILoc
     /// <inheritdoc/>
     public async ValueTask RemoveObserverAsync(IWorldObserver observer)
     {
-        using var writerLock = await this.ObserverLock.WriterLockAsync();
+        using var writerLock = await this.ObserverLock.WriterLockAsync().ConfigureAwait(false);
         this.Observers.Remove(observer);
         if (this.Observers.Count == 0)
         {
@@ -127,6 +146,26 @@ public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILoc
         }
 
         this.OnObserverRemoved();
+    }
+
+    /// <summary>
+    /// Registers a disposable (e.g. a configuration change registration) to be disposed
+    /// together with this instance.
+    /// </summary>
+    /// <param name="disposable">The disposable.</param>
+    public void RegisterDisposable(IDisposable disposable)
+    {
+        lock (this._registrations)
+        {
+            if (!this._registrationsReleased)
+            {
+                this._registrations.Add(disposable);
+                return;
+            }
+        }
+
+        // Registered after this instance was disposed, e.g. by a spawn which raced the teardown of its map.
+        disposable.Dispose();
     }
 
     /// <inheritdoc/>
@@ -167,6 +206,28 @@ public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILoc
         // can be overwritten.
     }
 
+    /// <inheritdoc/>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            IDisposable[] registrations;
+            lock (this._registrations)
+            {
+                this._registrationsReleased = true;
+                registrations = [.. this._registrations];
+                this._registrations.Clear();
+            }
+
+            foreach (var registration in registrations)
+            {
+                registration.Dispose();
+            }
+        }
+
+        base.Dispose(disposing);
+    }
+
     /// <inheritdoc />
     protected override async ValueTask DisposeAsyncCore()
     {
@@ -183,11 +244,6 @@ public class NonPlayerCharacter : AsyncDisposable, IObservable, IRotatable, ILoc
     {
         throw new NotSupportedException("NPCs can't be moved");
     }
-
-    /// <summary>
-    /// Gets a value indicating whether this instance can spawn in a safe zone.
-    /// </summary>
-    protected virtual bool CanSpawnInSafezone => this.Definition.ObjectKind != NpcObjectKind.Monster && this.Definition.ObjectKind != NpcObjectKind.Trap;
 
     /// <summary>
     /// Gets the spawn direction.

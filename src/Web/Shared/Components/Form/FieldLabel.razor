@@ -11,9 +11,9 @@
         @this._actualLabel
         @if (!string.IsNullOrWhiteSpace(this._description))
         {
-            <details>
+            <details class="info-popup ms-2" @onclick:stopPropagation>
                 <summary></summary>
-                <div><span class="oi oi-info" aria-hidden="true"></span> @this._description</div>
+                <div class="alert alert-secondary shadow me-3"><span class="oi oi-info" aria-hidden="true"></span> @this._description</div>
             </details>
         }
     </label>
@@ -46,8 +46,10 @@
         var displayAttribute = property?.GetCustomAttribute<DisplayAttribute>(true);
         if (property is not null)
         {
-            // DisplayAttribute has priority
-            this._actualLabel = displayAttribute?.GetName() ?? type.GetPropertyCaption(property.Name);
+            // Explicit captions take priority over display metadata and model resources.
+            this._actualLabel = string.IsNullOrEmpty(this.Text)
+                ? displayAttribute?.GetName() ?? type.GetPropertyCaption(property.Name)
+                : this.Text;
             this._description = displayAttribute?.GetDescription() ?? type.GetPropertyDescription(property.Name);
         }
     }

@@ -1,6 +1,7 @@
 ﻿// <copyright file="ConnectServerContainer.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
+
 namespace MUnique.OpenMU.Startup;
 
 using System.Collections;
@@ -11,7 +12,7 @@ using MUnique.OpenMU.ConnectServer;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.Interfaces;
 using MUnique.OpenMU.Persistence;
-using MUnique.OpenMU.Web.AdminPanel.Services;
+using MUnique.OpenMU.Persistence.Initialization;
 
 /// <summary>
 /// A container which keeps all <see cref="Interfaces.IConnectServer"/>s in one <see cref="IHostedService"/>.
@@ -49,7 +50,7 @@ public class ConnectServerContainer : ServerContainerBase, IEnumerable<IConnectS
             .ConfigureAwait(false);
 
         var newConnectServer = this.InitializeConnectServer(definition ?? throw new InvalidOperationException($"ConnectServerDefinition with id {connectServerDefinitionId} was not found."));
-        if(this._observers.TryGetValue(definition.Client!, out var observer))
+        if (this._observers.TryGetValue(definition.Client!, out var observer))
         {
             observer.PullRegistrations(newConnectServer);
         }

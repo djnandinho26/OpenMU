@@ -7,6 +7,7 @@ namespace MUnique.OpenMU.Persistence.Initialization.Skills;
 using MUnique.OpenMU.DataModel.Attributes;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
 
 /// <summary>
 /// Initializer for the stun effect.
@@ -29,7 +30,7 @@ public class StunEffectInitializer : InitializerBase
         var magicEffect = this.Context.CreateNew<MagicEffectDefinition>();
         this.GameConfiguration.MagicEffects.Add(magicEffect);
         magicEffect.Number = (short)MagicEffectNumber.Stunned;
-        magicEffect.Name = "Stun Effect";
+        magicEffect.Name = LocalizedString.FromResource(() => MagicEffectNames.StunEffect);
         magicEffect.InformObservers = true;
         magicEffect.SendDuration = false;
         magicEffect.StopByDeath = true;
@@ -45,7 +46,7 @@ public class StunEffectInitializer : InitializerBase
         // Placeholder for master skills that use this effect
         var stunChancePowerUpDefinition = this.Context.CreateNew<PowerUpDefinition>();
         magicEffect.PowerUpDefinitions.Add(stunChancePowerUpDefinition);
-        stunChancePowerUpDefinition.TargetAttribute = Stats.StunChance.GetPersistent(this.GameConfiguration);
+        stunChancePowerUpDefinition.TargetAttribute = Stats.MasteryStunChance.GetPersistent(this.GameConfiguration);
         stunChancePowerUpDefinition.Boost = this.Context.CreateNew<PowerUpDefinitionValue>();
         stunChancePowerUpDefinition.Boost.ConstantValue.Value = 0;
     }

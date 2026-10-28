@@ -77,9 +77,34 @@ public static class PlayerState
         EnteredWorld.PossibleTransitions.Add(PlayerState.Dead);
 
         EnteredWorld.PossibleTransitions.Add(PlayerState.CharacterSelection);
+
+        // A map change can be started while the player is in the world, while it's dead (respawn on
+        // another map) and while an NPC dialog is opened, because some NPCs warp the player.
+        EnteredWorld.PossibleTransitions.Add(PlayerState.ChangingMap);
+        Dead.PossibleTransitions!.Add(PlayerState.ChangingMap);
+        NpcDialogOpened.PossibleTransitions.Add(PlayerState.ChangingMap);
+
+        // A player can log out back to the character selection at any time while it's in the game,
+        // so every in-game state has to be able to advance to the authenticated state.
+        State[] inGameStates =
+        [
+            EnteredWorld,
+            ChangingMap,
+            Dead,
+            NpcDialogOpened,
+            PartyRequest,
+            GuildRequest,
+            TradeRequested,
+            TradeOpened,
+            TradeButtonPressed,
+        ];
+        foreach (var inGameState in inGameStates)
+        {
+            inGameState.PossibleTransitions!.Add(PlayerState.Authenticated);
+        }
     }
 
-     /// <summary>
+    /// <summary>
     /// Gets the finished state. When this state is active, the player session was saved and the player object can be safely removed from the game.
     /// </summary>
     public static State Finished { get; } = new(new Guid("AB24C7C4-4F37-40ED-B874-0F6C7984C471"))
@@ -176,7 +201,9 @@ public static class PlayerState
     };
 
     /// <summary>
-    /// Gets the changing map state.
+    /// Gets the changing map state. When this state is active, the player left its previous map and
+    /// the game client is loading the new one. It's left again when the client signals that it's
+    /// ready, see <see cref="Player.ClientReadyAfterMapChangeAsync"/>.
     /// </summary>
     public static State ChangingMap { get; } = new(new Guid("FF660582-460C-4B69-9D99-F5EB156E83B9"))
     {
@@ -185,6 +212,7 @@ public static class PlayerState
         {
             Disconnected,
             EnteredWorld,
+            CharacterSelection,
         },
     };
 

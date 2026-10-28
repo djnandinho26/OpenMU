@@ -15,7 +15,7 @@ using Microsoft.JSInterop;
 public partial class ThemeSelector : IAsyncDisposable
 {
     private static readonly string JsModulePath =
-        $"./_content/{typeof(ThemeSelector).Assembly.GetName().Name}/themeSelector.js";
+        $"./_content/{typeof(ThemeSelector).Assembly.GetName().Name}/Components/{nameof(ThemeSelector)}.razor.js";
 
     private IJSObjectReference? _jsModule;
 
@@ -24,7 +24,7 @@ public partial class ThemeSelector : IAsyncDisposable
     private bool _hydrated;
 
     /// <summary>
-    /// Gets or sets the current dark-mode state as seen by the server-side renderer.
+    /// Gets or sets a value indicating whether the current dark-mode state as seen by the server-side renderer.
     /// </summary>
     /// <remarks>
     /// Only used until the first interactive render hydrates the value from the live DOM

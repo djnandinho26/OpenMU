@@ -1,4 +1,8 @@
-﻿namespace MUnique.OpenMU.Persistence.Initialization.Updates;
+﻿// <copyright file="FixWarriorMorningStarPlugIn.cs" company="MUnique">
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+// </copyright>
+
+namespace MUnique.OpenMU.Persistence.Initialization.Updates;
 
 using System.Runtime.InteropServices;
 using MUnique.OpenMU.DataModel.Configuration;
@@ -9,7 +13,7 @@ using MUnique.OpenMU.PlugIns;
 /// This update fixes the weapon of the warrior ancient set. The Hand Axe is replaced by the Morning Star.
 /// </summary>
 [PlugIn]
-[Display(Name = PlugInName, Description = PlugInDescription)]
+[Display(Name = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixWarriorMorningStarPlugIn_Name), Description = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixWarriorMorningStarPlugIn_Description), ResourceType = typeof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources))]
 [Guid("65BA79B5-1DBF-4C97-9628-0D8A429A8C88")]
 public class FixWarriorMorningStarPlugIn : UpdatePlugInBase
 {
@@ -30,9 +34,6 @@ public class FixWarriorMorningStarPlugIn : UpdatePlugInBase
     public override string Description => PlugInDescription;
 
     /// <inheritdoc />
-    public override UpdateVersion Version => UpdateVersion.FixWarriorMorningStar;
-
-    /// <inheritdoc />
     public override string DataInitializationKey => VersionSeasonSix.DataInitialization.Id;
 
     /// <inheritdoc />
@@ -44,7 +45,7 @@ public class FixWarriorMorningStarPlugIn : UpdatePlugInBase
     /// <inheritdoc />
     protected override async ValueTask ApplyAsync(IContext context, GameConfiguration gameConfiguration)
     {
-        var warriorSet = gameConfiguration.ItemSetGroups.First(set => set.Name == "Warrior");
+        var warriorSet = gameConfiguration.ItemSetGroups.First(set => set.Name.ValueInNeutralLanguage == "Warrior");
         var itemSet = warriorSet.Items.FirstOrDefault(item => item.ItemDefinition?.Group == (byte)ItemGroups.Axes);
         if (itemSet != null)
         {

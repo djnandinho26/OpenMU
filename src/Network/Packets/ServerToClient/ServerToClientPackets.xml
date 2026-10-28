@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <PacketDefinitions xmlns="http://www.munique.net/OpenMU/PacketDefinitions">
   <Description>This file contains all packet definitions for packets which are sent from game server to client.</Description>
   <Structures>
@@ -49,17 +49,19 @@
           <Index>0</Index>
           <Type>IntegerLittleEndian</Type>
           <Name>MoneyPrice</Name>
+          <Description>The price in zen, or in account coins when PriceItemType is one of the account coin values (see there). It's 0 when the price is defined in items.</Description>
         </Field>
         <Field>
           <Index>4</Index>
           <Type>ShortLittleEndian</Type>
           <Name>PriceItemType</Name>
-          <Description>Contains the item group in the highest 4 bits, and the item number in the remaining ones.</Description>
+          <Description>When RequiredItemAmount is greater than 0, it contains the item group in the highest 4 bits, and the item number in the remaining ones, of the item (e.g. a jewel) which is required to buy the item. When RequiredItemAmount is 0, the following reserved values define an account coin as currency, with the amount in MoneyPrice: 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P), 0xFFF2 = Goblin Points. Any other value means that MoneyPrice is the price in zen.</Description>
         </Field>
         <Field>
           <Index>6</Index>
           <Type>ShortLittleEndian</Type>
           <Name>RequiredItemAmount</Name>
+          <Description>The number of pieces of the item which is defined by PriceItemType, which is required to buy the item. 0, if the price is not defined in items.</Description>
         </Field>
         <Field>
           <Index>8</Index>
@@ -3922,6 +3924,11 @@
               <Value>12</Value>
             </EnumValue>
             <EnumValue>
+              <Name>CastleSiegeGuardsman</Name>
+              <Description>The castle siege guardsman window. The client requests the castle siege status (C1 B2 00) when it opens.</Description>
+              <Value>13</Value>
+            </EnumValue>
+            <EnumValue>
               <Name>ElphisRefinery</Name>
               <Description>The elphis refinery window.</Description>
               <Value>17</Value>
@@ -4481,6 +4488,11 @@
               <Description>The requested player has item block active.</Description>
               <Value>9</Value>
             </EnumValue>
+            <EnumValue>
+              <Name>LackOfPriceCurrency</Name>
+              <Description>The player has not enough of the currency (jewels or account coins) in which the price of the item is defined.</Description>
+              <Value>10</Value>
+            </EnumValue>
           </Values>
         </Enum>
       </Enums>
@@ -4554,6 +4566,44 @@
           </Values>
         </Enum>
       </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>3F</Code>
+      <SubCode>0A</SubCode>
+      <Name>PlayerShopPriceTypesExtended</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After entering the game world, and before the player shop of another player is shown, when the server allows prices in player shops which are not paid in zen.</SentWhen>
+      <CausedReaction>The client offers the allowed price types, in addition to zen, when the player sets an item price in his player shop. Without this message, only zen prices are possible.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Count</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Structure[]</Type>
+          <TypeName>PlayerShopPriceType</TypeName>
+          <Name>PriceTypes</Name>
+          <ItemCountField>Count</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>PlayerShopPriceType</Name>
+          <Description>A price type which is allowed for prices in player shops, in addition to zen.</Description>
+          <Length>2</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>ShortLittleEndian</Type>
+              <Name>PriceItemType</Name>
+              <Description>The value of PriceItemType of a price of this type, like in PlayerShopItemExtended: the item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, or 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P), 0xFFF2 = Goblin Points.</Description>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
     </Packet>
     <Packet>
       <HeaderType>C2HeaderWithSubCode</HeaderType>
@@ -4816,6 +4866,80 @@
           </Fields>
         </Structure>
       </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C2Header</HeaderType>
+      <Code>45</Code>
+      <Name>AddTransformedCharacterToScopeExtended</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player wears a monster transformation ring (extended client).</SentWhen>
+      <CausedReaction>The character appears as monster, defined by the Skin property.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>CharacterCount</Name>
+          <Description>The number of characters in this packet. This packet contains only one character, because the size of the appearance data depends on the used appearance serializer.</Description>
+          <DefaultValue>1</DefaultValue>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>Id</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Byte</Type>
+          <Name>CurrentPositionX</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>CurrentPositionY</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>Skin</Name>
+        </Field>
+        <Field>
+          <Index>11</Index>
+          <Type>String</Type>
+          <Name>Name</Name>
+          <Length>10</Length>
+        </Field>
+        <Field>
+          <Index>21</Index>
+          <Type>Byte</Type>
+          <Name>TargetPositionX</Name>
+        </Field>
+        <Field>
+          <Index>22</Index>
+          <Type>Byte</Type>
+          <Name>TargetPositionY</Name>
+        </Field>
+        <Field>
+          <Index>23</Index>
+          <LeftShifted>4</LeftShifted>
+          <Type>Byte</Type>
+          <Name>Rotation</Name>
+          <Length>4</Length>
+        </Field>
+        <Field>
+          <Index>23</Index>
+          <LeftShifted>0</LeftShifted>
+          <Type>Enum</Type>
+          <TypeName>CharacterHeroState</TypeName>
+          <Name>HeroState</Name>
+          <Length>4</Length>
+        </Field>
+        <Field>
+          <Index>24</Index>
+          <Type>Binary</Type>
+          <Name>AppearanceAndEffects</Name>
+          <Description>The appearance data, followed by the number of effects and the effect ids.</Description>
+        </Field>
+      </Fields>
     </Packet>
     <Packet>
       <HeaderType>C1Header</HeaderType>
@@ -7316,6 +7440,53 @@
     </Packet>
     <Packet>
       <HeaderType>C1Header</HeaderType>
+      <Code>0D</Code>
+      <Name>SlideNotice</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A game master or the server sends a notice which should scroll across the top of the screen.</SentWhen>
+      <CausedReaction>The client scrolls the message through the band at the top of the screen, as often as the loop count says.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>3</Index>
+          <Type>Byte</Type>
+          <Name>Type</Name>
+          <Description>The band and queueing of the message. 10 to 12 use the help band, 13 to 15 the notice band. Within a band, the first value drops the message when it could not be shown within a minute, the second one queues it, and the third one puts it in front of the queue, ignoring the loop delay.</Description>
+          <DefaultValue>14</DefaultValue>
+        </Field>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>LoopCount</Name>
+          <Description>How often the message is shown. The client ignores messages with more than 30 loops.</Description>
+          <DefaultValue>1</DefaultValue>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>LoopDelay</Name>
+          <Description>The delay between the loops, in seconds.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>Color</Name>
+          <Description>The color of the text, as 0xAABBGGRR.</Description>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>Byte</Type>
+          <Name>Speed</Name>
+          <Description>The scroll speed, multiplied by 10. 0 means the default speed.</Description>
+        </Field>
+        <Field>
+          <Index>13</Index>
+          <Type>String</Type>
+          <Name>Message</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1Header</HeaderType>
       <Code>50</Code>
       <Name>GuildJoinRequest</Name>
       <Length>5</Length>
@@ -7390,6 +7561,21 @@
               <Name>MinimumLevel6</Name>
               <Description>The requesting player needs a minimum level of 6.</Description>
               <Value>7</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>GuildMasterNotInGens</Name>
+              <Description>The guild master is not a member of a gens.</Description>
+              <Value>161</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>GuildMasterInDifferentGens</Name>
+              <Description>The guild master is a member of a different gens.</Description>
+              <Value>162</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotInGensOfGuildMaster</Name>
+              <Description>The requesting player has to be a member of the gens of the guild master.</Description>
+              <Value>163</Value>
             </EnumValue>
           </Values>
         </Enum>
@@ -8524,6 +8710,35 @@
     </Packet>
     <Packet>
       <HeaderType>C1Header</HeaderType>
+      <Code>88</Code>
+      <Name>ItemCraftingPreviewExtended</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the items of the crafting dialog changed, e.g. at the chaos machine.</SentWhen>
+      <CausedReaction>The game client shows the success rate and the price of the crafting which matches the items, as they are calculated by the server, instead of calculating them by itself.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>3</Index>
+          <Type>Byte</Type>
+          <Name>MixType</Name>
+          <Description>The number of the crafting which matches the items, which is also sent by the client to execute it. 0, if the items don't match any crafting.</Description>
+        </Field>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>SuccessRate</Name>
+          <Description>The success rate in percent, including the crafting bonus of the character.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>Price</Name>
+          <Description>The price in zen, without the tax of the chaos machine.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1Header</HeaderType>
       <Code>A0</Code>
       <Name>LegacyQuestStateList</Name>
       <Direction>ServerToClient</Direction>
@@ -9333,6 +9548,399 @@
 		</Packet>
     <Packet>
       <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>00</SubCode>
+      <Name>CrywolfInfo</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The state of the crywolf event changed, or the player entered the crywolf map. It should only be sent to players on the crywolf map, because the client loads the terrain of the occupation state for its current map.</SentWhen>
+      <CausedReaction>The client shows the event window in the states Ready, Start and End, plays the intro in the state Notify2, shows the result in the state End, and loads the terrain and light of the occupation state.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>OccupationState</TypeName>
+          <Name>Occupation</Name>
+          <Description>The occupation state. It must be Peace or Occupied in the state End, otherwise the client shows no result.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>CrywolfState</TypeName>
+          <Name>State</Name>
+          <Description>The state of the event.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>OccupationState</Name>
+          <Description>The occupation state of the crywolf fortress.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Peace</Name>
+              <Description>The fortress has been defended. The benefits apply.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Occupied</Name>
+              <Description>The fortress has been occupied by Balgass. The penalties apply.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>War</Name>
+              <Description>The fortress is under attack.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+        <Enum>
+          <Name>CrywolfState</Name>
+          <Description>The state of the crywolf event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>None</Name>
+              <Description>The event is not running.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify1</Name>
+              <Description>The first notification of the upcoming event.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify2</Name>
+              <Description>The second notification. The client plays the intro of the event.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ready</Name>
+              <Description>The altars can be contracted and the monsters appeared.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Start</Name>
+              <Description>The monsters attack.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>End</Name>
+              <Description>The event ended. The client shows the result.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>EndCycle</Name>
+              <Description>The event is finished.</Description>
+              <Value>6</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>02</SubCode>
+      <Name>CrywolfStatueAndAltarInfo</Name>
+      <Length>16</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Every two seconds while the altars can be contracted and during the battle.</SentWhen>
+      <CausedReaction>The client shows the shield of the statue and the states of the altars.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>StatueHealthPercent</Name>
+          <Description>The shield of the statue in percent, from 0 to 100.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>Altar1State</Name>
+          <Description>The state of the first altar (205). The high nibble is the altar state (1 = contracted), the low nibble the number of remaining contracts.</Description>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Byte</Type>
+          <Name>Altar2State</Name>
+          <Description>The state of the second altar (206), like Altar1State.</Description>
+        </Field>
+        <Field>
+          <Index>10</Index>
+          <Type>Byte</Type>
+          <Name>Altar3State</Name>
+          <Description>The state of the third altar (207), like Altar1State.</Description>
+        </Field>
+        <Field>
+          <Index>11</Index>
+          <Type>Byte</Type>
+          <Name>Altar4State</Name>
+          <Description>The state of the fourth altar (208), like Altar1State.</Description>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>Byte</Type>
+          <Name>Altar5State</Name>
+          <Description>The state of the fifth altar (209), like Altar1State.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>03</SubCode>
+      <Name>CrywolfContractResult</Name>
+      <Length>8</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested to contract an altar.</SentWhen>
+      <CausedReaction>On success, the client shows that the player is a guardian of the altar, and lets the character pray. Otherwise, it shows why the contract failed.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+          <Description>The result of the contract: 1 when it was accepted, 0 otherwise. The client compares the whole byte, so it's no boolean field.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>AltarState</Name>
+          <Description>The new state of the altar, like in the CrywolfStatueAndAltarInfo.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>AltarKey</Name>
+          <Description>The key of the altar. The client uses the key minus 317 as index into its five altar states without checking the range, so it must be 317 plus the index of the altar (0 to 4).</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>04</SubCode>
+      <Name>CrywolfLeftTime</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Every 20 seconds during the battle.</SentWhen>
+      <CausedReaction>The client shows the remaining minutes and counts down the seconds by itself. It expects this packet every 20 seconds: when the minute is the same as before, it assumes that 40 or 20 seconds of the minute are left.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Hours</Name>
+          <Description>The remaining hours. The client doesn't show them.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>Minutes</Name>
+          <Description>The remaining minutes.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>05</SubCode>
+      <Name>CrywolfBossMonsterInfo</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Every five seconds during the battle.</SentWhen>
+      <CausedReaction>The client shows the health of Balgass and the number of Dark Elves.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>BalgassHealthPercent</Name>
+          <Description>The health of Balgass in percent, or -1, when Balgass is not alive.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>DarkElfCount</Name>
+          <Description>The number of alive Dark Elves. The client shows it as count of 12.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>07</SubCode>
+      <Name>CrywolfPersonalRank</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The crywolf event ended, after the CrywolfInfo with the state End.</SentWhen>
+      <CausedReaction>The client shows the rank and the experience of the player in the result.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CrywolfRank</TypeName>
+          <Name>Rank</Name>
+          <Description>The rank of the player.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>Experience</Name>
+          <Description>The rewarded experience. The field is aligned to 4 bytes, because the client structure is not packed.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>CrywolfRank</Name>
+          <Description>The rank of a player in the crywolf event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>D</Name>
+              <Description>The rank D.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>C</Name>
+              <Description>The rank C.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>B</Name>
+              <Description>The rank B.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>A</Name>
+              <Description>The rank A.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>S</Name>
+              <Description>The rank S.</Description>
+              <Value>4</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>08</SubCode>
+      <Name>CrywolfHeroList</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The crywolf event ended, after the CrywolfInfo with the state End.</SentWhen>
+      <CausedReaction>The client shows the heroes with the highest scores in the result.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>HeroCount</Name>
+          <Description>The number of heroes, at most 5.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Structure[]</Type>
+          <TypeName>Hero</TypeName>
+          <Name>Heroes</Name>
+          <Description>The heroes.</Description>
+          <ItemCountField>HeroCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>Hero</Name>
+          <Description>Contains a hero of the crywolf event.</Description>
+          <Length>20</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>Byte</Type>
+              <Name>Rank</Name>
+              <Description>The place of the hero, from 0 (first) to 4. The client uses it as array index, so it must not be greater than 4.</Description>
+            </Field>
+            <Field>
+              <Index>1</Index>
+              <Type>String</Type>
+              <Name>Name</Name>
+              <Description>The name of the hero.</Description>
+              <Length>10</Length>
+            </Field>
+            <Field>
+              <Index>12</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>Score</Name>
+              <Description>The score of the hero. The field is aligned to 4 bytes, because the client structure is not packed.</Description>
+            </Field>
+            <Field>
+              <Index>16</Index>
+              <Type>Byte</Type>
+              <Name>CharacterClass</Name>
+              <Description>The number of the character class.</Description>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>09</SubCode>
+      <Name>CrywolfBenefitPlusChaosRate</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player opened a crafting dialog and requested the chaos rate benefit of the crywolf event.</SentWhen>
+      <CausedReaction>The client shows the additional success rate of the crafting.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>PlusChaosRate</Name>
+          <Description>The additional success rate in percent.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>0C</SubCode>
+      <Name>CrywolfRegionMonsterAttack</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A ballista of the crywolf event attacks an area.</SentWhen>
+      <CausedReaction>The client shows an arrow which hits the target point. The direction of the arrow depends on the x coordinate of the ballista.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>MonsterNumber</Name>
+          <Description>The number of the monster. The client ignores it.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>SourceX</Name>
+          <Description>The x coordinate of the ballista.</Description>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Byte</Type>
+          <Name>SourceY</Name>
+          <Description>The y coordinate of the ballista. The client ignores it.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>TargetX</Name>
+          <Description>The x coordinate of the target point.</Description>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Byte</Type>
+          <Name>TargetY</Name>
+          <Description>The y coordinate of the target point.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
       <Code>BF</Code>
       <SubCode>00</SubCode>
       <Name>IllusionTempleEnterResult</Name>
@@ -9705,6 +10313,288 @@
           </Fields>
         </Structure>
       </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BF</Code>
+      <SubCode>0E</SubCode>
+      <Name>DoppelgangerEnterResult</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested to enter the doppelganger event through the NPC Lugard.</SentWhen>
+      <CausedReaction>On failure, the client locks the enter button of the doppelganger entry dialog and may show a message.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>EnterResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>EnterResult</Name>
+          <Description>Result of the doppelganger enter request.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The player entered the event.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Failed</Name>
+              <Description>The player could not enter, e.g. because of a missing ticket item. The client locks the enter button without showing a message.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>AlreadyStarted</Name>
+              <Description>The event is already running or occupied by another party. The client shows "Battle has already commenced. You cannot enter.".</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>PlayerKiller</Name>
+              <Description>Player killers are not allowed to enter. The client shows "You cannot enter if you are a 1st Stage Outlaw.".</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>EntranceAvailable</Name>
+              <Description>The client unlocks the enter button of the doppelganger entry dialog.</Description>
+              <Value>4</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BF</Code>
+      <SubCode>0F</SubCode>
+      <Name>DoppelgangerMonsterPosition</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The position of the most advanced monster on the path to the magic circle changed during the doppelganger event.</SentWhen>
+      <CausedReaction>The client updates the monster progress bar of the doppelganger frame.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Position</Name>
+          <Description>The position index on the path, between 0 (start) and 22 (magic circle).</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BF</Code>
+      <SubCode>10</SubCode>
+      <Name>DoppelgangerStateUpdate</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The state of the doppelganger event changed.</SentWhen>
+      <CausedReaction>When the event starts (state Playing), the client shows the doppelganger frame and a message box with the failure conditions.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>DoppelgangerState</TypeName>
+          <Name>State</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>DoppelgangerState</Name>
+          <Description>The state of the doppelganger event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Waiting</Name>
+              <Description>The event is waiting for the party members to enter.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ready</Name>
+              <Description>The entrance is closed and the event is about to start.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Playing</Name>
+              <Description>The event is running.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ended</Name>
+              <Description>The event has ended.</Description>
+              <Value>3</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BF</Code>
+      <SubCode>11</SubCode>
+      <Name>DoppelgangerIceWalkerState</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The ice walker appeared on or disappeared from the path during the doppelganger event.</SentWhen>
+      <CausedReaction>The client shows or hides the ice walker icon on the progress bar of the doppelganger frame.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>IceWalkerState</TypeName>
+          <Name>State</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>Position</Name>
+          <Description>The position index of the ice walker on the path, between 0 (start) and 22 (magic circle).</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>IceWalkerState</Name>
+          <Description>The state of the ice walker.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Appeared</Name>
+              <Description>The ice walker is present at the given position.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Disappeared</Name>
+              <Description>The ice walker was killed or disappeared.</Description>
+              <Value>1</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BF</Code>
+      <SubCode>12</SubCode>
+      <Name>DoppelgangerPlayInfo</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Periodically (every second) while the doppelganger event is running.</SentWhen>
+      <CausedReaction>The client updates the remaining time and the positions of the party members on the progress bar of the doppelganger frame. Players which are not included are no longer shown.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>RemainingSeconds</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>PlayerCount</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Structure[]</Type>
+          <TypeName>PlayerPosition</TypeName>
+          <Name>PlayerPositions</Name>
+          <ItemCountField>PlayerCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>PlayerPosition</Name>
+          <Description>The position of a player on the path.</Description>
+          <Length>4</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>ShortLittleEndian</Type>
+              <Name>PlayerId</Name>
+            </Field>
+            <Field>
+              <Index>2</Index>
+              <Type>Byte</Type>
+              <Name>MapNumber</Name>
+              <Description>The map number of the player. It is ignored by the client.</Description>
+            </Field>
+            <Field>
+              <Index>3</Index>
+              <Type>Byte</Type>
+              <Name>Position</Name>
+              <Description>The position index of the player on the path, between 0 (start) and 22 (magic circle).</Description>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BF</Code>
+      <SubCode>13</SubCode>
+      <Name>DoppelgangerResult</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The doppelganger event ended for the player.</SentWhen>
+      <CausedReaction>The client stops the timer and the event music, and shows a message box with the result.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>ResultType</TypeName>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>RewardExperience</Name>
+          <Description>The experience which the player got as reward. It is not shown by the client. The field is aligned to 4 bytes, because the client structure is not packed.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>ResultType</Name>
+          <Description>The result of the doppelganger event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The party successfully defended the magic circle.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Failed</Name>
+              <Description>The player failed, e.g. because the character died or left the event map.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>MonstersReachedMagicCircle</Name>
+              <Description>The defense failed, because too many monsters reached the magic circle.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BF</Code>
+      <SubCode>14</SubCode>
+      <Name>DoppelgangerMonsterGoal</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A monster reached the magic circle during the doppelganger event.</SentWhen>
+      <CausedReaction>The client updates the counter of monsters which passed the magic circle.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>MaximumGoalCount</Name>
+          <Description>The number of monsters which may reach the magic circle until the event fails.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>GoalCount</Name>
+          <Description>The number of monsters which reached the magic circle.</Description>
+        </Field>
+      </Fields>
     </Packet>
 		<Packet>
 			<HeaderType>C1HeaderWithSubCode</HeaderType>
@@ -10544,6 +11434,281 @@
       </Fields>
     </Packet>
     <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F8</Code>
+      <SubCode>02</SubCode>
+      <Name>GensJoinResponse</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested to join a gens at one of the gens NPCs.</SentWhen>
+      <CausedReaction>The npc dialog shows the result. When the player joined, the client assigns the gens to the own character.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>GensJoinResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>GensType</TypeName>
+          <Name>GensType</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>GensJoinResult</Name>
+          <Description>Defines the result of the gens join request.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The player joined the gens.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>AlreadyJoined</Name>
+              <Description>The player is already member of a gens.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>LeftRecently</Name>
+              <Description>The player left a gens recently and has to wait before joining again.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>LevelTooLow</Name>
+              <Description>The level of the character is too low.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>GuildInDifferentGens</Name>
+              <Description>The guild of the player is part of a different gens. The client shows this for members of a guild.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>GuildMasterNotInGens</Name>
+              <Description>The guild master is not member of the gens.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>InParty</Name>
+              <Description>The player is in a party.</Description>
+              <Value>6</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>GuildAllianceMember</Name>
+              <Description>The guild of the player is part of a guild alliance.</Description>
+              <Value>7</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F8</Code>
+      <SubCode>04</SubCode>
+      <Name>GensLeaveResponse</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested to leave the gens at one of the gens NPCs.</SentWhen>
+      <CausedReaction>The npc dialog shows the result. When the player left, the client removes the gens of the own character.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>GensLeaveResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>GensLeaveResult</Name>
+          <Description>Defines the result of the gens leave request.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The player left the gens.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotJoined</Name>
+              <Description>The player is not member of a gens.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>GuildMasterCannotLeave</Name>
+              <Description>The player is a guild master, which can't leave the gens.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DifferentGensNpc</Name>
+              <Description>The player is member of a different gens than the one of the npc.</Description>
+              <Value>3</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C2HeaderWithSubCode</HeaderType>
+      <Code>F8</Code>
+      <SubCode>05</SubCode>
+      <Name>AssignCharactersToGens</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server wants to visibly assign players to their gens, e.g. when two players met each other, or when a player joined or left a gens.</SentWhen>
+      <CausedReaction>The client shows the gens mark and rank next to the names of the players.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>PlayerCount</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Structure[]</Type>
+          <TypeName>GensMemberRelation</TypeName>
+          <Name>Members</Name>
+          <ItemCountField>PlayerCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>GensMemberRelation</Name>
+          <Description>Relation between a gens and a player.</Description>
+          <Length>16</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>Enum</Type>
+              <TypeName>GensType</TypeName>
+              <Name>GensType</Name>
+            </Field>
+            <Field>
+              <Index>1</Index>
+              <Type>ShortBigEndian</Type>
+              <Name>PlayerId</Name>
+            </Field>
+            <Field>
+              <Index>4</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>RankingPosition</Name>
+            </Field>
+            <Field>
+              <Index>8</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>Rank</Name>
+            </Field>
+            <Field>
+              <Index>12</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>ContributionPoints</Name>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F8</Code>
+      <SubCode>07</SubCode>
+      <Name>GensInfo</Name>
+      <Length>24</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player entered the game world, joined or left a gens, or requested the gens ranking.</SentWhen>
+      <CausedReaction>The client shows the gens mark and rank of the own character, and the gens info window shows the ranking and contribution.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>GensType</TypeName>
+          <Name>GensType</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>RankingPosition</Name>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>Rank</Name>
+        </Field>
+        <Field>
+          <Index>16</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>ContributionPoints</Name>
+        </Field>
+        <Field>
+          <Index>20</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NextRankContributionPoints</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F8</Code>
+      <SubCode>0A</SubCode>
+      <Name>GensRewardResponse</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested the gens ranking reward at one of the gens NPCs.</SentWhen>
+      <CausedReaction>The npc dialog shows the result.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>GensRewardResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>GensRewardResult</Name>
+          <Description>Defines the result of the gens reward request.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The player got the reward.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>OutsideRewardPeriod</Name>
+              <Description>The rewards are only given out in the reward period, e.g. the first week of a month.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotEligible</Name>
+              <Description>The player is not eligible for a reward.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>InventoryFull</Name>
+              <Description>The inventory of the player has not enough space for the reward.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>AlreadyClaimed</Name>
+              <Description>The player already got the reward.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DifferentGensNpc</Name>
+              <Description>The player is member of a different gens than the one of the npc.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotJoined</Name>
+              <Description>The player is not member of a gens.</Description>
+              <Value>6</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
       <HeaderType>C1Header</HeaderType>
       <Code>90</Code>
       <Name>DevilSquareEnterResult</Name>
@@ -10712,6 +11877,26 @@
               <Description>The chaos castle game is finished. Chaos Castle Event shuts down (in x seconds)".</Description>
               <Value>13</Value>
             </EnumValue>
+            <EnumValue>
+              <Name>DoppelgangerEntranceClosing</Name>
+              <Description>The entrance of the doppelganger event closes in 30 seconds. The client shows the countdown only on the doppelganger maps.</Description>
+              <Value>16</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DoppelgangerStarting</Name>
+              <Description>The doppelganger event starts in 30 seconds. The client shows the countdown only on the doppelganger maps.</Description>
+              <Value>17</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DoppelgangerIceWalkerCountdown</Name>
+              <Description>The ice walker has to be killed within 30 seconds. The client shows the countdown only on the doppelganger maps.</Description>
+              <Value>18</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DoppelgangerEnding</Name>
+              <Description>The doppelganger event ends in 30 seconds. The client shows the countdown only on the doppelganger maps.</Description>
+              <Value>19</Value>
+            </EnumValue>
           </Values>
         </Enum>
       </Enums>
@@ -10733,6 +11918,7 @@
           <Index>4</Index>
           <Type>Byte</Type>
           <Name>ResultCount</Name>
+          <Description>The number of results. The client shares the code 0x93 with the BloodCastleScore (0xFF) and ChaosCastleScore (0xFE) at this index, so a score table must contain less than 200 results; the client holds up to 11.</Description>
         </Field>
         <Field>
           <Index>5</Index>
@@ -10791,6 +11977,7 @@
           <Index>4</Index>
           <Type>Byte</Type>
           <Name>Type</Name>
+          <Description>Identifies the blood castle result. The client shares the code 0x93 with the MiniGameScoreTable and the ChaosCastleScore and distinguishes them by this byte.</Description>
           <DefaultValue>0xFF</DefaultValue>
         </Field>
         <Field>
@@ -10813,6 +12000,51 @@
           <Index>25</Index>
           <Type>IntegerLittleEndian</Type>
           <Name>BonusMoney</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1Header</HeaderType>
+      <Code>93</Code>
+      <Name>ChaosCastleScore</Name>
+      <Length>29</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The chaos castle mini game ended and the score of the player is sent to the player.</SentWhen>
+      <CausedReaction>The client shows the experience and the killed monsters and players.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>3</Index>
+          <Type>Boolean</Type>
+          <Name>Success</Name>
+          <Description>If the player won the chaos castle.</Description>
+        </Field>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Type</Name>
+          <Description>Identifies the chaos castle result. The client shares the code 0x93 with the MiniGameScoreTable and the BloodCastleScore and distinguishes them by this byte.</Description>
+          <DefaultValue>0xFE</DefaultValue>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>String</Type>
+          <Name>PlayerName</Name>
+          <Length>10</Length>
+        </Field>
+        <Field>
+          <Index>17</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>MonsterKillCount</Name>
+        </Field>
+        <Field>
+          <Index>21</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>BonusExperience</Name>
+        </Field>
+        <Field>
+          <Index>25</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>PlayerKillCount</Name>
         </Field>
       </Fields>
     </Packet>
@@ -11067,8 +12299,3062 @@
         </Enum>
       </Enums>
     </Packet>
+    <Packet>
+      <HeaderType>C2HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>01</SubCode>
+      <Name>AvailableChatCommand</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the client requested the list of available chat commands. One message is sent for each command which is available to the player.</SentWhen>
+      <CausedReaction>The client adds the command to its list of known commands, so that it can offer them to the player without requiring him to know or type them.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>Index</Name>
+          <Description>The index of this command within the list, starting at 0.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>Count</Name>
+          <Description>The total number of commands which are available to the player, so that the client knows when it received all of them.</Description>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Enum</Type>
+          <TypeName>CharacterStatus</TypeName>
+          <Name>MinimumCharacterStatus</Name>
+          <Description>The character status which is required to execute the command.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>ParameterCount</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>String</Type>
+          <Name>Command</Name>
+          <Length>32</Length>
+          <Description>The command including its slash, e.g. '/item'.</Description>
+        </Field>
+        <Field>
+          <Index>41</Index>
+          <Type>String</Type>
+          <Name>Name</Name>
+          <Length>48</Length>
+          <Description>The name of the command, in the language of the player.</Description>
+        </Field>
+        <Field>
+          <Index>89</Index>
+          <Type>String</Type>
+          <Name>Description</Name>
+          <Length>256</Length>
+          <Description>The description of the command, in the language of the player.</Description>
+        </Field>
+        <Field>
+          <Index>345</Index>
+          <Type>Structure[]</Type>
+          <TypeName>ChatCommandParameter</TypeName>
+          <Name>Parameters</Name>
+          <ItemCountField>ParameterCount</ItemCountField>
+          <Description>The parameters of the command, in the order in which they are expected when they are entered without their short names.</Description>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>ChatCommandParameter</Name>
+          <Description>Describes one parameter of a chat command, so that a user interface can offer an input for it.</Description>
+          <Length>102</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>Boolean</Type>
+              <Name>IsRequired</Name>
+              <Description>Defines if the parameter has to be specified to execute the command.</Description>
+            </Field>
+            <Field>
+              <Index>1</Index>
+              <Type>Enum</Type>
+              <TypeName>ChatCommandParameterType</TypeName>
+              <Name>Type</Name>
+              <Description>The kind of value which is expected, so that a fitting input can be shown.</Description>
+            </Field>
+            <Field>
+              <Index>2</Index>
+              <Type>String</Type>
+              <Name>Name</Name>
+              <Length>32</Length>
+            </Field>
+            <Field>
+              <Index>34</Index>
+              <Type>String</Type>
+              <Name>ShortName</Name>
+              <Length>20</Length>
+              <Description>The short name which is used in the 'shortName=value' notation. It's empty when the parameter can only be passed by its position.</Description>
+            </Field>
+            <Field>
+              <Index>54</Index>
+              <Type>String</Type>
+              <Name>ValidValues</Name>
+              <Length>48</Length>
+              <Description>The accepted values, separated by a pipe. It's empty when the parameter isn't limited to a set of values.</Description>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>03</SubCode>
+      <Name>DiscordIntegrationInfo</Name>
+      <Length>224</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the client requested the Discord integration info, and after the player unlinked the account.</SentWhen>
+      <CausedReaction>The client configures its Discord features with it: the Rich Presence, a button which opens the invite, the account link dialog and the notice that the chat is mirrored.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Boolean</Type>
+          <Name>IsAccountLinked</Name>
+          <Description>Defines if the account is linked to a Discord user.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Boolean</Type>
+          <Name>IsGuildChatBridged</Name>
+          <Description>Defines if the chat of the guild of the character is mirrored to a Discord channel.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Boolean</Type>
+          <Name>IsAllianceChatBridged</Name>
+          <Description>Defines if the chat of the alliance of the character is mirrored to a Discord channel.</Description>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Boolean</Type>
+          <Name>IsWorldChatBridged</Name>
+          <Description>Defines if the world chat leaves the game for Discord: the server publishes it, so a Discord bot with a world chat channel mirrors it. The server can't tell whether the bot has such a channel.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>String</Type>
+          <Name>RichPresenceApplicationId</Name>
+          <Length>20</Length>
+          <Description>The id of the Discord application which the client uses for the Rich Presence. Empty, if the server has none.</Description>
+        </Field>
+        <Field>
+          <Index>28</Index>
+          <Type>String</Type>
+          <Name>RichPresenceLargeImageKey</Name>
+          <Length>32</Length>
+          <Description>The key of the large image of the Rich Presence, as uploaded to the Discord application. Empty for no image.</Description>
+        </Field>
+        <Field>
+          <Index>60</Index>
+          <Type>String</Type>
+          <Name>RichPresenceSmallImageKey</Name>
+          <Length>32</Length>
+          <Description>The key of the small image of the Rich Presence, as uploaded to the Discord application. Empty for no image.</Description>
+        </Field>
+        <Field>
+          <Index>92</Index>
+          <Type>String</Type>
+          <Name>InviteUrl</Name>
+          <Length>100</Length>
+          <Description>The invite link to the Discord server of the game server, e.g. 'https://discord.gg/abc123'. Empty, if the server has none.</Description>
+        </Field>
+        <Field>
+          <Index>192</Index>
+          <Type>String</Type>
+          <Name>LinkedUserName</Name>
+          <Length>32</Length>
+          <Description>The name of the Discord user which the account is linked to. Empty, if the account isn't linked.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>05</SubCode>
+      <Name>DiscordLinkCode</Name>
+      <Length>16</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the client requested a code to link the account to a Discord user.</SentWhen>
+      <CausedReaction>The client shows the code, so that the player can enter it in Discord.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>DiscordLinkCodeResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>String</Type>
+          <Name>LinkCode</Name>
+          <Length>10</Length>
+          <Description>The one-time code, e.g. 'ABCD-EFGH'. The player enters it in Discord with '/link'.</Description>
+        </Field>
+        <Field>
+          <Index>15</Index>
+          <Type>Byte</Type>
+          <Name>ValidMinutes</Name>
+          <Description>The number of minutes the code is valid.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>DiscordLinkCodeResult</Name>
+          <Description>The result of a request of a code to link the account to a Discord user.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The code was created.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotAvailable</Name>
+              <Description>Linking isn't available, e.g. because the server isn't connected to Discord.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>TooSoon</Name>
+              <Description>A code was requested a moment ago. Every code replaces the previous one, so the server hands out new ones only every few seconds.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C2HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>07</SubCode>
+      <Name>ExternalChatMessage</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A message was written outside of the game, e.g. in a Discord channel which is bound to the chat of a guild, an alliance or the world chat. It's only sent to clients which requested the DiscordIntegrationInfo before; other clients get it as normal chat message, with a prefix in front of the sender.</SentWhen>
+      <CausedReaction>The client shows the message in the chat of its scope, marked with its source, so that it can't be mistaken for a message of a character.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>ExternalChatSource</TypeName>
+          <Name>Source</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Enum</Type>
+          <TypeName>ExternalChatScope</TypeName>
+          <Name>Scope</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>String</Type>
+          <Name>SenderName</Name>
+          <Length>48</Length>
+          <Description>The name of the sender, without a prefix. It's not a character name, so it can't be whispered.</Description>
+        </Field>
+        <Field>
+          <Index>55</Index>
+          <Type>String</Type>
+          <Name>Message</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>ExternalChatSource</Name>
+          <Description>Where an external chat message was written.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Discord</Name>
+              <Description>The message was written in Discord.</Description>
+              <Value>0</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+        <Enum>
+          <Name>ExternalChatScope</Name>
+          <Description>The chat of the game which an external chat message belongs to.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Guild</Name>
+              <Description>The chat of the guild.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Alliance</Name>
+              <Description>The chat of the alliance.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>World</Name>
+              <Description>The world chat, which all players of all game servers can read.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1Header</HeaderType>
+      <Code>94</Code>
+      <Name>EventChipRegistrationResult</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player receives the result of registering Rena or Event Chips at the Golden Archer NPC.</SentWhen>
+      <CausedReaction>The client updates the Golden Archer interface with total registered count and remaining count in inventory.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>3</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>RegisteredCount</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>RemainingInventoryCount</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>00</SubCode>
+      <Name>CastleSiegeStatusResponse</Name>
+      <Length>46</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested the current castle siege status from a castle siege npc.</SentWhen>
+      <CausedReaction>The client shows the castle siege status.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeState</TypeName>
+          <Name>State</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>StartYear</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>StartMonth</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Byte</Type>
+          <Name>StartDay</Name>
+        </Field>
+        <Field>
+          <Index>10</Index>
+          <Type>Byte</Type>
+          <Name>StartHour</Name>
+        </Field>
+        <Field>
+          <Index>11</Index>
+          <Type>Byte</Type>
+          <Name>StartMinute</Name>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>EndYear</Name>
+        </Field>
+        <Field>
+          <Index>14</Index>
+          <Type>Byte</Type>
+          <Name>EndMonth</Name>
+        </Field>
+        <Field>
+          <Index>15</Index>
+          <Type>Byte</Type>
+          <Name>EndDay</Name>
+        </Field>
+        <Field>
+          <Index>16</Index>
+          <Type>Byte</Type>
+          <Name>EndHour</Name>
+        </Field>
+        <Field>
+          <Index>17</Index>
+          <Type>Byte</Type>
+          <Name>EndMinute</Name>
+        </Field>
+        <Field>
+          <Index>18</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>SiegeStartYear</Name>
+        </Field>
+        <Field>
+          <Index>20</Index>
+          <Type>Byte</Type>
+          <Name>SiegeStartMonth</Name>
+        </Field>
+        <Field>
+          <Index>21</Index>
+          <Type>Byte</Type>
+          <Name>SiegeStartDay</Name>
+        </Field>
+        <Field>
+          <Index>22</Index>
+          <Type>Byte</Type>
+          <Name>SiegeStartHour</Name>
+        </Field>
+        <Field>
+          <Index>23</Index>
+          <Type>Byte</Type>
+          <Name>SiegeStartMinute</Name>
+        </Field>
+        <Field>
+          <Index>24</Index>
+          <Type>String</Type>
+          <Name>GuildName</Name>
+          <Length>8</Length>
+        </Field>
+        <Field>
+          <Index>32</Index>
+          <Type>String</Type>
+          <Name>GuildMasterName</Name>
+          <Length>10</Length>
+        </Field>
+        <Field>
+          <Index>42</Index>
+          <Type>IntegerBigEndian</Type>
+          <Name>RemainingTime</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>01</SubCode>
+      <Name>CastleSiegeRegistrationResponse</Name>
+      <Length>13</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested to register his guild for the next castle siege.</SentWhen>
+      <CausedReaction>The client shows the result of the registration attempt.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>String</Type>
+          <Name>GuildName</Name>
+          <Length>8</Length>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>02</SubCode>
+      <Name>CastleSiegeUnregisterResponse</Name>
+      <Length>14</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested to un-register his guild from the next castle siege.</SentWhen>
+      <CausedReaction>The client shows the result of the un-registration attempt.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Boolean</Type>
+          <Name>IsGivingUp</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>String</Type>
+          <Name>GuildName</Name>
+          <Length>8</Length>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>03</SubCode>
+      <Name>CastleSiegeRegistrationStateResponse</Name>
+      <Length>19</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested the current registration state of his guild.</SentWhen>
+      <CausedReaction>The client shows the current registration state including the number of submitted guild marks.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>String</Type>
+          <Name>GuildName</Name>
+          <Length>8</Length>
+        </Field>
+        <Field>
+          <Index>13</Index>
+          <Type>IntegerBigEndian</Type>
+          <Name>GuildMarkCount</Name>
+        </Field>
+        <Field>
+          <Index>17</Index>
+          <Type>Boolean</Type>
+          <Name>IsGivingUp</Name>
+        </Field>
+        <Field>
+          <Index>18</Index>
+          <Type>Byte</Type>
+          <Name>RegistrationRank</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>04</SubCode>
+      <Name>CastleSiegeMarkRegistrationResponse</Name>
+      <Length>17</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player submitted a guild mark for the castle siege registration.</SentWhen>
+      <CausedReaction>The client shows the updated guild mark count.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>String</Type>
+          <Name>GuildName</Name>
+          <Length>8</Length>
+        </Field>
+        <Field>
+          <Index>13</Index>
+          <Type>IntegerBigEndian</Type>
+          <Name>GuildMarkCount</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>05</SubCode>
+      <Name>CastleSiegeDefenseBuyResponse</Name>
+      <Length>13</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested to buy a castle siege defense structure (gate or statue).</SentWhen>
+      <CausedReaction>The client shows the result of the buy request.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcNumber</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcIndex</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>06</SubCode>
+      <Name>CastleSiegeDefenseRepairResponse</Name>
+      <Length>21</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested to repair a castle siege defense structure (gate or statue).</SentWhen>
+      <CausedReaction>The client shows the result of the repair request.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcNumber</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcIndex</Name>
+        </Field>
+        <Field>
+          <Index>13</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>CurrentHp</Name>
+        </Field>
+        <Field>
+          <Index>17</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>MaxHp</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>07</SubCode>
+      <Name>CastleSiegeDefenseUpgradeResponse</Name>
+      <Length>21</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player requested to upgrade a castle siege defense structure (gate or statue).</SentWhen>
+      <CausedReaction>The client shows the result of the upgrade request and the new upgrade values.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcNumber</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcIndex</Name>
+        </Field>
+        <Field>
+          <Index>13</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcUpgradeType</Name>
+        </Field>
+        <Field>
+          <Index>17</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcUpgradeValue</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>08</SubCode>
+      <Name>CastleSiegeTaxInfoResponse</Name>
+      <Length>15</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the guild master opened the castle npc to manage the castle taxes.</SentWhen>
+      <CausedReaction>The client shows the current tax configuration and treasury amount.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>TaxRateChaosMachine</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>TaxRateNormal</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>LongBigEndian</Type>
+          <Name>Treasury</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>09</SubCode>
+      <Name>CastleSiegeTaxChangeResponse</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the guild master changed the tax rate.</SentWhen>
+      <CausedReaction>The client shows the result of the tax rate change.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeTaxType</TypeName>
+          <Name>TaxType</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>IntegerBigEndian</Type>
+          <Name>TaxValue</Name>
+          <Description>The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>10</SubCode>
+      <Name>CastleSiegeTributeWithdrawResponse</Name>
+      <Length>13</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the guild master requested to withdraw tax money from the castle treasury.</SentWhen>
+      <CausedReaction>The client shows the result of the withdrawal and the withdrawn amount.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>LongBigEndian</Type>
+          <Name>Money</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>11</SubCode>
+      <Name>CastleSiegeGateInterfaceResponse</Name>
+      <Length>7</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After a player talks to the lever of a castle gate.</SentWhen>
+      <CausedReaction>The client opens the gate operation interface when access is allowed.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>GateIndex</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>12</SubCode>
+      <Name>CastleSiegeGateOperateResponse</Name>
+      <Length>8</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After a guild member of the castle owner requested to toggle a castle gate.</SentWhen>
+      <CausedReaction>The client shows the result of the gate toggle operation.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Boolean</Type>
+          <Name>IsOpen</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>GateIndex</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>13</SubCode>
+      <Name>CastleSiegeGateStateNotification</Name>
+      <Length>7</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A castle gate is opened or closed.</SentWhen>
+      <CausedReaction>The client updates the castle gate animation and collision state.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Boolean</Type>
+          <Name>IsOpen</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>GateIndex</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>14</SubCode>
+      <Name>CastleSiegeCrownSwitchState</Name>
+      <Length>9</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A player starts or stops occupying a castle crown switch.</SentWhen>
+      <CausedReaction>The client updates the crown switch interaction state.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>SwitchIndex</Name>
+          <Description>The network object identifier of the Crown switch.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>PlayerIndex</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeCrownSwitchStateType</TypeName>
+          <Name>State</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>15</SubCode>
+      <Name>CastleSiegeCrownAccessState</Name>
+      <Length>9</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server updates the access state of the castle crown during the siege.</SentWhen>
+      <CausedReaction>The client updates the crown access state and accumulated time display.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeCrownAccessStateType</TypeName>
+          <Name>State</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>AccumulatedTimeMs</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>16</SubCode>
+      <Name>CastleSiegeCrownStateUpdate</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server updates the state of the castle crown during the siege.</SentWhen>
+      <CausedReaction>The client updates the crown state display.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeCrownState</TypeName>
+          <Name>State</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>17</SubCode>
+      <Name>CastleSiegeBattleStartEnd</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server notifies all players that the castle siege battle has started or ended.</SentWhen>
+      <CausedReaction>The client updates the siege state accordingly.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Boolean</Type>
+          <Name>IsStarted</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>18</SubCode>
+      <Name>CastleSiegeBattleProcess</Name>
+      <Length>13</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A guild starts accessing the crown or successfully takes ownership of the castle.</SentWhen>
+      <CausedReaction>The client announces the crown access or castle ownership change.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeBattleProcessState</TypeName>
+          <Name>State</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>String</Type>
+          <Name>GuildName</Name>
+          <Length>8</Length>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>19</SubCode>
+      <Name>CastleSiegeJoinSideNotification</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server notifies the player of which siege side (attacker/defender) they are on.</SentWhen>
+      <CausedReaction>The client updates the player regiment and Castle Siege mini-map accordingly.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeJoinSide</TypeName>
+          <Name>Side</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>1A</SubCode>
+      <Name>CastleSiegeTaxRateNotification</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The castle owner changes a server-wide chaos machine or store tax rate.</SentWhen>
+      <CausedReaction>The client updates the applicable tax rate.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeTaxType</TypeName>
+          <Name>TaxType</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>TaxRate</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>1B</SubCode>
+      <Name>CastleSiegeMiniMapResponse</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server responds to a Castle Siege mini-map request.</SentWhen>
+      <CausedReaction>The client opens the mini map when the request was accepted.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+          <Description>The result code. The client currently ignores it; historically documented values are not yet verified.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>1D</SubCode>
+      <Name>CastleSiegeGuildCommand</Name>
+      <Length>8</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>An alliance master sends a command during the Castle Siege battle.</SentWhen>
+      <CausedReaction>The client shows the command on the mini map.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Team</Name>
+          <Description>Team number from 0 to 7.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>PositionX</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>PositionY</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeGuildCommandType</TypeName>
+          <Name>Command</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>1E</SubCode>
+      <Name>CastleSiegeRemainingTime</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server sends the remaining Castle Siege battle time.</SentWhen>
+      <CausedReaction>The client updates the Castle Siege battle timer.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Hour</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>Minute</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>1F</SubCode>
+      <Name>CastleSiegeHuntingZoneEntranceSettingResponse</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The castle owner requests to change public access to the Castle Siege hunting zone.</SentWhen>
+      <CausedReaction>The client updates the hunting-zone access setting or shows an error.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Boolean</Type>
+          <Name>IsPublic</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B2</Code>
+      <SubCode>20</SubCode>
+      <Name>CastleSiegeSwitchInfo</Name>
+      <Length>27</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server sends information about a Castle Siege crown switch.</SentWhen>
+      <CausedReaction>The client updates the crown switch occupation display.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>SwitchIndex</Name>
+          <Description>The network object identifier of the Crown switch.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Boolean</Type>
+          <Name>IsOccupied</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeJoinSide</TypeName>
+          <Name>JoinSide</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>String</Type>
+          <Name>GuildName</Name>
+          <Length>8</Length>
+        </Field>
+        <Field>
+          <Index>16</Index>
+          <Type>String</Type>
+          <Name>UserName</Name>
+          <Length>11</Length>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C2Header</HeaderType>
+      <Code>B3</Code>
+      <Name>CastleSiegeNpcList</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the guild master requested the list of all castle siege statues and gates.</SentWhen>
+      <CausedReaction>The client shows the list of castle siege NPCs with their current status.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>NpcCount</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Structure[]</Type>
+          <TypeName>CastleSiegeNpcInfo</TypeName>
+          <Name>NpcList</Name>
+          <ItemCountField>NpcCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>CastleSiegeNpcInfo</Name>
+          <Description>Information about one castle siege NPC (gate or statue).</Description>
+          <Length>27</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>NpcNumber</Name>
+            </Field>
+            <Field>
+              <Index>4</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>NpcIndex</Name>
+            </Field>
+            <Field>
+              <Index>8</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>DefenseUpgradeLevel</Name>
+            </Field>
+            <Field>
+              <Index>12</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>RegenerationLevel</Name>
+            </Field>
+            <Field>
+              <Index>16</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>MaxHp</Name>
+            </Field>
+            <Field>
+              <Index>20</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>CurrentHp</Name>
+            </Field>
+            <Field>
+              <Index>24</Index>
+              <Type>Byte</Type>
+              <Name>PositionX</Name>
+            </Field>
+            <Field>
+              <Index>25</Index>
+              <Type>Byte</Type>
+              <Name>PositionY</Name>
+            </Field>
+            <Field>
+              <Index>26</Index>
+              <Type>Boolean</Type>
+              <Name>IsAlive</Name>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C2Header</HeaderType>
+      <Code>B4</Code>
+      <Name>CastleSiegeRegisteredGuildList</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the guild master requested the list of guilds registered for the next siege.</SentWhen>
+      <CausedReaction>The client shows the list of registered guilds and their mark counts.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>GuildCount</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Structure[]</Type>
+          <TypeName>RegisteredGuildEntry</TypeName>
+          <Name>Guilds</Name>
+          <ItemCountField>GuildCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>RegisteredGuildEntry</Name>
+          <Description>Information about one guild registered for the next castle siege.</Description>
+          <Length>14</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>String</Type>
+              <Name>GuildName</Name>
+              <Length>8</Length>
+            </Field>
+            <Field>
+              <Index>8</Index>
+              <Type>IntegerBigEndian</Type>
+              <Name>GuildMarkCount</Name>
+            </Field>
+            <Field>
+              <Index>12</Index>
+              <Type>Boolean</Type>
+              <Name>IsGivingUp</Name>
+            </Field>
+            <Field>
+              <Index>13</Index>
+              <Type>Byte</Type>
+              <Name>SequenceNumber</Name>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C2Header</HeaderType>
+      <Code>B5</Code>
+      <Name>CastleSiegeGuildList</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the guild master requested the list of all guilds in the current castle siege.</SentWhen>
+      <CausedReaction>The client shows the list of guilds participating in the castle siege.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>GuildCount</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Structure[]</Type>
+          <TypeName>CastleSiegeGuildEntry</TypeName>
+          <Name>Guilds</Name>
+          <ItemCountField>GuildCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>CastleSiegeGuildEntry</Name>
+          <Description>Information about one guild in the castle siege.</Description>
+          <Length>14</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>Enum</Type>
+              <TypeName>CastleSiegeJoinSide</TypeName>
+              <Name>Side</Name>
+            </Field>
+            <Field>
+              <Index>1</Index>
+              <Type>Boolean</Type>
+              <Name>IsInvolved</Name>
+            </Field>
+            <Field>
+              <Index>2</Index>
+              <Type>String</Type>
+              <Name>GuildName</Name>
+              <Length>8</Length>
+            </Field>
+            <Field>
+              <Index>10</Index>
+              <Type>IntegerLittleEndian</Type>
+              <Name>Score</Name>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C2Header</HeaderType>
+      <Code>B6</Code>
+      <Name>CastleSiegeMiniMapPlayerPositions</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server pushes same-side player positions to an online Castle Siege alliance master, on a periodic timer while the siege is active.</SentWhen>
+      <CausedReaction>The client updates the mini map with the player positions.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>PlayerCount</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Structure[]</Type>
+          <TypeName>MiniMapPlayerPosition</TypeName>
+          <Name>Players</Name>
+          <ItemCountField>PlayerCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>MiniMapPlayerPosition</Name>
+          <Description>The position of one player on the mini map.</Description>
+          <Length>2</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>Byte</Type>
+              <Name>PositionX</Name>
+            </Field>
+            <Field>
+              <Index>1</Index>
+              <Type>Byte</Type>
+              <Name>PositionY</Name>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B7</Code>
+      <SubCode>00</SubCode>
+      <Name>CastleSiegeMachineInterface</Name>
+      <Length>8</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server sends the siege machine interface to a player who is operating the machine.</SentWhen>
+      <CausedReaction>The client shows the siege machine operation interface.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeMachineType</TypeName>
+          <Name>MachineType</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>NpcIndex</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B7</Code>
+      <SubCode>01</SubCode>
+      <Name>CastleSiegeMachineUseResult</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player fired a siege machine (catapult).</SentWhen>
+      <CausedReaction>The client shows the catapult animation toward the target area.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>NpcIndex</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeMachineType</TypeName>
+          <Name>MachineType</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>TargetX</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Byte</Type>
+          <Name>TargetY</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B7</Code>
+      <SubCode>02</SubCode>
+      <Name>CastleSiegeMachineRegionNotify</Name>
+      <Length>7</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server notifies the player of the impact region of a siege machine.</SentWhen>
+      <CausedReaction>The client shows the impact area effect.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeMachineType</TypeName>
+          <Name>MachineType</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>TargetX</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>TargetY</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B9</Code>
+      <SubCode>01</SubCode>
+      <Name>CastleSiegeLifeStoneBuildTime</Name>
+      <Length>7</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The creation stage of a Castle Siege Life Stone advances.</SentWhen>
+      <CausedReaction>The client updates the Life Stone construction animation.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>NpcIndex</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>BuildTime</Name>
+          <Description>The creation stage of the Life Stone.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B9</Code>
+      <SubCode>02</SubCode>
+      <Name>CastleSiegeOwnerLogo</Name>
+      <Length>36</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the client requested the guild logo of the current castle owner.</SentWhen>
+      <CausedReaction>The client shows the castle owner guild logo.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Binary</Type>
+          <Name>Logo</Name>
+          <Length>32</Length>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B9</Code>
+      <SubCode>03</SubCode>
+      <Name>CastleSiegeHuntingZoneGuardInfo</Name>
+      <Length>18</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server sends information about the hunting zone guard configuration.</SentWhen>
+      <CausedReaction>The client shows the hunting zone entrance configuration.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Boolean</Type>
+          <Name>IsEnabled</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>CurrentPrice</Name>
+        </Field>
+        <Field>
+          <Index>10</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>MaxPrice</Name>
+        </Field>
+        <Field>
+          <Index>14</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>UnitPrice</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>B9</Code>
+      <SubCode>05</SubCode>
+      <Name>CastleSiegeHuntingZoneEnterResponse</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A player requests to enter the Castle Siege hunting zone.</SentWhen>
+      <CausedReaction>The client closes the dialog on success or shows an error.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C2Header</HeaderType>
+      <Code>BB</Code>
+      <Name>CastleSiegeMiniMapNpcPositions</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server pushes alive gate and Guardian Statue positions to an online Castle Siege alliance master, on a periodic timer while the siege is active.</SentWhen>
+      <CausedReaction>The client updates the mini map with the siege-NPC positions.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>NpcCount</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Structure[]</Type>
+          <TypeName>MiniMapNpcPosition</TypeName>
+          <Name>Npcs</Name>
+          <ItemCountField>NpcCount</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>MiniMapNpcPosition</Name>
+          <Description>The position of one siege NPC on the mini map.</Description>
+          <Length>3</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>Enum</Type>
+              <TypeName>CastleSiegeMiniMapNpcType</TypeName>
+              <Name>NpcType</Name>
+            </Field>
+            <Field>
+              <Index>1</Index>
+              <Type>Byte</Type>
+              <Name>PositionX</Name>
+            </Field>
+            <Field>
+              <Index>2</Index>
+              <Type>Byte</Type>
+              <Name>PositionY</Name>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
+  <Packet>
+    <HeaderType>C1HeaderWithSubCode</HeaderType>
+    <Code>D1</Code>
+    <SubCode>00</SubCode>
+    <Name>KanturuStateInfo</Name>
+    <Length>12</Length>
+    <Direction>ServerToClient</Direction>
+    <SentWhen>The player requests state information from the Kanturu gateway NPC.</SentWhen>
+    <CausedReaction>The client shows the Kanturu entry dialog (INTERFACE_KANTURU2ND_ENTERNPC) with event state, detail state, whether entry is possible, current player count and remaining time.</CausedReaction>
+    <Fields>
+      <Field>
+        <Index>4</Index>
+        <Type>Enum</Type>
+        <TypeName>StateType</TypeName>
+        <Name>State</Name>
+      </Field>
+      <Field>
+        <Index>5</Index>
+        <Type>Byte</Type>
+        <Name>DetailState</Name>
+        <Description>Detail state; semantics depend on the main State field. See the game logic enums for per-state values.</Description>
+      </Field>
+      <Field>
+        <Index>6</Index>
+        <Type>Boolean</Type>
+        <Name>CanEnter</Name>
+        <Description>1 = entrance is open (Enter button enabled); 0 = entrance closed.</Description>
+      </Field>
+      <Field>
+        <Index>7</Index>
+        <Type>Byte</Type>
+        <Name>UserCount</Name>
+        <Description>Number of players currently inside the event map (capped at 255).</Description>
+      </Field>
+      <Field>
+        <Index>8</Index>
+        <Type>IntegerLittleEndian</Type>
+        <Name>RemainSeconds</Name>
+        <Description>Remaining time in seconds. Standby: seconds until event opens. Tower: seconds the tower has been open. Otherwise 0.</Description>
+      </Field>
+    </Fields>
+    <Enums>
+      <Enum>
+        <Name>StateType</Name>
+        <Description>Main state of the Kanturu event, matching the client KANTURU_STATE_TYPE enum.</Description>
+        <Values>
+          <EnumValue>
+            <Name>None</Name>
+            <Description>No active state.</Description>
+            <Value>0</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>Standby</Name>
+            <Description>Waiting for players to enter before the event starts.</Description>
+            <Value>1</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>MayaBattle</Name>
+            <Description>Maya battle phase covering Phases 1 through 3 and their boss waves.</Description>
+            <Value>2</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>NightmareBattle</Name>
+            <Description>Nightmare battle phase after all three Maya phases are cleared.</Description>
+            <Value>3</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>Tower</Name>
+            <Description>Tower of Refinement phase; opens after Nightmare is defeated.</Description>
+            <Value>4</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>End</Name>
+            <Description>Event has ended.</Description>
+            <Value>5</Value>
+          </EnumValue>
+        </Values>
+      </Enum>
+    </Enums>
+  </Packet>
+  <Packet>
+    <HeaderType>C1HeaderWithSubCode</HeaderType>
+    <Code>D1</Code>
+    <SubCode>01</SubCode>
+    <Name>KanturuEnterResult</Name>
+    <Length>5</Length>
+    <Direction>ServerToClient</Direction>
+    <SentWhen>The player attempted to enter the Kanturu event through the gateway NPC.</SentWhen>
+    <CausedReaction>The client closes the NPC animation and shows an error popup on failure. On success the player has already been teleported to the event map.</CausedReaction>
+    <Fields>
+      <Field>
+        <Index>4</Index>
+        <Type>Enum</Type>
+        <TypeName>EnterResult</TypeName>
+        <Name>Result</Name>
+      </Field>
+    </Fields>
+    <Enums>
+      <Enum>
+        <Name>EnterResult</Name>
+        <Description>Result of the Kanturu enter request.</Description>
+        <Values>
+          <EnumValue>
+            <Name>Failed</Name>
+            <Description>Entry failed (generic failure).</Description>
+            <Value>0</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>Success</Name>
+            <Description>The player has been successfully entered into the event.</Description>
+            <Value>1</Value>
+          </EnumValue>
+        </Values>
+      </Enum>
+    </Enums>
+  </Packet>
+  <Packet>
+    <HeaderType>C1HeaderWithSubCode</HeaderType>
+    <Code>D1</Code>
+    <SubCode>03</SubCode>
+    <Name>KanturuStateChange</Name>
+    <Length>6</Length>
+    <Direction>ServerToClient</Direction>
+    <SentWhen>The Kanturu event transitions to a new phase or sub-phase.</SentWhen>
+    <CausedReaction>The client shows or hides the in-map HUD, switches background music, and when entering the Tower state reloads the barrier-open terrain file (EncTerrain_n_01.att) to visually remove the Elphis barrier.</CausedReaction>
+    <Fields>
+      <Field>
+        <Index>4</Index>
+        <Type>Enum</Type>
+        <TypeName>StateType</TypeName>
+        <Name>State</Name>
+        <Description>Refers to the KanturuStateInfo.StateType enum values.</Description>
+      </Field>
+      <Field>
+        <Index>5</Index>
+        <Type>Byte</Type>
+        <Name>DetailState</Name>
+        <Description>Detail state within the main state. Maya battle: 0=none, 2=notify, 3=monster1, 4=maya1, 8=monster2, 9=maya2, 13=monster3, 14=maya3, 16=endcycle. Nightmare: 0=none, 1=idle, 2=intro, 3=battle, 4=end. Tower: 0=none, 1=revitalization, 2=notify, 3=close.</Description>
+      </Field>
+    </Fields>
+    <Enums>
+      <Enum>
+        <Name>StateType</Name>
+        <Description>Main state; see KanturuStateInfo.StateType for value descriptions.</Description>
+        <Values>
+          <EnumValue>
+            <Name>None</Name>
+            <Description>No active state.</Description>
+            <Value>0</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>Standby</Name>
+            <Description>Standby phase; the event is waiting for players to enter.</Description>
+            <Value>1</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>MayaBattle</Name>
+            <Description>Maya battle phase, which consists of three monster waves and the boss fights against her hands.</Description>
+            <Value>2</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>NightmareBattle</Name>
+            <Description>Nightmare battle phase after all three Maya phases are cleared.</Description>
+            <Value>3</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>Tower</Name>
+            <Description>Tower of Refinement phase; opens after Nightmare is defeated.</Description>
+            <Value>4</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>End</Name>
+            <Description>Event has ended.</Description>
+            <Value>5</Value>
+          </EnumValue>
+        </Values>
+      </Enum>
+    </Enums>
+  </Packet>
+  <Packet>
+    <HeaderType>C1HeaderWithSubCode</HeaderType>
+    <Code>D1</Code>
+    <SubCode>04</SubCode>
+    <Name>KanturuBattleResult</Name>
+    <Length>5</Length>
+    <Direction>ServerToClient</Direction>
+    <SentWhen>The Kanturu event ends with a victory or defeat outcome.</SentWhen>
+    <CausedReaction>The client displays the Success_kantru.tga overlay on victory or the Failure_kantru.tga overlay on defeat.</CausedReaction>
+    <Fields>
+      <Field>
+        <Index>4</Index>
+        <Type>Enum</Type>
+        <TypeName>BattleResult</TypeName>
+        <Name>Result</Name>
+      </Field>
+    </Fields>
+    <Enums>
+      <Enum>
+        <Name>BattleResult</Name>
+        <Description>Outcome of the Kanturu battle.</Description>
+        <Values>
+          <EnumValue>
+            <Name>Failure</Name>
+            <Description>The event ended in failure; shows Failure_kantru.tga.</Description>
+            <Value>0</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>Victory</Name>
+            <Description>Nightmare was defeated; shows Success_kantru.tga.</Description>
+            <Value>1</Value>
+          </EnumValue>
+        </Values>
+      </Enum>
+    </Enums>
+  </Packet>
+  <Packet>
+    <HeaderType>C1HeaderWithSubCode</HeaderType>
+    <Code>D1</Code>
+    <SubCode>05</SubCode>
+    <Name>KanturuTimeLimit</Name>
+    <Length>8</Length>
+    <Direction>ServerToClient</Direction>
+    <SentWhen>A timed phase begins in the Kanturu event.</SentWhen>
+    <CausedReaction>The client starts a countdown timer shown in the Kanturu HUD. The value is divided by 1000 to obtain seconds.</CausedReaction>
+    <Fields>
+      <Field>
+        <Index>4</Index>
+        <Type>IntegerLittleEndian</Type>
+        <Name>TimeLimitMilliseconds</Name>
+        <Description>Countdown duration in milliseconds.</Description>
+      </Field>
+    </Fields>
+  </Packet>
+  <Packet>
+    <HeaderType>C1HeaderWithSubCode</HeaderType>
+    <Code>D1</Code>
+    <SubCode>06</SubCode>
+    <Name>KanturuMayaWideAreaAttack</Name>
+    <Length>7</Length>
+    <Direction>ServerToClient</Direction>
+    <SentWhen>The Maya body executes a wide-area attack during the Maya battle phase.</SentWhen>
+    <CausedReaction>The client calls MayaSceneMayaAction(type) which plays one of two visual sequences on the Maya body model: storm (0) or stone-rain (1). This is a purely cosmetic packet — damage is handled server-side.</CausedReaction>
+    <Fields>
+      <Field>
+        <Index>4</Index>
+        <Type>Byte</Type>
+        <Name>ObjClassH</Name>
+        <Description>High byte of the Maya object class; ignored by the client.</Description>
+      </Field>
+      <Field>
+        <Index>5</Index>
+        <Type>Byte</Type>
+        <Name>ObjClassL</Name>
+        <Description>Low byte of the Maya object class; ignored by the client.</Description>
+      </Field>
+      <Field>
+        <Index>6</Index>
+        <Type>Enum</Type>
+        <TypeName>AttackType</TypeName>
+        <Name>Type</Name>
+      </Field>
+    </Fields>
+    <Enums>
+      <Enum>
+        <Name>AttackType</Name>
+        <Description>Visual type of the Maya wide-area attack.</Description>
+        <Values>
+          <EnumValue>
+            <Name>Storm</Name>
+            <Description>Stone-storm effect (MODEL_STORM3 plus falling debris around the hero).</Description>
+            <Value>0</Value>
+          </EnumValue>
+          <EnumValue>
+            <Name>Rain</Name>
+            <Description>Stone-rain effect (MODEL_MAYASTONE projectiles falling on the hero).</Description>
+            <Value>1</Value>
+          </EnumValue>
+        </Values>
+      </Enum>
+    </Enums>
+  </Packet>
+  <Packet>
+    <HeaderType>C1HeaderWithSubCode</HeaderType>
+    <Code>D1</Code>
+    <SubCode>07</SubCode>
+    <Name>KanturuMonsterUserCount</Name>
+    <Length>6</Length>
+    <Direction>ServerToClient</Direction>
+    <SentWhen>A monster is killed or the player count changes during the Kanturu event.</SentWhen>
+    <CausedReaction>The client updates the monster count and user count numbers displayed in the Kanturu HUD.</CausedReaction>
+    <Fields>
+      <Field>
+        <Index>4</Index>
+        <Type>Byte</Type>
+        <Name>MonsterCount</Name>
+        <Description>Number of monsters still alive in the current wave (capped at 255).</Description>
+      </Field>
+      <Field>
+        <Index>5</Index>
+        <Type>Byte</Type>
+        <Name>UserCount</Name>
+        <Description>Number of players currently inside the event map (capped at 255).</Description>
+      </Field>
+    </Fields>
+  </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D1</Code>
+      <SubCode>10</SubCode>
+      <Name>RaklionStateInfo</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested the state of the raklion event.</SentWhen>
+      <CausedReaction>The client updates the state of the raklion maps, e.g. whether the portal to the hatchery is shown, the effects and the music.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>RaklionState</TypeName>
+          <Name>State</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>DetailState</Name>
+          <Description>The state of Selupan, if the state is DetailState: 0 = none, 1 = standby, 2 to 8 = pattern 1 to 7 (by the remaining health), 9 = dead. Otherwise it is ignored by the client.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Boolean</Type>
+          <Name>CanEnter</Name>
+          <Description>It is not used by the client.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>RemainingSeconds</Name>
+          <Description>It is not used by the client. The field is aligned to 4 bytes, because the client structure is not packed.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>RaklionState</Name>
+          <Description>The state of the raklion event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Idle</Name>
+              <Description>No event activity; the hatchery gate is open.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify1</Name>
+              <Description>Only a few spider eggs are left.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Standby</Name>
+              <Description>All spider eggs are destroyed and Selupan is about to appear.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify2</Name>
+              <Description>Selupan appeared; the hatchery gate closes soon.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ready</Name>
+              <Description>Selupan rises; the client plays the boss music on the hatchery map.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>StartBattle</Name>
+              <Description>The battle against Selupan is running.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify3</Name>
+              <Description>The hatchery gate is about to close.</Description>
+              <Value>6</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>CloseDoor</Name>
+              <Description>The hatchery gate is closed; nobody can enter anymore.</Description>
+              <Value>7</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>AllUserDie</Name>
+              <Description>All players of the battle died or left.</Description>
+              <Value>8</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify4</Name>
+              <Description>The battle ended; the hatchery gate opens soon.</Description>
+              <Value>9</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>End</Name>
+              <Description>The event ended.</Description>
+              <Value>10</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DetailState</Name>
+              <Description>The detail state contains the state of Selupan.</Description>
+              <Value>11</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D1</Code>
+      <SubCode>11</SubCode>
+      <Name>RaklionCurrentState</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player entered one of the raklion maps.</SentWhen>
+      <CausedReaction>The client updates the state of the raklion maps, e.g. whether the portal to the hatchery is shown, the effects and the music.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>RaklionState</TypeName>
+          <Name>State</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>DetailState</Name>
+          <Description>The state of Selupan, if the state is DetailState: 0 = none, 1 = standby, 2 to 8 = pattern 1 to 7 (by the remaining health), 9 = dead. Otherwise it is ignored by the client.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>RaklionState</Name>
+          <Description>The state of the raklion event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Idle</Name>
+              <Description>No event activity; the hatchery gate is open.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify1</Name>
+              <Description>Only a few spider eggs are left.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Standby</Name>
+              <Description>All spider eggs are destroyed and Selupan is about to appear.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify2</Name>
+              <Description>Selupan appeared; the hatchery gate closes soon.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ready</Name>
+              <Description>Selupan rises; the client plays the boss music on the hatchery map.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>StartBattle</Name>
+              <Description>The battle against Selupan is running.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify3</Name>
+              <Description>The hatchery gate is about to close.</Description>
+              <Value>6</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>CloseDoor</Name>
+              <Description>The hatchery gate is closed; nobody can enter anymore.</Description>
+              <Value>7</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>AllUserDie</Name>
+              <Description>All players of the battle died or left.</Description>
+              <Value>8</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify4</Name>
+              <Description>The battle ended; the hatchery gate opens soon.</Description>
+              <Value>9</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>End</Name>
+              <Description>The event ended.</Description>
+              <Value>10</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DetailState</Name>
+              <Description>The detail state contains the state of Selupan.</Description>
+              <Value>11</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D1</Code>
+      <SubCode>12</SubCode>
+      <Name>RaklionStateChange</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The state of the raklion event or of Selupan changed.</SentWhen>
+      <CausedReaction>The client updates the state of the raklion maps, e.g. whether the portal to the hatchery is shown, the effects and the music.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>RaklionState</TypeName>
+          <Name>State</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>DetailState</Name>
+          <Description>The state of Selupan, if the state is DetailState: 0 = none, 1 = standby, 2 to 8 = pattern 1 to 7 (by the remaining health), 9 = dead. Otherwise it is ignored by the client.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>RaklionState</Name>
+          <Description>The state of the raklion event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Idle</Name>
+              <Description>No event activity; the hatchery gate is open.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify1</Name>
+              <Description>Only a few spider eggs are left.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Standby</Name>
+              <Description>All spider eggs are destroyed and Selupan is about to appear.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify2</Name>
+              <Description>Selupan appeared; the hatchery gate closes soon.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ready</Name>
+              <Description>Selupan rises; the client plays the boss music on the hatchery map.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>StartBattle</Name>
+              <Description>The battle against Selupan is running.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify3</Name>
+              <Description>The hatchery gate is about to close.</Description>
+              <Value>6</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>CloseDoor</Name>
+              <Description>The hatchery gate is closed; nobody can enter anymore.</Description>
+              <Value>7</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>AllUserDie</Name>
+              <Description>All players of the battle died or left.</Description>
+              <Value>8</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify4</Name>
+              <Description>The battle ended; the hatchery gate opens soon.</Description>
+              <Value>9</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>End</Name>
+              <Description>The event ended.</Description>
+              <Value>10</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DetailState</Name>
+              <Description>The detail state contains the state of Selupan.</Description>
+              <Value>11</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D1</Code>
+      <SubCode>13</SubCode>
+      <Name>RaklionBattleResult</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The battle against Selupan ended.</SentWhen>
+      <CausedReaction>None, the client ignores it.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>BattleResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>BattleResult</Name>
+          <Description>The result of the battle against Selupan.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Failure</Name>
+              <Description>All players of the battle died or left.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>Selupan was killed.</Description>
+              <Value>1</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1Header</HeaderType>
+      <Code>69</Code>
+      <Name>MonsterSkillAnimation</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A monster performs a special skill, e.g. Selupan.</SentWhen>
+      <CausedReaction>The client shows the animation of the monster skill.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>3</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>SkillNumber</Name>
+          <Description>The number of the monster skill of the client, e.g. 34 to 42 for the skills of Selupan.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>AttackerId</Name>
+          <Description>The id of the monster. The field is aligned to 2 bytes, because the client structure is not packed.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>TargetId</Name>
+          <Description>The id of the target. The highest bit is set, if the skill has been applied successfully.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F7</Code>
+      <SubCode>02</SubCode>
+      <Name>ImperialGuardianEnterResult</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested to enter the imperial guardian event, or entered the next zone of it.</SentWhen>
+      <CausedReaction>The client shows a message when entering failed. On success, it remembers the day and zone for the timer and the result, and sets the weather of the map.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>EnterResult</TypeName>
+          <Name>Result</Name>
+          <Description>The result of the request.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>Day</Name>
+          <Description>The day of the week, from 1 (monday) to 7 (sunday). The client shows it as the round.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Byte</Type>
+          <Name>Zone</Name>
+          <Description>The zone, starting at 1.</Description>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Enum</Type>
+          <TypeName>WeatherType</TypeName>
+          <Name>Weather</Name>
+          <Description>The weather of the map.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>RemainingMilliseconds</Name>
+          <Description>The remaining time in milliseconds. When the result is NotOpen, the client shows the minutes until the event can be entered. The field is aligned to 4 bytes, because the client structure is not packed.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>EnterResult</Name>
+          <Description>The result of an enter request.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The player entered the event.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotOpen</Name>
+              <Description>The event can not be entered yet.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>MissingTicket</Name>
+              <Description>The player has no Gaion's Order or Complete Secromicon.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Full</Name>
+              <Description>The zone is full.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>ZoneTimeRemaining</Name>
+              <Description>There is still time remaining in this zone.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>PartyRequired</Name>
+              <Description>The player can only enter as a member of a party.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>CharacterLevelTooLow</Name>
+              <Description>The character level is too low. The client doesn't show a message.</Description>
+              <Value>6</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+        <Enum>
+          <Name>WeatherType</Name>
+          <Description>The weather of the map.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Sun</Name>
+              <Description>The sun shines.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Rain</Name>
+              <Description>It rains.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Fog</Name>
+              <Description>There is fog.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Storm</Name>
+              <Description>There is a storm.</Description>
+              <Value>3</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F7</Code>
+      <SubCode>04</SubCode>
+      <Name>ImperialGuardianTimer</Name>
+      <Length>16</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Every second during the imperial guardian event.</SentWhen>
+      <CausedReaction>The client shows the timer with the remaining time and the number of remaining monsters. The client doesn't count down the time by itself.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>TimerType</TypeName>
+          <Name>Type</Name>
+          <Description>The type of the timer.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>RemainingMilliseconds</Name>
+          <Description>The remaining time in milliseconds. The field is aligned to 4 bytes, because the client structure is not packed.</Description>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>Byte</Type>
+          <Name>MonsterCount</Name>
+          <Description>The number of remaining monsters.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>TimerType</Name>
+          <Description>The type of the timer.</Description>
+          <Values>
+            <EnumValue>
+              <Name>LootTime</Name>
+              <Description>The time to collect the loot.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Standby</Name>
+              <Description>The time until the monsters appear.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>TimeAttack</Name>
+              <Description>The time to kill the monsters.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F7</Code>
+      <SubCode>06</SubCode>
+      <Name>ImperialGuardianResult</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>A zone of the imperial guardian event has been cleared, or the event ended.</SentWhen>
+      <CausedReaction>The client shows the result and hides the timer.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>ResultType</TypeName>
+          <Name>Result</Name>
+          <Description>The result.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>Experience</Name>
+          <Description>The rewarded experience, when the event has been completed. The field is aligned to 4 bytes, because the client structure is not packed.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>ResultType</Name>
+          <Description>The result of the imperial guardian event.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Failed</Name>
+              <Description>The event failed.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>ZoneCleared</Name>
+              <Description>The zone has been cleared.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The event has been completed.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>01</SubCode>
+      <Name>CashShopPointInfo</Name>
+      <Length>45</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested the cash shop point information (CashShopPointInfoRequest).</SentWhen>
+      <CausedReaction>The client shows the available WCoin (C), WCoin (P) and Goblin Points in the cash shop dialog.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>ViewType</Name>
+          <Description>It is stored, but not used by the client.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Double</Type>
+          <Name>TotalCash</Name>
+          <Description>The sum of WCoin (C) and WCoin (P). It is stored, but not shown by the client.</Description>
+        </Field>
+        <Field>
+          <Index>13</Index>
+          <Type>Double</Type>
+          <Name>WCoinC</Name>
+          <Description>The available WCoin (C), originally named "cash credit".</Description>
+        </Field>
+        <Field>
+          <Index>21</Index>
+          <Type>Double</Type>
+          <Name>WCoinP</Name>
+          <Description>The available WCoin (P), originally named "cash prepaid".</Description>
+        </Field>
+        <Field>
+          <Index>29</Index>
+          <Type>Double</Type>
+          <Name>TotalPoints</Name>
+          <Description>It is stored, but not shown by the client.</Description>
+        </Field>
+        <Field>
+          <Index>37</Index>
+          <Type>Double</Type>
+          <Name>GoblinPoints</Name>
+          <Description>The available Goblin Points, originally named "mileage".</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>02</SubCode>
+      <Name>CashShopOpenStateResponse</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested to open the cash shop dialog (CashShopOpenState).</SentWhen>
+      <CausedReaction>If the opening is allowed, the client requests the point information and the first storage page, and shows the cash shop dialog. Otherwise, nothing happens.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Boolean</Type>
+          <Name>IsAllowed</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>03</SubCode>
+      <Name>CashShopItemBuyResult</Name>
+      <Length>9</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested to buy an item in the cash shop (CashShopItemBuyRequest).</SentWhen>
+      <CausedReaction>The client shows a message with the result. If the item was bought, it requests the point information and the first storage page again.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CashShopBuyResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>LeftCount</Name>
+          <Description>The number of items which are left for sale, if the number is limited. It's not used by the client.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>CashShopBuyResult</Name>
+          <Description>The result of a request to buy an item in the cash shop.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The item was bought and added to the storage.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotEnoughCoins</Name>
+              <Description>The player doesn't have enough WCoin or Goblin Points.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>StorageFull</Name>
+              <Description>The storage of the player is full.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>SoldOut</Name>
+              <Description>The item is sold out.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotAvailableCurrently</Name>
+              <Description>The item is currently not available.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NoLongerAvailable</Name>
+              <Description>The item is no longer available.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>CannotBeBought</Name>
+              <Description>The item can't be bought.</Description>
+              <Value>6</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>EventItemCannotBeBought</Name>
+              <Description>Event items can't be bought.</Description>
+              <Value>7</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>EventItemLimitExceeded</Name>
+              <Description>The maximum number of purchases of the event item is exceeded.</Description>
+              <Value>8</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>WrongCoinType</Name>
+              <Description>The selected coin type is not the one of the item.</Description>
+              <Value>9</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DatabaseAccessFailed</Name>
+              <Description>The access to the database failed.</Description>
+              <Value>254</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DatabaseError</Name>
+              <Description>A database error occurred.</Description>
+              <Value>255</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>04</SubCode>
+      <Name>CashShopItemGiftResult</Name>
+      <Length>17</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested to send an item of the cash shop as gift (CashShopItemGiftRequest).</SentWhen>
+      <CausedReaction>The client shows a message with the result. If the gift was sent, it requests the point information again.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CashShopGiftResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>LeftCount</Name>
+          <Description>The number of items which are left for sale, if the number is limited. It's not used by the client.</Description>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Double</Type>
+          <Name>LimitedCash</Name>
+          <Description>It's not used by the client.</Description>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>CashShopGiftResult</Name>
+          <Description>The result of a request to send an item of the cash shop as gift.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The gift was added to the gift storage of the recipient.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NotEnoughCoins</Name>
+              <Description>The player doesn't have enough WCoin or Goblin Points.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>RecipientStorageFull</Name>
+              <Description>The storage of the recipient is full.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>RecipientNotFound</Name>
+              <Description>The recipient wasn't found.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>SoldOut</Name>
+              <Description>The item is sold out.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NoLongerAvailable</Name>
+              <Description>The item is no longer available.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>NoLongerAvailable2</Name>
+              <Description>The item is no longer available. The client shows it as error.</Description>
+              <Value>6</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>CannotBeGifted</Name>
+              <Description>The item can't be sent as gift.</Description>
+              <Value>7</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>EventItemCannotBeGifted</Name>
+              <Description>The event item can't be sent as gift.</Description>
+              <Value>8</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>EventItemGiftLimitExceeded</Name>
+              <Description>The maximum number of gifts of the event item is exceeded.</Description>
+              <Value>9</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>WrongCoinType</Name>
+              <Description>The selected coin type is not the one of the item.</Description>
+              <Value>10</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>IdDoesNotExist</Name>
+              <Description>The ID doesn't exist.</Description>
+              <Value>20</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DatabaseAccessFailed</Name>
+              <Description>The access to the database failed.</Description>
+              <Value>254</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DatabaseError</Name>
+              <Description>A database error occurred.</Description>
+              <Value>255</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>0B</SubCode>
+      <Name>CashShopStorageItemConsumeResult</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested to use an item of the cash shop storage (CashShopStorageItemConsumeRequest).</SentWhen>
+      <CausedReaction>The client shows a message with the result. If the item was used, it requests the shown storage page again.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>CashShopConsumeResult</TypeName>
+          <Name>Result</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>CashShopConsumeResult</Name>
+          <Description>The result of a request to use an item of the cash shop storage.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Success</Name>
+              <Description>The item was used.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>ItemNotFound</Name>
+              <Description>The item doesn't exist in the storage.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>PcCafeOnly</Name>
+              <Description>The item can only be received in a PC cafe.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>ColorPlanActive</Name>
+              <Description>A color plan is already active in the selected period.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>PersonalFixedPlanActive</Name>
+              <Description>A personal fixed plan is already active in the selected period.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>InventoryFull</Name>
+              <Description>The inventory doesn't have enough space.</Description>
+              <Value>21</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>CannotUse</Name>
+              <Description>The item can't be used.</Description>
+              <Value>22</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>ConflictingItemActive</Name>
+              <Description>The item can't be used together with an item which is already in use.</Description>
+              <Value>24</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>DatabaseAccessFailed</Name>
+              <Description>The access to the database failed.</Description>
+              <Value>254</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Error</Name>
+              <Description>An error occurred.</Description>
+              <Value>255</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>06</SubCode>
+      <Name>CashShopStorageListResponse</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player requested a page of the cash shop storage or gift storage (CashShopStorageListRequest).</SentWhen>
+      <CausedReaction>The client clears the storage list and expects the items of the page with the following CashShopStorageItem or CashShopGiftStorageItem messages.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>TotalItemCount</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>PageItemCount</Name>
+          <Description>The number of items on the requested page. The client shows up to 9 items per page.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>PageIndex</Name>
+          <Description>The one-based index of the page.</Description>
+        </Field>
+        <Field>
+          <Index>10</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>TotalPages</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>0C</SubCode>
+      <Name>CashShopScriptVersion</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player entered the game.</SentWhen>
+      <CausedReaction>The client remembers the version of the cash shop script (product catalog) and unlocks the cash shop. When the dialog is opened, the client loads the script of this version from 'Data\InGameShopScript\[SaleZone].[Year].[YearId]'.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>SaleZone</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>Year</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>YearId</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>0D</SubCode>
+      <Name>CashShopStorageItem</Name>
+      <Length>33</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After CashShopStorageListResponse of the normal storage, for each item of the requested page.</SentWhen>
+      <CausedReaction>The client adds the item to the shown storage list. Name, quantity and period are looked up in the cash shop script by the product and price sequence numbers.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>StorageIndex</Name>
+          <Description>The index of the item in the storage. The client sends it back when the item should be used.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>ItemSequence</Name>
+          <Description>The client sends it back when the item should be used.</Description>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>StorageGroupCode</Name>
+          <Description>It is stored, but not used by the client.</Description>
+        </Field>
+        <Field>
+          <Index>16</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>ProductSequence</Name>
+          <Description>The product sequence number of the cash shop script.</Description>
+        </Field>
+        <Field>
+          <Index>20</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>PriceSequence</Name>
+          <Description>The price sequence number of the cash shop script. If it's 0, the client takes the data of the first entry of the product.</Description>
+        </Field>
+        <Field>
+          <Index>24</Index>
+          <Type>Double</Type>
+          <Name>CashPoints</Name>
+          <Description>The amount of WCoin, if the item type is Cash.</Description>
+        </Field>
+        <Field>
+          <Index>32</Index>
+          <Type>Enum</Type>
+          <TypeName>CashShopStorageItemType</TypeName>
+          <Name>ItemType</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>CashShopStorageItemType</Name>
+          <Description>The type of an item in the cash shop storage.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Cash</Name>
+              <Description>The item is an amount of WCoin, which is defined by the cash points field. The ASCII character 'C'.</Description>
+              <Value>67</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Product</Name>
+              <Description>The item is a product of the cash shop script. The ASCII character 'P'.</Description>
+              <Value>80</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>0E</SubCode>
+      <Name>CashShopGiftStorageItem</Name>
+      <Length>244</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After CashShopStorageListResponse of the gift storage, for each item of the requested page.</SentWhen>
+      <CausedReaction>The client adds the item to the shown gift storage list, together with the sender and the message.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>StorageIndex</Name>
+          <Description>The index of the item in the storage. The client sends it back when the item should be used.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>ItemSequence</Name>
+          <Description>The client sends it back when the item should be used.</Description>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>StorageGroupCode</Name>
+          <Description>It is stored, but not used by the client.</Description>
+        </Field>
+        <Field>
+          <Index>16</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>ProductSequence</Name>
+          <Description>The product sequence number of the cash shop script.</Description>
+        </Field>
+        <Field>
+          <Index>20</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>PriceSequence</Name>
+          <Description>The price sequence number of the cash shop script. If it's 0, the client takes the data of the first entry of the product.</Description>
+        </Field>
+        <Field>
+          <Index>24</Index>
+          <Type>Double</Type>
+          <Name>CashPoints</Name>
+          <Description>The amount of WCoin, if the item type is Cash.</Description>
+        </Field>
+        <Field>
+          <Index>32</Index>
+          <Type>Enum</Type>
+          <TypeName>CashShopStorageItemType</TypeName>
+          <Name>ItemType</Name>
+        </Field>
+        <Field>
+          <Index>33</Index>
+          <Type>String</Type>
+          <Name>SenderName</Name>
+          <Length>11</Length>
+        </Field>
+        <Field>
+          <Index>44</Index>
+          <Type>String</Type>
+          <Name>Message</Name>
+          <Length>200</Length>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>CashShopStorageItemType</Name>
+          <Description>The type of an item in the cash shop storage.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Cash</Name>
+              <Description>The item is an amount of WCoin, which is defined by the cash points field. The ASCII character 'C'.</Description>
+              <Value>67</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Product</Name>
+              <Description>The item is a product of the cash shop script. The ASCII character 'P'.</Description>
+              <Value>80</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>D2</Code>
+      <SubCode>15</SubCode>
+      <Name>CashShopBannerVersion</Name>
+      <Length>10</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player entered the game.</SentWhen>
+      <CausedReaction>The client remembers the version of the cash shop banner. When the dialog is opened, the client loads the banner of this version from 'Data\InGameShopBanner\[SaleZone].[Year].[YearId]'.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>SaleZone</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>Year</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>YearId</Name>
+        </Field>
+      </Fields>
+    </Packet>
   </Packets>
   <Enums>
+    <Enum>
+      <Name>GensType</Name>
+      <Description>Describes the gens type.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Undefined</Name>
+          <Description>The undefined gens type, e.g. when the player is not a member of a gens.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Duprian</Name>
+          <Description>The Duprian gens.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Vanert</Name>
+          <Description>The Vanert gens.</Description>
+          <Value>2</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
     <Enum>
       <Name>GuildMemberRole</Name>
       <Description>Defines the role of a guild member.</Description>
@@ -11633,6 +15919,282 @@
           <Name>White</Name>
           <Description>White color.</Description>
           <Value>7</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>ChatCommandParameterType</Name>
+      <Description>The kind of value which a chat command parameter expects.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Text</Name>
+          <Description>The parameter expects a text.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Number</Name>
+          <Description>The parameter expects a number.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Boolean</Name>
+          <Description>The parameter expects a 0 or a 1.</Description>
+          <Value>2</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeState</Name>
+      <Description>Defines the scheduled state of the Castle Siege event.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Idle1</Name>
+          <Description>The first idle period.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>RegisterGuild</Name>
+          <Description>Guild registration is open.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Idle2</Name>
+          <Description>The second idle period.</Description>
+          <Value>2</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>RegisterMark</Name>
+          <Description>Sign of Lord registration is open.</Description>
+          <Value>3</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Idle3</Name>
+          <Description>The third idle period.</Description>
+          <Value>4</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Notify</Name>
+          <Description>The selected participants are announced.</Description>
+          <Value>5</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Ready</Name>
+          <Description>The event is preparing to start.</Description>
+          <Value>6</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Start</Name>
+          <Description>The siege battle is running.</Description>
+          <Value>7</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>End</Name>
+          <Description>The siege battle has ended.</Description>
+          <Value>8</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>EndCycle</Name>
+          <Description>The current siege cycle is ending.</Description>
+          <Value>9</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeTaxType</Name>
+      <Description>Defines the castle tax or fee being changed.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Undefined</Name>
+          <Description>No tax type is selected.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>ChaosMachine</Name>
+          <Description>The Chaos Machine tax rate.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Store</Name>
+          <Description>The NPC store tax rate.</Description>
+          <Value>2</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>HuntingZoneEntranceFee</Name>
+          <Description>The hunting-zone entrance fee.</Description>
+          <Value>3</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeCrownSwitchStateType</Name>
+      <Description>Defines the interaction state of a crown switch.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Released</Name>
+          <Description>The switch is not occupied.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>OccupiedByCurrentPlayer</Name>
+          <Description>The current player occupies the switch.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>OccupiedByOtherPlayer</Name>
+          <Description>Another player occupies the switch.</Description>
+          <Value>2</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeCrownAccessStateType</Name>
+      <Description>Defines the result or progress state of a crown-access attempt.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Started</Name>
+          <Description>Crown registration has started.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Succeeded</Name>
+          <Description>Crown registration succeeded.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Failed</Name>
+          <Description>Crown registration failed.</Description>
+          <Value>2</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>OccupiedByOtherPlayer</Name>
+          <Description>Another player is accessing the crown.</Description>
+          <Value>3</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>OccupiedByOtherSide</Name>
+          <Description>A player from another siege side is accessing the crown.</Description>
+          <Value>4</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeCrownState</Name>
+      <Description>Defines the availability of the castle crown.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Accessible</Name>
+          <Description>The crown is accessible.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Protected</Name>
+          <Description>The crown is protected.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>RegistrationSucceeded</Name>
+          <Description>A guild successfully registered the crown.</Description>
+          <Value>2</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeBattleProcessState</Name>
+      <Description>Defines a public Castle Siege battle-process announcement.</Description>
+      <Values>
+        <EnumValue>
+          <Name>CrownRegistrationStarted</Name>
+          <Description>A guild started registering the crown.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>CrownRegistrationSucceeded</Name>
+          <Description>A guild successfully registered the crown.</Description>
+          <Value>1</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeJoinSide</Name>
+      <Description>Defines a participant's side in the Castle Siege battle.</Description>
+      <Values>
+        <EnumValue>
+          <Name>None</Name>
+          <Description>The participant does not belong to a siege side.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Defense</Name>
+          <Description>The defending alliance.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Attack1</Name>
+          <Description>The first attacking alliance.</Description>
+          <Value>2</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Attack2</Name>
+          <Description>The second attacking alliance.</Description>
+          <Value>3</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Attack3</Name>
+          <Description>The third attacking alliance.</Description>
+          <Value>4</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeGuildCommandType</Name>
+      <Description>Defines a command placed on the Castle Siege mini-map.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Attack</Name>
+          <Description>Orders the team to attack.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Defend</Name>
+          <Description>Orders the team to defend.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Wait</Name>
+          <Description>Orders the team to wait.</Description>
+          <Value>2</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeMachineType</Name>
+      <Description>Defines the side-specific Castle Siege catapult type.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Attack</Name>
+          <Description>The attacking-side catapult.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Defense</Name>
+          <Description>The defending-side catapult.</Description>
+          <Value>2</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeMiniMapNpcType</Name>
+      <Description>Defines a Castle Siege NPC shown on the mini-map.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Gate</Name>
+          <Description>A castle gate.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>GuardianStatue</Name>
+          <Description>A Guardian Statue.</Description>
+          <Value>1</Value>
         </EnumValue>
       </Values>
     </Enum>

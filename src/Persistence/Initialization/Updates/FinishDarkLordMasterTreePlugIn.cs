@@ -16,7 +16,7 @@ using MUnique.OpenMU.PlugIns;
 /// This update completes the dark lord master tree skills and effects.
 /// </summary>
 [PlugIn]
-[Display(Name = PlugInName, Description = PlugInDescription)]
+[Display(Name = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FinishDarkLordMasterTreePlugIn_Name), Description = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FinishDarkLordMasterTreePlugIn_Description), ResourceType = typeof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources))]
 [Guid("1A2B3C4D-5E6F-7890-ABCD-EF1234567890")]
 public class FinishDarkLordMasterTreePlugIn : UpdatePlugInBase
 {
@@ -29,9 +29,6 @@ public class FinishDarkLordMasterTreePlugIn : UpdatePlugInBase
     /// The plug in description.
     /// </summary>
     internal const string PlugInDescription = "This update completes the dark lord master tree skills and effects.";
-
-    /// <inheritdoc />
-    public override UpdateVersion Version => UpdateVersion.FinishDarkLordMasterTree;
 
     /// <inheritdoc />
     public override string DataInitializationKey => VersionSeasonSix.DataInitialization.Id;
@@ -61,7 +58,7 @@ public class FinishDarkLordMasterTreePlugIn : UpdatePlugInBase
 
         var stunChancePowerUpDefinition = context.CreateNew<PowerUpDefinition>();
         stunnedEffect.PowerUpDefinitions.Add(stunChancePowerUpDefinition);
-        stunChancePowerUpDefinition.TargetAttribute = Stats.StunChance.GetPersistent(gameConfiguration);
+        stunChancePowerUpDefinition.TargetAttribute = Stats.MasteryStunChance.GetPersistent(gameConfiguration);
         stunChancePowerUpDefinition.Boost = context.CreateNew<PowerUpDefinitionValue>();
         stunChancePowerUpDefinition.Boost.ConstantValue.Value = 0;
 
@@ -90,7 +87,7 @@ public class FinishDarkLordMasterTreePlugIn : UpdatePlugInBase
         if (gameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.FireBurstMastery)?.MasterDefinition is { } fireBurstMastery)
         {
             fireBurstMastery.ReplacedSkill = gameConfiguration.Skills.First(s => s.Number == (short)SkillNumber.FireBurstStreng);
-            fireBurstMastery.TargetAttribute = Stats.StunChance.GetPersistent(gameConfiguration);
+            fireBurstMastery.TargetAttribute = Stats.MasteryStunChance.GetPersistent(gameConfiguration);
             fireBurstMastery.Aggregation = AggregateType.AddRaw;
             fireBurstMastery.ValueFormula = $"{fireBurstMastery.ValueFormula} / 100";
         }
@@ -104,7 +101,7 @@ public class FinishDarkLordMasterTreePlugIn : UpdatePlugInBase
         if (gameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.EarthshakeMastery)?.MasterDefinition is { } earthshakeMastery)
         {
             earthshakeMastery.ReplacedSkill = gameConfiguration.Skills.First(s => s.Number == (short)SkillNumber.EarthshakeStreng);
-            earthshakeMastery.TargetAttribute = Stats.StunChance.GetPersistent(gameConfiguration);
+            earthshakeMastery.TargetAttribute = Stats.MasteryStunChance.GetPersistent(gameConfiguration);
             earthshakeMastery.Aggregation = AggregateType.AddRaw;
             earthshakeMastery.ValueFormula = $"{earthshakeMastery.ValueFormula} / 100";
         }

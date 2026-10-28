@@ -66,10 +66,22 @@ public class TargetedSkillDefaultPlugin : TargetedSkillPluginBase
         }
 
         var skillEntry = player.SkillList?.GetSkill(skillId);
-        var skill = skillEntry?.Skill;
-        if (skill is null || skill.SkillType == SkillType.PassiveBoost)
+        if (skillEntry?.Skill is not { } skill || skill.SkillType == SkillType.PassiveBoost)
         {
             return;
+        }
+
+        if (skill.SkillType != SkillType.Buff && skill.SkillType != SkillType.Regeneration && skill.SkillType != SkillType.SummonMonster)
+        {
+            if (player.GameContext.PlugInManager.GetPlugInPoint<ISpeedHackCheatCheckPlugIn>() is { } speedCheck)
+            {
+                var eventArgs = new SpeedHackCheckEventArgs();
+                await speedCheck.AttackCheatCheckAsync(player, eventArgs).ConfigureAwait(false);
+                if (eventArgs.IsCheatDetected)
+                {
+                    return;
+                }
+            }
         }
 
         var miniGame = player.CurrentMiniGame;
@@ -113,7 +125,7 @@ public class TargetedSkillDefaultPlugin : TargetedSkillPluginBase
         }
 
         // enough mana, ag etc?
-        if (!await player.TryConsumeForSkillAsync(skill).ConfigureAwait(false))
+        if (!await player.TryConsumeForSkillAsync(skillEntry).ConfigureAwait(false))
         {
             return;
         }
@@ -143,6 +155,17 @@ public class TargetedSkillDefaultPlugin : TargetedSkillPluginBase
         }
 
         await player.ForEachWorldObserverAsync<IShowSkillAnimationPlugIn>(p => p.ShowSkillAnimationAsync(player, target, skill, effectApplied), true).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Determines whether the skill directly hits its targets with damage.
+    /// It can be overridden by derived classes which always hit, regardless of the configured skill type.
+    /// </summary>
+    /// <param name="skill">The skill.</param>
+    /// <returns><c>true</c>, if the skill directly hits its targets; otherwise, <c>false</c>.</returns>
+    protected virtual bool IsDirectHitSkill(Skill skill)
+    {
+        return skill.SkillType is SkillType.DirectHit or SkillType.CastleSiegeSkill;
     }
 
     /// <summary>
@@ -178,7 +201,7 @@ public class TargetedSkillDefaultPlugin : TargetedSkillPluginBase
         {
             if (player.GameContext.PlugInManager.GetStrategy<short, IAreaSkillTargetFilter>(skill.Number) is { } filterPlugin)
             {
-                var rotationToTarget = (byte)(player.Position.GetAngleDegreeTo(targetedTarget.Position) / 360.0 * 255.0);
+                var rotationToTarget = AreaSkillTargetSelector.ConvertAngleToRotation((float)player.Position.GetAngleDegreeTo(targetedTarget.Position));
                 var attackablesInRange =
                     player.CurrentMap?
                         .GetAttackablesInRange(player.Position, skill.Range)
@@ -254,7 +277,7 @@ public class TargetedSkillDefaultPlugin : TargetedSkillPluginBase
 
         foreach (var target in targets)
         {
-            if (skill.SkillType == SkillType.DirectHit || skill.SkillType == SkillType.CastleSiegeSkill)
+            if (this.IsDirectHitSkill(skill))
             {
                 if (player.Attributes![Stats.AmmunitionConsumptionRate] > player.Attributes[Stats.AmmunitionAmount])
                 {

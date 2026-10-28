@@ -12,8 +12,8 @@ internal static class ModelBuilderExtensions
     /// <summary>
     /// Configures the model builder to use UUID V7 as primary keys.
     /// </summary>
-    /// <param name="modelBuilder">The model builder.</param>
-    /// <returns>The model builder.</returns>
+    /// <param name="modelBuilder">The model builder to configure.</param>
+    /// <returns>The configured model builder with UUID V7 key generation applied.</returns>
     public static Microsoft.EntityFrameworkCore.ModelBuilder UseGuidV7Ids(this Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
     {
         var types = modelBuilder.Model.GetEntityTypes();
@@ -24,7 +24,7 @@ internal static class ModelBuilderExtensions
             if (key != null)
             {
                 key.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd;
-                key.SetValueGeneratorFactory((_, _) => new GuidV7ValueGenerator());
+                key.SetValueGeneratorFactory(typeof(GuidV7ValueGeneratorFactory));
             }
         }
 

@@ -4,6 +4,7 @@
 
 namespace MUnique.OpenMU.GameLogic.PlayerActions.Items;
 
+using MUnique.OpenMU.GameLogic.CastleSiege;
 using MUnique.OpenMU.GameLogic.PlugIns;
 using MUnique.OpenMU.GameLogic.Views.Inventory;
 
@@ -12,6 +13,7 @@ using MUnique.OpenMU.GameLogic.Views.Inventory;
 /// </summary>
 public class BuyNpcItemAction
 {
+    private readonly CastleSiegeTaxProvider _castleSiegeTaxProvider = new();
     private readonly ItemPriceCalculator _priceCalculator;
 
     /// <summary>
@@ -43,7 +45,7 @@ public class BuyNpcItemAction
         }
 
         var storeItem = npcDefinition.MerchantStore.Items.FirstOrDefault(i => i.ItemSlot == slot);
-        if (storeItem is null)
+        if (storeItem is null || storeItem.Definition is { IsActive: false })
         {
             await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.ItemUnknown)).ConfigureAwait(false);
             await player.InvokeViewPlugInAsync<IBuyNpcItemFailedPlugIn>(p => p.BuyNpcItemFailedAsync()).ConfigureAwait(false);
@@ -53,14 +55,20 @@ public class BuyNpcItemAction
         // Inventory Update:
         if (storeItem.IsStackable() && player.Inventory!.Items.FirstOrDefault(item => storeItem.CanCompletelyStackOn(item)) is { } targetItem)
         {
-            if (!this.CheckMoney(player, storeItem))
+            if (!await this.CheckMoneyAsync(player, storeItem).ConfigureAwait(false))
             {
+                await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.NotEnoughMoney)).ConfigureAwait(false);
+                await player.InvokeViewPlugInAsync<IBuyNpcItemFailedPlugIn>(p => p.BuyNpcItemFailedAsync()).ConfigureAwait(false);
                 return;
             }
 
             targetItem.Durability += storeItem.Durability;
+
+            // A stacked purchase is still a successful purchase: report it with ItemBought (C1 32),
+            // which releases the client from its waiting state. NpcItemBuyFailed (C1 32 FF) must only
+            // be sent on actual failures; the durability update tells the client the new stack size.
+            await player.InvokeViewPlugInAsync<INpcItemBoughtPlugIn>(p => p.NpcItemBoughtAsync(targetItem)).ConfigureAwait(false);
             await player.InvokeViewPlugInAsync<IItemDurabilityChangedPlugIn>(p => p.ItemDurabilityChangedAsync(targetItem, false)).ConfigureAwait(false);
-            await player.InvokeViewPlugInAsync<IBuyNpcItemFailedPlugIn>(p => p.BuyNpcItemFailedAsync()).ConfigureAwait(false);
         }
         else
         {
@@ -72,7 +80,7 @@ public class BuyNpcItemAction
                 return;
             }
 
-            if (!this.CheckMoney(player, storeItem))
+            if (!await this.CheckMoneyAsync(player, storeItem).ConfigureAwait(false))
             {
                 await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.NotEnoughMoney)).ConfigureAwait(false);
                 await player.InvokeViewPlugInAsync<IBuyNpcItemFailedPlugIn>(p => p.BuyNpcItemFailedAsync()).ConfigureAwait(false);
@@ -90,14 +98,9 @@ public class BuyNpcItemAction
         await player.InvokeViewPlugInAsync<IUpdateMoneyPlugIn>(p => p.UpdateMoneyAsync()).ConfigureAwait(false);
     }
 
-    private bool CheckMoney(Player player, Item item)
+    private ValueTask<bool> CheckMoneyAsync(Player player, Item item)
     {
         var price = this._priceCalculator.CalculateFinalBuyingPrice(item);
-        if (!player.TryRemoveMoney((int)price))
-        {
-            return false;
-        }
-
-        return true;
+        return this._castleSiegeTaxProvider.TryPayStoreCostAsync(player, price);
     }
 }

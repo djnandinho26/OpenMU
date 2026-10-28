@@ -7,7 +7,7 @@ namespace MUnique.OpenMU.Web.Shared;
 using System.Collections.Immutable;
 
 /// <summary>
-/// Class which holds the script exports of this project.
+/// Class that holds the script exports of this project.
 /// </summary>
 /// <remarks>
 /// TODO: Instead of a static class, create an interface, so we can inject an instance into the layout.
@@ -15,11 +15,6 @@ using System.Collections.Immutable;
 /// </remarks>
 public static class Exports
 {
-    /// <summary>
-    /// Gets the url prefix to the scripts of this project.
-    /// </summary>
-    private static string Prefix { get; } = $"_content/{typeof(Exports).Namespace}";
-
     /// <summary>
     /// Gets the scripts.
     /// </summary>
@@ -47,8 +42,23 @@ public static class Exports
     {
         get
         {
-            yield return $"{Prefix}/css/shared.css";
-            yield return $"{Prefix}/css/theme.css";
+            var prefix = GetPrefix();
+            yield return $"{prefix}/css/bootstrap.min.css";
+            yield return $"{prefix}/css/open-iconic/font/css/open-iconic-bootstrap.min.css";
+            yield return $"{prefix}/css/theme.css";
+            yield return $"{prefix}/css/navigation.css";
+            yield return $"{prefix}/css/main.css";
+            yield return $"{prefix}/css/forms.css";
+            yield return $"{prefix}/css/tables.css";
+            yield return $"{prefix}/css/common.css";
+            yield return $"{prefix}/css/log.css";
+            yield return $"{prefix}/css/map-editor.css";
+            yield return $"{prefix}/css/terrain-editor.css";
         }
     }
+
+    /// <summary>
+    /// Gets the url prefix to the scripts of this project.
+    /// </summary>
+    private static string GetPrefix() => $"_content/{typeof(Exports).Namespace}";
 }

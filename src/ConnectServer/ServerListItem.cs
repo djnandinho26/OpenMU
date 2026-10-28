@@ -45,7 +45,7 @@ internal class ServerListItem : IGameServerEntry
     public ushort ServerId { get; set; }
 
     /// <summary>
-    /// Gets or sets the server load (usage rate).
+    /// Gets the server load (usage rate).
     /// </summary>
     public byte ServerLoadPercentage
     {
@@ -55,7 +55,7 @@ internal class ServerListItem : IGameServerEntry
         {
             this._serverLoadPercentage = value;
             var cache = this._owner.Cache;
-            if (cache != null && this.LoadIndex != -1)
+            if (cache != null && this.LoadIndex >= 0 && this.LoadIndex < cache.Length)
             {
                 cache[this.LoadIndex] = value;
             }

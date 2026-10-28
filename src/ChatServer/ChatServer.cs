@@ -13,13 +13,14 @@ using System.Timers;
 using Microsoft.Extensions.Logging;
 using MUnique.OpenMU.Interfaces;
 using MUnique.OpenMU.Network;
+using MUnique.OpenMU.Network.Analyzer;
 using MUnique.OpenMU.PlugIns;
 using Timer = System.Timers.Timer;
 
 /// <summary>
-/// Chat Server Listener, accepts incoming connections.
+/// Chat Server Listener that accepts incoming connections.
 /// </summary>
-public sealed class ChatServer : IChatServer, IDisposable
+public sealed class ChatServer : IChatServer, IDisposable, IConnectionSource
 {
     private readonly ChatRoomManager _manager;
     private readonly ILogger<ChatServer> _logger;
@@ -94,6 +95,20 @@ public sealed class ChatServer : IChatServer, IDisposable
     public int CurrentConnections => this._connectedClients.Count;
 
     private ChatServerSettings Settings => this._settings ?? throw new InvalidOperationException("The server was not initialized before");
+
+    /// <inheritdoc />
+    public ValueTask<IReadOnlyList<ICapturedConnectionInfo>> GetConnectionsAsync()
+    {
+        IReadOnlyList<ICapturedConnectionInfo> result = this._connectedClients
+            .OfType<ChatClient>()
+            .Select(client => client.Connection is { } connection
+                ? new ChatClientConnectionInfo(client, connection, this.Id, this.Description)
+                : null)
+            .Where(info => info is not null)
+            .Select(info => (ICapturedConnectionInfo)info!)
+            .ToList();
+        return ValueTask.FromResult(result);
+    }
 
     /// <inheritdoc/>
     public async ValueTask<ChatServerAuthenticationInfo?> RegisterClientAsync(ushort roomId, string clientName)
@@ -180,38 +195,6 @@ public sealed class ChatServer : IChatServer, IDisposable
         this._settings = settings;
     }
 
-    private void CreateCleanupTimers()
-    {
-        this._clientCleanupTimer = new Timer(this.Settings.ClientCleanUpInterval.TotalMilliseconds);
-        this._clientCleanupTimer.Elapsed += this.ClientCleanupInactiveClients;
-        this._clientCleanupTimer.Start();
-        this._roomCleanupTimer = new Timer(this.Settings.RoomCleanUpInterval.TotalMilliseconds);
-        this._roomCleanupTimer.Elapsed += this.ClientCleanupUnusedRooms;
-        this._roomCleanupTimer.Start();
-    }
-
-    private void RemoveCleanupTimers()
-    {
-        this._clientCleanupTimer?.Stop();
-        this._clientCleanupTimer?.Dispose();
-        this._clientCleanupTimer = null;
-
-        this._roomCleanupTimer?.Stop();
-        this._roomCleanupTimer?.Dispose();
-        this._roomCleanupTimer = null;
-    }
-
-    private void CreateListeners()
-    {
-        foreach (var endpoint in this.Settings.Endpoints)
-        {
-            var listener = new ChatServerListener(endpoint, this._plugInManager, this._loggerFactory);
-            listener.ClientAccepted += this.ChatClientAcceptedAsync;
-            listener.ClientAccepting += this.ChatClientAcceptingAsync;
-            this._listeners.Add(listener);
-        }
-    }
-
     /// <inheritdoc/>
     public async ValueTask ShutdownAsync()
     {
@@ -222,7 +205,7 @@ public sealed class ChatServer : IChatServer, IDisposable
 
         this._logger.LogInformation("Begin shutdown");
         this.ServerState = OpenMU.Interfaces.ServerState.Stopping;
-        this.RemoveCleanupTimers(); 
+        this.RemoveCleanupTimers();
         foreach (var listener in this._listeners)
         {
             listener.Stop();
@@ -262,11 +245,43 @@ public sealed class ChatServer : IChatServer, IDisposable
         }
     }
 
+    private void CreateCleanupTimers()
+    {
+        this._clientCleanupTimer = new Timer(this.Settings.ClientCleanUpInterval.TotalMilliseconds);
+        this._clientCleanupTimer.Elapsed += this.ClientCleanupInactiveClients;
+        this._clientCleanupTimer.Start();
+        this._roomCleanupTimer = new Timer(this.Settings.RoomCleanUpInterval.TotalMilliseconds);
+        this._roomCleanupTimer.Elapsed += this.ClientCleanupUnusedRooms;
+        this._roomCleanupTimer.Start();
+    }
+
+    private void RemoveCleanupTimers()
+    {
+        this._clientCleanupTimer?.Stop();
+        this._clientCleanupTimer?.Dispose();
+        this._clientCleanupTimer = null;
+
+        this._roomCleanupTimer?.Stop();
+        this._roomCleanupTimer?.Dispose();
+        this._roomCleanupTimer = null;
+    }
+
+    private void CreateListeners()
+    {
+        foreach (var endpoint in this.Settings.Endpoints)
+        {
+            var listener = new ChatServerListener(endpoint, this._plugInManager, this._loggerFactory);
+            listener.ClientAccepted += this.ChatClientAcceptedAsync;
+            listener.ClientAccepting += this.ChatClientAcceptingAsync;
+            this._listeners.Add(listener);
+        }
+    }
+
     /// <summary>
     /// Gets a random authentication token.
     /// </summary>
     /// <param name="clientIndex">Index of the client.</param>
-    /// <returns>The random authentication token as string.</returns>
+    /// <returns>The random authentication token as a string.</returns>
     /// <remarks>
     ///  This is the original way of generating the token - not especially secure, but to keep it simple, I leave it that way.
     /// </remarks>
@@ -322,8 +337,7 @@ public sealed class ChatServer : IChatServer, IDisposable
                 }
 
                 this._logger.LogDebug(
-                    "Disconnecting client {Client}, because of activity timeout. LastActivity: {ClientLastActivity}",
-                    client, client.LastActivity);
+                    "Disconnecting client {Client}, because of activity timeout. LastActivity: {ClientLastActivity}", client, client.LastActivity);
 
                 await client.LogOffAsync().ConfigureAwait(false);
             }

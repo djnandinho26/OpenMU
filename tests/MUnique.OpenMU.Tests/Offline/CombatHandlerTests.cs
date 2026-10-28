@@ -50,17 +50,57 @@ public class CombatHandlerTests
         await player.CurrentMap!.AddAsync(monster).ConfigureAwait(false);
 
         var config = new MuHelperSettings { HuntingRange = 10 };
-        var movementHandler = new MovementHandler(player, config, this._origin);
-        var buffHandler = new BuffHandler(player, config);
+        player.HuntingOrigin = this._origin;
+        var movementHandler = new MovementHandler(player, config);
 
-        var handler = new CombatHandler(player, config, movementHandler, buffHandler, this._origin);
+        var handler = new CombatHandler(player, config, movementHandler);
 
         // Act
+        // The first call only acquires the target and turns towards it: a fresh target gets a small
+        // randomized human-like reaction delay (up to 900 ms) before the bot engages, so we call
+        // again after the delay has certainly elapsed.
+        await handler.PerformAttackAsync().ConfigureAwait(false);
+        await Task.Delay(1000).ConfigureAwait(false);
         await handler.PerformAttackAsync().ConfigureAwait(false);
 
         // Assert
         // Should have initiated a walk closer to the monster
         Assert.That(player.IsWalking, Is.True);
+    }
+
+    /// <summary>
+    /// Tests that <see cref="CombatHandler.PerformAttackAsync"/> does not pick a monster summoned by a
+    /// player as its target: it belongs to its owner, and hitting it grants the owner self-defense
+    /// against the attacker.
+    /// </summary>
+    [Test]
+    public async ValueTask PerformAttackAsync_IgnoresSummonedMonsterAsync()
+    {
+        // Arrange
+        var player = await this.CreateOfflinePlayerAsync().ConfigureAwait(false);
+        player.Position = this._origin;
+
+        var owner = await PlayerTestHelper.CreatePlayerAsync(this._gameContext).ConfigureAwait(false);
+        var summon = await this.CreateMonsterAsync(new Point(105, 105), new SummonedMonsterIntelligence(owner)).ConfigureAwait(false);
+        await player.CurrentMap!.AddAsync(summon).ConfigureAwait(false);
+
+        var config = new MuHelperSettings { HuntingRange = 10 };
+        player.HuntingOrigin = this._origin;
+        var movementHandler = new MovementHandler(player, config);
+
+        var handler = new CombatHandler(player, config, movementHandler);
+
+        // Act
+        // Same timing as in PerformAttackAsync_MovesCloserToTargetAsync, which walks towards a regular
+        // monster at the same spot.
+        await handler.PerformAttackAsync().ConfigureAwait(false);
+        await Task.Delay(1000).ConfigureAwait(false);
+        await handler.PerformAttackAsync().ConfigureAwait(false);
+
+        // Assert
+        Assert.That(summon.SummonedBy, Is.SameAs(owner));
+        Assert.That(player.IsWalking, Is.False);
+        Assert.That(summon.Attributes[Stats.CurrentHealth], Is.EqualTo(100));
     }
 
     /// <summary>
@@ -80,13 +120,13 @@ public class CombatHandlerTests
         var monster = await this.CreateMonsterAsync(monsterPosition).ConfigureAwait(false);
         await player.CurrentMap!.AddAsync(monster).ConfigureAwait(false);
 
-        var config = new MuHelperSettings 
-        { 
-            UseDrainLife = true, 
+        var config = new MuHelperSettings
+        {
+            UseDrainLife = true,
             HealThresholdPercent = 50,
             HuntingRange = 10
         };
-        
+
         // Add Drain Life skill to player
         var drainSkill = new TestSkill
         {
@@ -94,10 +134,10 @@ public class CombatHandlerTests
         };
         await player.SkillList!.AddLearnedSkillAsync(drainSkill).ConfigureAwait(false);
 
-        var movementHandler = new MovementHandler(player, config, this._origin);
-        var buffHandler = new BuffHandler(player, config);
+        player.HuntingOrigin = this._origin;
+        var movementHandler = new MovementHandler(player, config);
 
-        var handler = new CombatHandler(player, config, movementHandler, buffHandler, this._origin);
+        var handler = new CombatHandler(player, config, movementHandler);
 
         // Act
         await handler.PerformDrainLifeRecoveryAsync().ConfigureAwait(false);
@@ -107,20 +147,61 @@ public class CombatHandlerTests
         Assert.That(player.Rotation, Is.Not.EqualTo(default(Direction)));
     }
 
+    /// <summary>
+    /// Tests that <see cref="CombatHandler.IsSafeTarget"/> lets a fresh level-1 character engage a
+    /// monster a few levels above it: without the level headroom every monster is above the fresh
+    /// bot's effective level, so it could never acquire a target and just wandered.
+    /// </summary>
+    [Test]
+    public async ValueTask IsSafeTarget_LevelOnePlayer_MayEngageLevelSixMonster()
+    {
+        var player = await this.CreateOfflinePlayerAsync().ConfigureAwait(false);
+        player.Attributes![Stats.Level] = 1;
+        await player.SkillList!.AddLearnedSkillAsync(new TestSkill { AttackDamage = 20 }).ConfigureAwait(false);
+
+        var monster = await this.CreateMonsterAsync(default, 6, 2, 2, 5, 300, 28).ConfigureAwait(false);
+
+        Assert.That(CombatHandler.IsSafeTarget(player, monster.Definition), Is.True);
+    }
+
+    /// <summary>
+    /// Tests that the level headroom of <see cref="CombatHandler.IsSafeTarget"/> does not open the
+    /// floodgates: a level-1 character still rejects a monster far above its tier.
+    /// </summary>
+    [Test]
+    public async ValueTask IsSafeTarget_LevelOnePlayer_RejectsLevelThirtyMonster()
+    {
+        var player = await this.CreateOfflinePlayerAsync().ConfigureAwait(false);
+        player.Attributes![Stats.Level] = 1;
+
+        var monster = await this.CreateMonsterAsync(default, 30, 2, 2, 5, 300, 28).ConfigureAwait(false);
+
+        Assert.That(CombatHandler.IsSafeTarget(player, monster.Definition), Is.False);
+    }
+
     private async ValueTask<OfflinePlayer> CreateOfflinePlayerAsync()
     {
         return await PlayerTestHelper.CreateOfflineLevelingPlayerAsync(this._gameContext).ConfigureAwait(false);
     }
 
-    private async ValueTask<Monster> CreateMonsterAsync(Point position)
+    private async ValueTask<Monster> CreateMonsterAsync(Point position, INpcIntelligence? intelligence = null)
+    {
+        return await this.CreateMonsterAsync(position, 6, minDamage: 2, maxDamage: 2, defense: 5, health: 300, attackRate: 28, intelligence).ConfigureAwait(false);
+    }
+
+    private async ValueTask<Monster> CreateMonsterAsync(Point position, int level, float minDamage, float maxDamage, float defense, float health, float attackRate, INpcIntelligence? intelligence = null)
     {
         var monsterDefinition = new MonsterDefinition
         {
             ObjectKind = NpcObjectKind.Monster,
         };
-        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.MaximumHealth, Value = 1000 });
-        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.DefenseBase, Value = 100 });
-        
+        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.Level, Value = level });
+        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.MinimumPhysBaseDmg, Value = minDamage });
+        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.MaximumPhysBaseDmg, Value = maxDamage });
+        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.DefenseBase, Value = defense });
+        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.MaximumHealth, Value = health });
+        monsterDefinition.Attributes.Add(new MonsterAttribute { AttributeDefinition = Stats.AttackRatePvm, Value = attackRate });
+
         var map = await this._gameContext.GetMapAsync(0).ConfigureAwait(false)!;
         var spawnArea = new MonsterSpawnArea
         {
@@ -134,17 +215,17 @@ public class CombatHandlerTests
         };
 
         var monster = new Monster(
-            spawnArea, 
-            monsterDefinition, 
-            map, 
-            NullDropGenerator.Instance, 
-            new Mock<INpcIntelligence>().Object, 
-            this._gameContext.PlugInManager, 
+            spawnArea,
+            monsterDefinition,
+            map,
+            NullDropGenerator.Instance,
+            intelligence ?? new Mock<INpcIntelligence>().Object,
+            this._gameContext.PlugInManager,
             this._gameContext.PathFinderPool);
-        
+
         monster.Initialize();
         monster.Attributes[Stats.CurrentHealth] = 100;
-        
+
         return monster;
     }
 

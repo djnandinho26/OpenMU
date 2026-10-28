@@ -28,6 +28,20 @@ public static class PlayerTestHelper
     /// <returns>The test player.</returns>
     public static async ValueTask<Player> CreatePlayerAsync()
     {
+        var gameConfiguration = CreateGameConfiguration();
+        var mapInitializer = new MapInitializer(gameConfiguration, new NullLogger<MapInitializer>(), NullDropGenerator.Instance, null);
+        var gameContext = new GameContext(gameConfiguration, new InMemoryPersistenceContextProvider(), mapInitializer, new NullLoggerFactory(), new PlugInManager(null, new NullLoggerFactory(), null, null), NullDropGenerator.Instance, new ConfigurationChangeMediator());
+        mapInitializer.PlugInManager = gameContext.PlugInManager;
+        mapInitializer.PathFinderPool = gameContext.PathFinderPool;
+        return await CreatePlayerAsync(gameContext).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Creates a minimal game configuration with one map with the number 0, which is sufficient for test players.
+    /// </summary>
+    /// <returns>The game configuration.</returns>
+    public static GameConfiguration CreateGameConfiguration()
+    {
         var gameConfig = new Mock<GameConfiguration>();
         gameConfig.SetupAllProperties();
         gameConfig.Setup(c => c.Maps).Returns(new List<GameMapDefinition>());
@@ -44,15 +58,11 @@ public static class PlayerTestHelper
         map.SetupAllProperties();
         map.Setup(m => m.DropItemGroups).Returns(new List<DropItemGroup>());
         map.Setup(m => m.MonsterSpawns).Returns(new List<MonsterSpawnArea>());
+        map.Setup(m => m.ExitGates).Returns(new List<ExitGate>());
         map.Object.TerrainData = new byte[ushort.MaxValue + 3];
         gameConfig.Object.RecoveryInterval = int.MaxValue;
         gameConfig.Object.Maps.Add(map.Object);
-
-        var mapInitializer = new MapInitializer(gameConfig.Object, new NullLogger<MapInitializer>(), NullDropGenerator.Instance, null);
-        var gameContext = new GameContext(gameConfig.Object, new InMemoryPersistenceContextProvider(), mapInitializer, new NullLoggerFactory(), new PlugInManager(null, new NullLoggerFactory(), null, null), NullDropGenerator.Instance, new ConfigurationChangeMediator());
-        mapInitializer.PlugInManager = gameContext.PlugInManager;
-        mapInitializer.PathFinderPool = gameContext.PathFinderPool;
-        return await CreatePlayerAsync(gameContext).ConfigureAwait(false);
+        return gameConfig.Object;
     }
 
     /// <summary>
@@ -80,6 +90,7 @@ public static class PlayerTestHelper
             new List<StatAttributeDefinition>
             {
                 new (Stats.Level, 0, false),
+                new (Stats.MasterLevel, 0, false),
                 new (Stats.BaseStrength, 28, true),
                 new (Stats.BaseAgility, 20, true),
                 new (Stats.BaseVitality, 25, true),

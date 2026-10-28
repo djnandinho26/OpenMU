@@ -23,6 +23,7 @@
     <ProjectReference Include="..\GameLogic\MUnique.OpenMU.GameLogic.csproj" />
     <ProjectReference Include="..\Interfaces\MUnique.OpenMU.Interfaces.csproj" />
     <ProjectReference Include="..\Network\MUnique.OpenMU.Network.csproj" />
+    <ProjectReference Include="..\Network\Analyzer\MUnique.OpenMU.Network.Analyzer.csproj" />
     <ProjectReference Include="..\Network\Packets\MUnique.OpenMU.Network.Packets.csproj" />
     <ProjectReference Include="..\Pathfinding\MUnique.OpenMU.Pathfinding.csproj" />
     <ProjectReference Include="..\Persistence\MUnique.OpenMU.Persistence.csproj" />
@@ -44,4 +45,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PlugIns.Generators\MUnique.OpenMU.PlugIns.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
 </Project>

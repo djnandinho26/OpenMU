@@ -7,6 +7,7 @@ namespace MUnique.OpenMU.Persistence.Initialization.Version075.Maps;
 using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
 using MUnique.OpenMU.Persistence.Initialization.Skills;
 
 /// <summary>
@@ -20,11 +21,6 @@ internal class Atlans : BaseMapInitializer
     internal const byte Number = 7;
 
     /// <summary>
-    /// The default name of the map.
-    /// </summary>
-    internal const string Name = "Atlans";
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="Atlans"/> class.
     /// </summary>
     /// <param name="context">The context.</param>
@@ -34,11 +30,23 @@ internal class Atlans : BaseMapInitializer
     {
     }
 
+    /// <summary>
+    /// Gets the name of the map.
+    /// </summary>
+    internal static LocalizedString Name => LocalizedString.FromResource(() => MapNames.Atlans);
+
     /// <inheritdoc/>
     protected override byte MapNumber => Number;
 
     /// <inheritdoc/>
-    protected override string MapName => Name;
+    protected override LocalizedString MapName => Name;
+
+    /// <inheritdoc />
+    protected override void AdditionalInitialization(GameMapDefinition mapDefinition)
+    {
+        base.AdditionalInitialization(mapDefinition);
+        this.AddUnderwaterMovementPowerUp();
+    }
 
     /// <inheritdoc/>
     protected override IEnumerable<MonsterSpawnArea> CreateNpcSpawns()
@@ -277,6 +285,7 @@ internal class Atlans : BaseMapInitializer
         yield return this.CreateMonsterSpawn(325, this.NpcDictionary[51], 62, 140);
         yield return this.CreateMonsterSpawn(326, this.NpcDictionary[51], 70, 133);
         yield return this.CreateMonsterSpawn(327, this.NpcDictionary[51], 168, 54);
+
         // yield return this.CreateMonsterSpawn(this2NpcDictionary[51], 7, 52);
         yield return this.CreateMonsterSpawn(330, this.NpcDictionary[51], 225, 45);
         yield return this.CreateMonsterSpawn(331, this.NpcDictionary[51], 207, 9);
@@ -395,7 +404,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 45;
-            monster.Designation = "Bahamut";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.Bahamut);
             monster.MoveRange = 2;
             monster.AttackRange = 1;
             monster.ViewRange = 4;
@@ -427,7 +436,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 46;
-            monster.Designation = "Vepar";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.Vepar);
             monster.MoveRange = 3;
             monster.AttackRange = 4;
             monster.ViewRange = 7;
@@ -460,7 +469,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 47;
-            monster.Designation = "Valkyrie";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.Valkyrie);
             monster.MoveRange = 3;
             monster.AttackRange = 5;
             monster.ViewRange = 7;
@@ -492,7 +501,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 48;
-            monster.Designation = "Lizard King";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.LizardKing);
             monster.MoveRange = 3;
             monster.AttackRange = 3;
             monster.ViewRange = 7;
@@ -525,7 +534,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 49;
-            monster.Designation = "Hydra";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.Hydra);
             monster.MoveRange = 3;
             monster.AttackRange = 4;
             monster.ViewRange = 7;
@@ -558,7 +567,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 50;
-            monster.Designation = "Sea Worm";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.SeaWorm);
             monster.MoveRange = 3;
             monster.AttackRange = 4;
             monster.ViewRange = 7;
@@ -590,7 +599,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 51;
-            monster.Designation = "Great Bahamut";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.GreatBahamut);
             monster.MoveRange = 3;
             monster.AttackRange = 2;
             monster.ViewRange = 7;
@@ -622,7 +631,7 @@ internal class Atlans : BaseMapInitializer
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 52;
-            monster.Designation = "Silver Valkyrie";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.SilverValkyrie);
             monster.MoveRange = 3;
             monster.AttackRange = 4;
             monster.ViewRange = 7;

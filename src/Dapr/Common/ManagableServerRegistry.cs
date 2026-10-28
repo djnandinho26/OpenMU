@@ -22,6 +22,7 @@ public class ManagableServerRegistry : IServerProvider, IDisposable
     private readonly ILogger<ManagableServerRegistry> _logger;
     private readonly DaprClient _daprClient;
     private readonly ConcurrentDictionary<int, ManageableServerClient> _serverClients = new();
+    private int _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ManagableServerRegistry" /> class.
@@ -33,11 +34,15 @@ public class ManagableServerRegistry : IServerProvider, IDisposable
         this._daprClient = daprClient;
         this._logger = logger;
 
-        async Task RunTimeoutLoop()
+        async Task RunTimeoutLoopAsync()
         {
             try
             {
                 await this.TimeoutLoopAsync(this._disposeCts.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // The registry got disposed.
             }
             catch (Exception ex)
             {
@@ -45,7 +50,7 @@ public class ManagableServerRegistry : IServerProvider, IDisposable
             }
         }
 
-        _ = RunTimeoutLoop();
+        _ = RunTimeoutLoopAsync();
     }
 
     /// <inheritdoc />
@@ -66,7 +71,9 @@ public class ManagableServerRegistry : IServerProvider, IDisposable
             _ =>
         {
             isNew = true;
-            return new ManageableServerClient(this._daprClient, serverData);
+            return serverData.Type == ServerType.GameServer
+                ? new GameServerClient(this._daprClient, serverData)
+                : new ManageableServerClient(this._daprClient, serverData);
         },
             (_, client) =>
             {
@@ -83,6 +90,12 @@ public class ManagableServerRegistry : IServerProvider, IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        // It's registered as itself and as IServerProvider, so the container disposes it twice.
+        if (Interlocked.Exchange(ref this._isDisposed, 1) == 1)
+        {
+            return;
+        }
+
         this._disposeCts.Cancel();
         this._disposeCts.Dispose();
     }

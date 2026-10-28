@@ -1,6 +1,7 @@
 ﻿@page "/servers"
 
 @using System.ComponentModel
+@using Microsoft.Extensions.DependencyInjection
 @using MUnique.OpenMU.Interfaces
 @using MUnique.OpenMU.Web.AdminPanel.Properties
 
@@ -16,8 +17,17 @@
 }
 else
 {
+@if (_gameServers is not null)
+{
+<div class="card mb-3">
+    <div class="card-body">
+        <GlobalMessageForm Servers="@_servers" />
+    </div>
+</div>
+}
+
 <div>
-  <table>
+  <table class="table table-striped table-hover">
     <thead>
     <tr>
       <th></th>
@@ -39,7 +49,7 @@ else
     <tr>
       <td></td>
       <td>
-        <NavLink class="btn btn-primary" href="create-game-server">
+        <NavLink class="btn btn-primary me-1" href="create-game-server">
           <span class="oi oi-plus"></span> @Resources.GameServer
         </NavLink>
         <NavLink class="btn btn-primary" href="create-connect-server">
@@ -53,14 +63,14 @@ else
         {
           @if (this._isRestarting)
           {
-            <button type="button" class="btn-warning" disabled="disabled">
+            <button type="button" class="btn btn-warning btn-sm" disabled="disabled">
               <div class="spinner-border text-secondary" role="status">
               </div>
             </button>
           }
           else
           {
-            <button type="button" class="btn-warning" @onclick="this.OnReloadAndRestartClickAsync">
+            <button type="button" class="btn btn-warning btn-sm" @onclick="this.OnReloadAndRestartClickAsync">
               <span class="oi oi-reload"></span>
               @Resources.ReloadConfigurationAndRestartAllGameServers
             </button>
@@ -90,6 +100,19 @@ else
     [Inject]
     public IGameServerInstanceManager? ServerInstanceManager { get; set; }
 
+    /// <summary>
+    /// Gets or sets the service provider, used to optionally resolve the game server dictionary.
+    /// </summary>
+    [Inject]
+    public IServiceProvider ServiceProvider { get; set; } = null!;
+
+    /// <summary>
+    /// The game servers, resolved optionally: the dictionary is only registered in the
+    /// single-process host, so it is null on the distributed (Dapr) admin panel host. When
+    /// null, the global message card is not rendered (graceful degradation).
+    /// </summary>
+    private IDictionary<int, IGameServer>? _gameServers;
+
     /// <inheritdoc />
     public void Dispose()
     {
@@ -101,6 +124,7 @@ else
     {
         base.OnInitialized();
         this._servers = this.ServerProvider.Servers;
+        this._gameServers = this.ServiceProvider.GetService<IDictionary<int, IGameServer>>();
         this.ServerProvider.PropertyChanged += this.OnServersChanged;
     }
 

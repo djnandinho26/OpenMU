@@ -1,13 +1,15 @@
-﻿// // <copyright file="ModelResourcesTest.cs" company="MUnique">
+// // <copyright file="ModelResourcesTest.cs" company="MUnique">
 // // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // // </copyright>
 
 namespace MUnique.OpenMU.Tests;
 
+using System;
 using System.Globalization;
 using MUnique.OpenMU.DataModel;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.DataModel.Entities;
+using MUnique.OpenMU.Interfaces;
 
 /// <summary>
 /// Unit tests for verifying that <see cref="ModelResourceProvider"/> returns expected captions and descriptions
@@ -62,7 +64,7 @@ public class ModelResourcesTest
 
     /// <summary>
     /// Verifies that a caption can be retrieved for a property inherited from a base type,
-    /// here <see cref="ExitGate.X1"/>.
+    /// here <see cref="Gate.X1"/>.
     /// </summary>
     [Test]
     public void InheritedPropertyCaption()
@@ -124,7 +126,7 @@ public class ModelResourcesTest
     }
 
     /// <summary>
-    /// Verifies that the non-generic overload of <see cref="ModelResourceProvider.GetEnumCaption(Type, object, CultureInfo)"/>
+    /// Verifies that the non-generic overload of <see cref="ModelResourceProvider.GetEnumCaption(Type, Enum, CultureInfo)"/>
     /// returns the expected caption for an enum value.
     /// </summary>
     [Test]
@@ -132,5 +134,20 @@ public class ModelResourcesTest
     {
         var caption = ModelResourceProvider.GetEnumCaption(typeof(AccountState), AccountState.GameMaster, CultureInfo.GetCultureInfo("en"));
         Assert.That(caption, Is.EqualTo("Game Master"));
+    }
+
+    /// <summary>
+    /// Verifies that the captions for <see cref="GuildPosition"/> are properly returned from model resources.
+    /// </summary>
+    /// <param name="position">The guild position.</param>
+    /// <param name="expectedCaption">The expected caption.</param>
+    [TestCase(GuildPosition.NormalMember, "Normal Member")]
+    [TestCase(GuildPosition.GuildMaster, "Guild Master")]
+    [TestCase(GuildPosition.BattleMaster, "Battle Master")]
+    [TestCase(GuildPosition.AssistantMaster, "Assistant Master")]
+    public void GuildPositionCaption(GuildPosition position, string expectedCaption)
+    {
+        var caption = position.GetEnumCaption(CultureInfo.GetCultureInfo("en"));
+        Assert.That(caption, Is.EqualTo(expectedCaption));
     }
 }

@@ -1,43 +1,62 @@
-﻿namespace MUnique.OpenMU.Web.API
+﻿// <copyright file="ServerController.cs" company="MUnique">
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+// </copyright>
+
+namespace MUnique.OpenMU.Web.AdminPanel.API
 {
+    using System.Text.Json;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using MUnique.OpenMU.DataModel.Entities;
     using MUnique.OpenMU.GameLogic;
     using MUnique.OpenMU.GameServer;
     using MUnique.OpenMU.Interfaces;
     using MUnique.OpenMU.Persistence;
-    using System.Text.Json;
+    using MUnique.OpenMU.Web.AdminPanel.Auth;
+    using MUnique.OpenMU.Web.AdminPanel.Operations;
 
     /// <summary>
-    /// Server API controller
+    /// Server API controller.
     /// </summary>
+    /// <remarks>
+    /// This is the public API of the server, meant to be used by external applications like a
+    /// game launcher or a website. Unlike the rest of the admin panel, it accepts an API key in
+    /// addition to the authentication cookie, because such an application can't go through an
+    /// interactive login with a second factor.
+    /// </remarks>
     [Route("api/")]
+    [Authorize(AuthenticationSchemes = ApiKeyAuthenticationDefaults.ApiSchemes, Policy = AdminPolicies.Viewer)]
     public class ServerController : Controller
     {
-        private IDictionary<int, IGameServer> _gameServers;
+        private readonly IDictionary<int, IGameServer> _gameServers;
+        private readonly ServerWriteOperations _operations;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="ServerController"/> class.
         /// </summary>
-        /// <param name="gameServers"></param>
-        public ServerController(IDictionary<int, IGameServer> gameServers) => _gameServers = gameServers;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="msg"></param>
-        /// <returns></returns>
-        [Route("send/{id=0}")]
-        public async Task<IActionResult> SendGlobalMessage(int id, [FromQuery(Name = "msg")] string msg)
+        /// <param name="gameServers">The game servers.</param>
+        /// <param name="operations">The audited server operations.</param>
+        public ServerController(IDictionary<int, IGameServer> gameServers, ServerWriteOperations operations)
         {
-            var server = (GameServer)_gameServers.Values.ElementAt(id);
-            if (server is not null)
-            {
-                await server.Context.SendGlobalNotificationAsync(msg).ConfigureAwait(false);
-                return Ok("Done");
-            }
-            return Ok("Server not ready");
+            this._gameServers = gameServers;
+            this._operations = operations;
+        }
+
+        /// <summary>
+        /// Sends a global message to the specified server.
+        /// </summary>
+        /// <param name="id">The server id.</param>
+        /// <param name="msg">The message.</param>
+        /// <remarks>
+        /// This is the only endpoint of the API which does something instead of reporting
+        /// something, so it requires the operator role and not just the viewer role.
+        /// </remarks>
+        [HttpPost]
+        [Route("send/{id=0}")]
+        [Authorize(AuthenticationSchemes = ApiKeyAuthenticationDefaults.ApiSchemes, Policy = AdminPolicies.AuthenticatedOperator)]
+        public async Task<IActionResult> SendGlobalMessageAsync(int id, [FromQuery(Name = "msg")] string msg)
+        {
+            await this._operations.SendMessageAsync(id, msg, MessageType.GoldenCenter, this.HttpContext.RequestAborted).ConfigureAwait(false);
+            return this.Ok("Done");
         }
 
         /// <summary>
@@ -65,37 +84,29 @@
         }
 
         /// <summary>
-        /// 
+        /// Gets the server state.
         /// </summary>
-        /// <returns></returns>
         [HttpGet]
         [Route("status")]
-        public IActionResult ServerState()
+        public async Task<IActionResult> ServerStateAsync()
         {
-            int sum = 0;
             var list = new List<string>();
-            _gameServers.Values.ForEach(async item =>
+            var sum = 0;
+            foreach (var server in this._gameServers.Values.OfType<GameServer>())
             {
-                var server = item as GameServer;
-                if(server is not null)
-                {
-                    await server.Context.ForEachPlayerAsync(player =>
-                    {
-                        list.Add(player.GetName());
-                        return Task.CompletedTask;
-                    }).ConfigureAwait(false);
-                    sum = sum + server.Context.PlayerCount;
-                }
-            });
+                var players = await server.Context.GetPlayersAsync().ConfigureAwait(false);
+                list.AddRange(players.Select(player => player.GetName()));
+                sum += server.Context.PlayerCount;
+            }
 
             var item = new
             {
                 state = "Online",
                 players = sum,
-                playersList = list
+                playersList = list,
             };
 
-            return Ok(JsonSerializer.Serialize(item));
+            return this.Ok(JsonSerializer.Serialize(item));
         }
     }
 }

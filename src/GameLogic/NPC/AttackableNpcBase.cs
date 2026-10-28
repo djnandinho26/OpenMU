@@ -4,6 +4,7 @@
 
 namespace MUnique.OpenMU.GameLogic.NPC;
 
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using MUnique.OpenMU.AttributeSystem;
@@ -24,7 +25,6 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     private readonly IEventStateProvider? _eventStateProvider;
     private readonly IDropGenerator _dropGenerator;
     private readonly PlugInManager _plugInManager;
-    private readonly List<IDisposable> _registrations = new();
 
     private int _health;
 
@@ -93,8 +93,8 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     /// </summary>
     public int Health
     {
-        get => Math.Max(this._health, 0);
-        set => this._health = value;
+        get => Math.Max(Volatile.Read(ref this._health), 0);
+        set => Interlocked.Exchange(ref this._health, value);
     }
 
     private bool ShouldRespawn => this.SpawnArea.SpawnTrigger == SpawnTrigger.Automatic
@@ -104,7 +104,9 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     /// <inheritdoc />
     public async ValueTask<HitInfo?> AttackByAsync(IAttacker attacker, SkillEntry? skill, bool isCombo, double damageFactor = 1.0, bool? isFinalStreakHit = null)
     {
-        if (this.Definition.ObjectKind == NpcObjectKind.Guard)
+        if (this.Definition.ObjectKind == NpcObjectKind.Guard
+            || this.IsAttackBlockedBySafezone(attacker)
+            || !this.CanBeAttackedBy(attacker))
         {
             return null;
         }
@@ -127,12 +129,17 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
 
             if (attacker is Player player)
             {
-                await player.AfterHitTargetAsync().ConfigureAwait(false);
+                await player.AfterHitTargetAsync(this.Attributes[Stats.DefensePvm], skill?.Skill?.DamageType).ConfigureAwait(false);
+
+                if (this.IsAlive && Rand.NextRandomBool(player.Attributes![Stats.MaceMasteryStunChance]))
+                {
+                    await player.ApplyMaceMasteryStunEffectAsync(this).ConfigureAwait(false);
+                }
             }
 
             if (attacker as IPlayerSurrogate is { } playerSurrogate)
             {
-                await playerSurrogate.Owner.AfterHitTargetAsync().ConfigureAwait(false);
+                await playerSurrogate.Owner.DecreaseRavenDurabilityAfterHitAsync(hitInfo.TotalDamage).ConfigureAwait(false);
             }
         }
 
@@ -171,16 +178,6 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
         (this.Attributes as MonsterAttributeHolder)?.ApplyChanges();
     }
 
-    /// <summary>
-    /// Registers a disposable (e.g. a configuration change registration) to be disposed
-    /// together with this instance.
-    /// </summary>
-    /// <param name="disposable">The disposable.</param>
-    public void RegisterDisposable(IDisposable disposable)
-    {
-        this._registrations.Add(disposable);
-    }
-
     /// <inheritdoc/>
     protected override void Dispose(bool managed)
     {
@@ -188,12 +185,6 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
         {
             this.Died = null;
             this.IsAlive = false;
-            foreach (var registration in this._registrations)
-            {
-                registration.Dispose();
-            }
-
-            this._registrations.Clear();
         }
 
         base.Dispose(managed);
@@ -225,7 +216,7 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
             return;
         }
 
-        var killed = this.TryHit(hitInfo.HealthDamage + hitInfo.ShieldDamage, attacker);
+        var killed = this.TryHit(hitInfo.TotalDamage, attacker);
 
         var player = this.GetHitNotificationTarget(attacker);
         if (player is not null)
@@ -267,12 +258,51 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     }
 
     /// <summary>
+    /// Determines whether the specified attacker may attack this NPC.
+    /// </summary>
+    /// <param name="attacker">The attacker.</param>
+    /// <returns><see langword="true"/> when the attack is allowed; otherwise, <see langword="false"/>.</returns>
+    protected virtual bool CanBeAttackedBy(IAttacker attacker) => true;
+
+    /// <summary>
     /// Registers the hit.
     /// </summary>
     /// <param name="attacker">The attacker.</param>
     protected virtual void RegisterHit(IAttacker attacker)
     {
         // can be overwritten
+    }
+
+    /// <summary>
+    /// Atomically restores health without exceeding the specified maximum.
+    /// </summary>
+    /// <param name="amount">The maximum amount of health to restore.</param>
+    /// <param name="maximumHealth">The maximum health after the restoration.</param>
+    /// <returns>The restored health.</returns>
+    protected int RestoreHealth(int amount, int maximumHealth)
+    {
+        if (amount <= 0 || maximumHealth <= 0)
+        {
+            return 0;
+        }
+
+        while (true)
+        {
+            var currentHealth = Volatile.Read(ref this._health);
+            if (currentHealth <= 0 || currentHealth >= maximumHealth)
+            {
+                return 0;
+            }
+
+            var restoredHealth = Math.Min(amount, maximumHealth - currentHealth);
+            if (Interlocked.CompareExchange(
+                    ref this._health,
+                    currentHealth + restoredHealth,
+                    currentHealth) == currentHealth)
+            {
+                return restoredHealth;
+            }
+        }
     }
 
     /// <summary>
@@ -302,7 +332,9 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
         var player = this.GetHitNotificationTarget(attacker);
         if (player is { })
         {
-            int exp = await (player.Party?.DistributeExperienceAfterKillAsync(this, player) ?? player.AddExpAfterKillAsync(this)).ConfigureAwait(false);
+            var experienceShares = player.Party is { } party
+                ? await party.DistributeExperienceAfterKillAsync(this, player).ConfigureAwait(false)
+                : [new ExperienceShare(player, await player.AddExpAfterKillAsync(this).ConfigureAwait(false))];
             if (attacker == player)
             {
                 await player.AfterKilledMonsterAsync().ConfigureAwait(false);
@@ -317,10 +349,12 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
             {
                 if (selectedCharacter.State > HeroState.Normal)
                 {
+                    // An outlaw can shorten its remaining state time by hunting monsters, on any map:
+                    // the level of the killed monster is subtracted in seconds.
                     selectedCharacter.StateRemainingSeconds -= (int)this.Attributes[Stats.Level];
                 }
 
-                _ = this.DropItemDelayedAsync(player, exp); // don't wait for completion.
+                _ = this.DropItemDelayedAsync(player, experienceShares); // don't wait for completion.
             }
         }
     }
@@ -339,6 +373,12 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     {
         try
         {
+            if (this.IsDisposed || this.IsDisposing)
+            {
+                // It got disposed while waiting for the respawn, e.g. because its spawn area was removed.
+                return;
+            }
+
             if (!this.ShouldRespawn)
             {
                 await this.RemoveFromMapAndDisposeAsync().ConfigureAwait(false);
@@ -380,51 +420,63 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
         }
     }
 
-    private async ValueTask HandleMoneyDropAsync(uint amount, Player killer)
+    private async ValueTask HandleMoneyDropAsync(uint amount, Player killer, IReadOnlyList<ExperienceShare> experienceShares)
     {
+        // Each player gets the part of the money which matches the experience they gained from the kill,
+        // so that money follows the same distribution as the experience it is derived from.
+        var shares = MoneyDistribution.CreateShares(amount, experienceShares);
+
         // We don't drop money in Devil Square, etc.
         var shouldDropMoney = killer.GameContext.Configuration.ShouldDropMoney && killer.CurrentMiniGame is null;
         if (!shouldDropMoney)
         {
-            var party = killer.Party;
-            if (party is null)
+            if (killer.Party is { } party)
             {
-                killer.TryAddMoney((int)amount);
+                await party.DistributeMoneyAfterKillAsync(this, killer, shares).ConfigureAwait(false);
             }
             else
             {
-                await party.DistributeMoneyAfterKillAsync(this, killer, amount).ConfigureAwait(false);
+                _ = MoneyDistribution.TryPay(killer, amount);
             }
 
             return;
         }
 
-        var droppedMoney = new DroppedMoney((uint)(amount * (killer.Attributes?[Stats.MoneyAmountRate] ?? 1.0f)), this.Position, this.CurrentMap);
+        var droppedMoney = new DroppedMoney(amount, this.Position, this.CurrentMap, shares);
         await this.CurrentMap.AddAsync(droppedMoney).ConfigureAwait(false);
+        await killer.GameContext.PlugInManager.NotifyPlugInsAsync<IMonsterMoneyDroppedPlugIn>(
+            p => p.MonsterMoneyDroppedAsync(this, killer, droppedMoney),
+            killer.Logger).ConfigureAwait(false);
     }
 
-    private async ValueTask DropItemAsync(int exp, Player killer)
+    private async ValueTask DropItemAsync(IReadOnlyList<ExperienceShare> experienceShares, Player killer)
     {
-        // When the killer is in a party, DistributeExperienceAfterKillAsync returns a
-        // total party experience that does NOT include game rate (ExperienceRate) or
-        // personal experience rate multipliers. Since the money drop amount is
-        // derived from this experience value, party money drops were dramatically
-        // lower than solo drops. We recalculate the experience for money purposes
-        // using the solo formula so money is consistent regardless of party state.
-        if (killer.Party is not null)
+        var exp = 0;
+        foreach (var share in experienceShares)
         {
-            exp = killer.CalculateExpAfterKill(this);
+            exp += share.Experience;
         }
 
         var (generatedItems, droppedMoney) = await this._dropGenerator.GenerateItemDropsAsync(this.Definition, exp, killer).ConfigureAwait(false);
         if (droppedMoney > 0)
         {
-            await this.HandleMoneyDropAsync(droppedMoney.Value, killer).ConfigureAwait(false);
+            await this.HandleMoneyDropAsync(droppedMoney.Value, killer, experienceShares).ConfigureAwait(false);
         }
 
         var firstItem = !droppedMoney.HasValue;
+        var plugInPoint = killer.GameContext.PlugInManager.GetPlugInPoint<IMonsterItemDropPlugIn>();
         foreach (var item in generatedItems)
         {
+            if (plugInPoint is not null)
+            {
+                var eventArgs = new CancelEventArgs();
+                plugInPoint.ItemDropping(this, killer, item, eventArgs);
+                if (eventArgs.Cancel)
+                {
+                    continue;
+                }
+            }
+
             Point dropCoordinates;
             if (firstItem)
             {
@@ -439,15 +491,18 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
             var owners = killer.Party?.PartyList.AsEnumerable() ?? killer.GetAsEnumerable();
             var droppedItem = new DroppedItem(item, dropCoordinates, this.CurrentMap, null, owners);
             await this.CurrentMap.AddAsync(droppedItem).ConfigureAwait(false);
+            await killer.GameContext.PlugInManager.NotifyPlugInsAsync<IMonsterItemDroppedPlugIn>(
+                p => p.MonsterItemDroppedAsync(this, killer, droppedItem),
+                killer.Logger).ConfigureAwait(false);
         }
     }
 
-    private async ValueTask DropItemDelayedAsync(Player player, int gainedExp)
+    private async ValueTask DropItemDelayedAsync(Player player, IReadOnlyList<ExperienceShare> experienceShares)
     {
         try
         {
             await Task.Delay(1000).ConfigureAwait(false);
-            await this.DropItemAsync(gainedExp, player).ConfigureAwait(false);
+            await this.DropItemAsync(experienceShares, player).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

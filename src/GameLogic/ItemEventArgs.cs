@@ -14,11 +14,13 @@ public class ItemEventArgs : EventArgs
     /// Initializes a new instance of the <see cref="ItemEventArgs"/> class.
     /// </summary>
     /// <param name="item">The item.</param>
-    /// <param name="isEquipped">Whether equipped or not</param>
-    public ItemEventArgs(Item item, bool isEquipped)
+    /// <param name="isEquipped">Whether equipped or not.</param>
+    /// <param name="hasDurabilityFactorChanged">Whether the durability factor has changed or not.</param>
+    public ItemEventArgs(Item item, bool isEquipped, bool hasDurabilityFactorChanged = false)
     {
         this.Item = item;
         this.IsEquipped = isEquipped;
+        this.HasDurabilityFactorChanged = isEquipped && hasDurabilityFactorChanged;
     }
 
     /// <summary>
@@ -30,4 +32,9 @@ public class ItemEventArgs : EventArgs
     /// Gets a value indicating whether the item is equipped at the event.
     /// </summary>
     public bool IsEquipped { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the item's durability factor has changed at the event.
+    /// </summary>
+    public bool HasDurabilityFactorChanged { get; }
 }

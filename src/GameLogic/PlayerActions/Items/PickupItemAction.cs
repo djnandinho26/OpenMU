@@ -5,6 +5,7 @@
 namespace MUnique.OpenMU.GameLogic.PlayerActions.Items;
 
 using MUnique.OpenMU.DataModel.Configuration.Items;
+using MUnique.OpenMU.DataModel.Configuration.Quests;
 using MUnique.OpenMU.GameLogic.Views;
 using MUnique.OpenMU.GameLogic.Views.Inventory;
 using MUnique.OpenMU.Interfaces;
@@ -14,6 +15,11 @@ using MUnique.OpenMU.Interfaces;
 /// </summary>
 public class PickupItemAction
 {
+    /// <summary>
+    /// The maximum distance in tiles between the player and a drop which can be picked up.
+    /// </summary>
+    internal const int MaximumPickupDistance = 3;
+
     /// <summary>
     /// Pickups the item.
     /// </summary>
@@ -33,32 +39,38 @@ public class PickupItemAction
 
                 break;
             case DroppedItem droppedItem:
-            {
-                var (success, stackTarget) = await TryPickupItemAsync(player, droppedItem).ConfigureAwait(false);
-                if (success)
                 {
-                    if (stackTarget != null)
+                    var (success, stackTarget) = await TryPickupItemAsync(player, droppedItem).ConfigureAwait(false);
+                    if (success)
                     {
-                        await player.InvokeViewPlugInAsync<IItemPickUpFailedPlugIn>(p => p.ItemPickUpFailedAsync(ItemPickFailReason.ItemStacked)).ConfigureAwait(false);
-                        await player.InvokeViewPlugInAsync<IItemDurabilityChangedPlugIn>(p => p.ItemDurabilityChangedAsync(stackTarget, false)).ConfigureAwait(false);
+                        if (stackTarget != null)
+                        {
+                            await player.InvokeViewPlugInAsync<IItemPickUpFailedPlugIn>(p => p.ItemPickUpFailedAsync(ItemPickFailReason.ItemStacked)).ConfigureAwait(false);
+                            await player.InvokeViewPlugInAsync<IItemDurabilityChangedPlugIn>(p => p.ItemDurabilityChangedAsync(stackTarget, false)).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await player.InvokeViewPlugInAsync<IItemAppearPlugIn>(p => p.ItemAppearAsync(droppedItem.Item)).ConfigureAwait(false);
+                        }
                     }
                     else
                     {
-                        await player.InvokeViewPlugInAsync<IItemAppearPlugIn>(p => p.ItemAppearAsync(droppedItem.Item)).ConfigureAwait(false);
+                        await player.InvokeViewPlugInAsync<IItemPickUpFailedPlugIn>(p => p.ItemPickUpFailedAsync(ItemPickFailReason.General)).ConfigureAwait(false);
                     }
-                }
-                else
-                {
-                    await player.InvokeViewPlugInAsync<IItemPickUpFailedPlugIn>(p => p.ItemPickUpFailedAsync(ItemPickFailReason.General)).ConfigureAwait(false);
-                }
 
-                break;
-            }
+                    break;
+                }
 
             default:
                 await player.InvokeViewPlugInAsync<IItemPickUpFailedPlugIn>(p => p.ItemPickUpFailedAsync(ItemPickFailReason.General)).ConfigureAwait(false);
                 break;
         }
+    }
+
+    private static async ValueTask<(bool Success, Item? StackTarget)> RejectAsync(Player player, string messageKey)
+    {
+        await player.ShowLocalizedBlueMessageAsync(messageKey).ConfigureAwait(false);
+        return (false, null);
     }
 
     private static bool CanPickup(Player player, ILocateable droppedLocateable)
@@ -69,7 +81,7 @@ public class PickupItemAction
         }
 
         var dist = (int)player.GetDistanceTo(droppedLocateable);
-        if (dist > 3)
+        if (dist > MaximumPickupDistance)
         {
             return false;
         }
@@ -92,6 +104,21 @@ public class PickupItemAction
         return player.Inventory?.Items.Count(item => item.Definition == itemDefinition) >= itemDefinition.StorageLimitPerCharacter;
     }
 
+    private static bool PlayerHasActiveQuestForItem(Player player, Item item)
+    {
+        var questStates = player.SelectedCharacter?.QuestStates;
+        if (questStates is null)
+        {
+            return false;
+        }
+
+        return questStates
+            .Select(q => q.ActiveQuest)
+            .OfType<QuestDefinition>()
+            .SelectMany(q => q.RequiredItems)
+            .Any(r => r.Item == item.Definition && (r.DropItemGroup?.ItemLevel is null || r.DropItemGroup.ItemLevel == item.Level));
+    }
+
     private static async ValueTask<(bool Success, Item? StackTarget)> TryPickupItemAsync(Player player, DroppedItem droppedItem)
     {
         if (!CanPickup(player, droppedItem))
@@ -108,6 +135,7 @@ public class PickupItemAction
                     ? $"{droppedItem.Item.Definition?.Name.ToString()} +{droppedItem.Item.Level.ToString()}"
                     : droppedItem.Item.Definition?.Name.ToString();
             }
+
             await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.PickupLimitReached), itemName).ConfigureAwait(false);
             return (false, null);
         }
@@ -116,6 +144,23 @@ public class PickupItemAction
         if (slot < InventoryConstants.EquippableSlotsCount)
         {
             return (false, null);
+        }
+
+        if (droppedItem.Item.Definition?.IsQuestItem == true
+            && !PlayerHasActiveQuestForItem(player, droppedItem.Item))
+        {
+            return await RejectAsync(player, nameof(PlayerMessage.ItemDoesNotBelongToYou)).ConfigureAwait(false);
+        }
+
+        if (droppedItem.Item.Definition?.IsBoundToCharacter == true
+            && !droppedItem.IsPlayerAnOwner(player))
+        {
+            return await RejectAsync(player, nameof(PlayerMessage.ItemDoesNotBelongToYou)).ConfigureAwait(false);
+        }
+
+        if (!droppedItem.IsPlayerAnOwner(player) && droppedItem.IsOwnerPickupPriorityActive)
+        {
+            return await RejectAsync(player, nameof(PlayerMessage.ItemDoesNotBelongToYou)).ConfigureAwait(false);
         }
 
         var result = await droppedItem.TryPickUpByAsync(player).ConfigureAwait(false);

@@ -14,6 +14,13 @@ public sealed class PowerUpWrapper : IElement, IDisposable
 {
     private readonly IElement _element;
 
+    private readonly AggregateType? _aggregateType;
+
+    /// <summary>
+    /// Whether the <see cref="_element"/> was created for this power-up alone, so that it ends with it.
+    /// </summary>
+    private readonly bool _ownsElement;
+
     private ComposableAttribute? _parentAttribute;
 
     /// <summary>
@@ -22,7 +29,13 @@ public sealed class PowerUpWrapper : IElement, IDisposable
     /// <param name="element">The element.</param>
     /// <param name="targetAttribute">The target attribute.</param>
     /// <param name="attributeHolder">The attribute holder.</param>
-    public PowerUpWrapper(IElement element, AttributeDefinition targetAttribute, AttributeSystem attributeHolder)
+    /// <param name="aggregateType">The aggregate type that should override the <paramref name="element"/>'s.</param>
+    public PowerUpWrapper(IElement element, AttributeDefinition targetAttribute, AttributeSystem attributeHolder, AggregateType? aggregateType = null)
+        : this(element, targetAttribute, attributeHolder, aggregateType, ownsElement: false)
+    {
+    }
+
+    private PowerUpWrapper(IElement element, AttributeDefinition targetAttribute, AttributeSystem attributeHolder, AggregateType? aggregateType, bool ownsElement)
     {
         this._parentAttribute = attributeHolder.GetComposableAttribute(targetAttribute);
         if (this._parentAttribute is null)
@@ -31,6 +44,8 @@ public sealed class PowerUpWrapper : IElement, IDisposable
         }
 
         this._element = element;
+        this._aggregateType = aggregateType;
+        this._ownsElement = ownsElement;
         this._parentAttribute.AddElement(this);
         this._element.ValueChanged += this.OnValueChanged;
     }
@@ -42,33 +57,41 @@ public sealed class PowerUpWrapper : IElement, IDisposable
     public float Value => this._element.Value;
 
     /// <inheritdoc/>
-    public AggregateType AggregateType => this._element.AggregateType;
+    public AggregateType AggregateType => this._aggregateType ?? this._element.AggregateType;
 
     /// <summary>
     /// Creates elements by a <see cref="PowerUpDefinition"/>.
     /// </summary>
     /// <param name="powerUpDef">The power up definition.</param>
     /// <param name="attributeHolder">The attribute holder.</param>
+    /// <param name="aggregateType">The specific aggregate type. If not specified, the aggregate type of the <paramref name="powerUpDef"/>'s constant value will be used.</param>
+    /// <param name="durabilityFactor">The durability factor, in case the <paramref name="powerUpDef"/> belongs to an item.</param>
     /// <returns>The elements which represent the power-up.</returns>
-    public static IEnumerable<PowerUpWrapper> CreateByPowerUpDefinition(PowerUpDefinition powerUpDef, AttributeSystem attributeHolder)
+    public static IEnumerable<PowerUpWrapper> CreateByPowerUpDefinition(PowerUpDefinition powerUpDef, AttributeSystem attributeHolder, AggregateType? aggregateType = null, float durabilityFactor = 1)
     {
         if (powerUpDef.Boost?.ConstantValue != null)
         {
             yield return new PowerUpWrapper(
-                powerUpDef.Boost.ConstantValue,
+                powerUpDef.Boost.GetSimpleValueElement(durabilityFactor),
                 powerUpDef.TargetAttribute ?? throw Error.NotInitializedProperty(powerUpDef, nameof(PowerUpDefinition.TargetAttribute)),
-                attributeHolder);
+                attributeHolder,
+                aggregateType);
         }
 
         if (powerUpDef.Boost?.RelatedValues != null)
         {
             foreach (var relationship in powerUpDef.Boost.RelatedValues)
             {
-                var aggregateType = powerUpDef.Boost?.ConstantValue.AggregateType ?? AggregateType.AddRaw;
+                var aggregType = powerUpDef.Boost?.ConstantValue.AggregateType ?? AggregateType.AddRaw;
+
+                // The relationship element follows attributes of the holder (e.g. the character level), which
+                // outlive this power-up - so it's owned by the power-up and disposed together with it.
                 yield return new PowerUpWrapper(
-                    attributeHolder.CreateRelatedAttribute(relationship, attributeHolder, aggregateType),
+                    attributeHolder.CreateRelatedAttribute(relationship, attributeHolder, aggregType),
                     powerUpDef.TargetAttribute ?? throw Error.NotInitializedProperty(powerUpDef, nameof(PowerUpDefinition.TargetAttribute)),
-                    attributeHolder);
+                    attributeHolder,
+                    aggregateType,
+                    ownsElement: true);
             }
         }
     }
@@ -82,13 +105,17 @@ public sealed class PowerUpWrapper : IElement, IDisposable
             this.ValueChanged = null;
             this._parentAttribute = null;
             this._element.ValueChanged -= this.OnValueChanged;
+            if (this._ownsElement && this._element is IDisposable ownedElement)
+            {
+                ownedElement.Dispose();
+            }
         }
     }
 
     /// <inheritdoc/>
     public override string? ToString()
     {
-        return $"{this._parentAttribute?.Definition.Designation}: {this._element}";
+        return $"{this._parentAttribute?.Definition.Designation}: {this._element}{(this._aggregateType is { } aggreg ? $"->({aggreg})" : string.Empty)}";
     }
 
     private void OnValueChanged(object? sender, EventArgs eventArgs)

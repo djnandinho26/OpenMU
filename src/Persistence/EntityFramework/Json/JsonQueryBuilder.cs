@@ -35,15 +35,15 @@ public class JsonQueryBuilder
     /// <returns>The query which returns the objects of the given type as json string.</returns>
     public string BuildJsonQueryForEntity(IEntityType entityType)
     {
-        //Debug.WriteLine($"Building the json query for {entityType.Name}.");
+        // Debug.WriteLine($"Building the json query for {entityType.Name}.");
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("select result.\"Id\" \"$id\", result.\"Id\" id, row_to_json(result) as ").AppendLine(entityType.GetTableName())
             .AppendLine("from (");
         this.AddTypeToQuery(entityType, stringBuilder, "a");
         stringBuilder.AppendLine(") result");
         var result = stringBuilder.ToString();
-        //Debug.WriteLine("Finished building the json query for {0}. Result: {1}", entityType.Name, result);
 
+        // Debug.WriteLine("Finished building the json query for {0}. Result: {1}", entityType.Name, result);
         return result;
     }
 
@@ -78,7 +78,9 @@ public class JsonQueryBuilder
             return;
         }
 
-        var navigations = this.GetNavigations(entityType);
+        // The order of the navigations differs between a model which is built at runtime and a compiled model,
+        // so we sort them to get the same query for both.
+        var navigations = this.GetNavigations(entityType).OrderBy(navigation => navigation.Name, StringComparer.Ordinal);
 
         foreach (var navigation in navigations)
         {
@@ -171,7 +173,7 @@ public class JsonQueryBuilder
         var navigationAlias = this.GetNextAlias(parentAlias);
 
         stringBuilder.AppendLine(", (")
-            .Append("select array_to_json(array_agg(row_to_json(").Append(navigationAlias).AppendLine("))) from (");
+            .Append("select coalesce(array_to_json(array_agg(row_to_json(").Append(navigationAlias).AppendLine("))), '[]'::json) from (");
 
         if (navigation.IsMemberOfAggregate())
         {
@@ -212,7 +214,7 @@ public class JsonQueryBuilder
             ?? throw new InvalidOperationException("No reference column available.");
 
         stringBuilder.AppendLine(", (")
-            .Append("select array_to_json(array_agg(row_to_json(").Append(navigationAlias).AppendLine("))) from (");
+            .Append("select coalesce(array_to_json(array_agg(row_to_json(").Append(navigationAlias).AppendLine("))), '[]'::json) from (");
 
         stringBuilder.Append("select \"").Append(referenceColumnToOtherEntity).AppendLine("\" as \"$ref\"")
             .Append("from ").Append(navigationType.GetSchema()).Append(".\"").Append(navigationType.GetTableName()).AppendLine("\" ")

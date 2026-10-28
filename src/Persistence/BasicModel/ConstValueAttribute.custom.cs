@@ -5,12 +5,24 @@
 namespace MUnique.OpenMU.Persistence.BasicModel;
 
 using System.Text.Json.Serialization;
+using MUnique.OpenMU.AttributeSystem;
 
 /// <summary>
 /// A plain implementation of <see cref="MUnique.OpenMU.AttributeSystem.ConstValueAttribute"/>.
 /// </summary>
-public partial class ConstValueAttribute
+public partial class ConstValueAttribute : MUnique.OpenMU.DataModel.IAssignable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConstValueAttribute"/> class
+    /// using the default <see cref="AggregateType.AddRaw"/> aggregation mode.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <param name="definition">The attribute definition.</param>
+    public ConstValueAttribute(float value, AttributeDefinition definition)
+        : base(value, definition)
+    {
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstValueAttribute"/> class.
     /// </summary>
@@ -40,4 +52,19 @@ public partial class ConstValueAttribute
     /// </remarks>
     [JsonIgnore]
     public new float Value => base.Value;
+
+    /// <inheritdoc />
+    public void AssignValuesOf(object other, MUnique.OpenMU.DataModel.Configuration.GameConfiguration gameConfiguration)
+    {
+        if (other is not MUnique.OpenMU.AttributeSystem.ConstValueAttribute value)
+        {
+            throw new ArgumentException("Expected a constant attribute.", nameof(other));
+        }
+
+        var definition = gameConfiguration.Attributes.SingleOrDefault(a => a.Id == value.Definition.Id)
+            ?? throw new ArgumentException("The attribute definition must belong to the target configuration.", nameof(gameConfiguration));
+        this.Definition = definition;
+        base.Value = value.Value;
+        this.AggregateType = value.AggregateType;
+    }
 }

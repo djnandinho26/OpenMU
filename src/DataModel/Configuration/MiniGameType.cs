@@ -38,4 +38,14 @@ public enum MiniGameType
     /// The doppelganger event.
     /// </summary>
     Doppelganger,
+
+    /// <summary>
+    /// The Kanturu Refinery Tower event.
+    /// </summary>
+    Kanturu,
+
+    /// <summary>
+    /// The imperial guardian event (fortress of the imperial guardian).
+    /// </summary>
+    ImperialGuardian,
 }

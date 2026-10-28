@@ -6,7 +6,9 @@ namespace MUnique.OpenMU.Persistence.Json;
 
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
+using MUnique.OpenMU.Interfaces;
 
 /// <summary>
 /// Class to serialize an object to a json string or stream.
@@ -19,33 +21,23 @@ public class JsonObjectSerializer
     /// <typeparam name="T">The type of the object.</typeparam>
     /// <param name="obj">The object.</param>
     /// <param name="stream">The stream.</param>
+    /// <param name="referenceHandler">An optional external reference handler to share reference state across multiple serializations. If null, a new one is created.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    public async ValueTask SerializeAsync<T>(T obj, Stream stream, ReferenceHandler? referenceHandler, CancellationToken cancellationToken)
+    {
+        await this.SerializeInternalAsync(obj, stream, referenceHandler ?? new IdReferenceHandler(), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Serializes the specified object into a stream.
+    /// </summary>
+    /// <typeparam name="T">The type of the object.</typeparam>
+    /// <param name="obj">The object.</param>
+    /// <param name="stream">The stream.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     public async ValueTask SerializeAsync<T>(T obj, Stream stream, CancellationToken cancellationToken)
     {
-        var options = new JsonSerializerOptions
-        {
-            ReferenceHandler = new IdReferenceHandler(),
-            WriteIndented = true,
-            Converters =
-            {
-                new OnlyWriteBelowRootConverter<BasicModel.ItemDefinition>(),
-                new OnlyWriteBelowRootConverter<BasicModel.DropItemGroup>(),
-                new OnlyWriteBelowRootConverter<BasicModel.Skill>(),
-                new OnlyWriteBelowRootConverter<BasicModel.CharacterClass>(),
-                new OnlyWriteBelowRootConverter<BasicModel.ItemLevelBonusTable>(),
-                new OnlyWriteBelowRootConverter<BasicModel.ItemSlotType>(),
-                new OnlyWriteBelowRootConverter<BasicModel.ItemOptionDefinition>(),
-                new OnlyWriteBelowRootConverter<BasicModel.ItemOptionType>(),
-                new OnlyWriteBelowRootConverter<BasicModel.ItemSetGroup>(),
-                new OnlyWriteBelowRootConverter<BasicModel.ItemOptionCombinationBonus>(),
-                new OnlyWriteBelowRootConverter<BasicModel.GameMapDefinition>(),
-                new OnlyWriteBelowRootConverter<BasicModel.MonsterDefinition>(),
-                new OnlyWriteBelowRootConverter<BasicModel.AttributeDefinition>(),
-                new OnlyWriteBelowRootConverter<BasicModel.MagicEffectDefinition>(),
-            },
-        };
-
-        await JsonSerializer.SerializeAsync(stream, obj, options, cancellationToken).ConfigureAwait(false);
+        await this.SerializeInternalAsync(obj, stream, new IdReferenceHandler(), cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -61,5 +53,35 @@ public class JsonObjectSerializer
         await this.SerializeAsync(obj, stream, cancellationToken).ConfigureAwait(false);
 
         return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
+    }
+
+    private async ValueTask SerializeInternalAsync<T>(T obj, Stream stream, ReferenceHandler referenceHandler, CancellationToken cancellationToken)
+    {
+        var options = new JsonSerializerOptions
+        {
+            ReferenceHandler = referenceHandler,
+            WriteIndented = true,
+            Converters =
+            {
+                new LocalizedStringJsonConverter(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemDefinition>(),
+                new OnlyWriteBelowRootConverter<BasicModel.DropItemGroup>(),
+                new OnlyWriteBelowRootConverter<BasicModel.Skill>(),
+                new OnlyWriteBelowRootConverter<BasicModel.CharacterClass>(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemLevelBonusTable>(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemPriceDefinition>(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemSlotType>(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemOptionDefinition>(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemOptionType>(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemSetGroup>(),
+                new OnlyWriteBelowRootConverter<BasicModel.ItemOptionCombinationBonus>(),
+                new OnlyWriteBelowRootConverter<BasicModel.GameMapDefinition>(),
+                new OnlyWriteBelowRootConverter<BasicModel.MonsterDefinition>(),
+                new OnlyWriteBelowRootConverter<BasicModel.AttributeDefinition>(),
+                new OnlyWriteBelowRootConverter<BasicModel.MagicEffectDefinition>(),
+            },
+        };
+
+        await JsonSerializer.SerializeAsync(stream, obj, options, cancellationToken).ConfigureAwait(false);
     }
 }

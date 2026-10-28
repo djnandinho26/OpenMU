@@ -3,7 +3,10 @@
 @using MUnique.OpenMU.DataModel.Configuration
 @using MUnique.OpenMU.Interfaces
 @using MUnique.OpenMU.Persistence
+@using MUnique.OpenMU.Web.AdminPanel.Operations
 @using MUnique.OpenMU.Web.AdminPanel.Properties
+@inject ServerWriteOperations Operations
+@inject IToastService ToastService
 @implements IDisposable
 
 @if (this._isDeleted)
@@ -46,45 +49,45 @@
       <div class="btn-group" role="group" aria-label="@Resources.ServerControl">
       @if (this.Server.ServerState == ServerState.Started)
       {
-        <button type="button" class="btn-secondary" title="@Resources.Start" disabled>
+        <button type="button" class="btn btn-secondary btn-sm" title="@Resources.Start" disabled>
           <span class="oi oi-media-play"></span>
         </button>
-        <button type="button" class="btn-warning" title="@Resources.Stop" @onclick="this.OnPauseClickAsync">
+        <button type="button" class="btn btn-warning btn-sm" title="@Resources.Stop" @onclick="this.OnPauseClickAsync">
           <span class="oi oi-media-pause"></span>
         </button>
         @if (this.Server.Type is ServerType.GameServer or ServerType.ConnectServer)
         {
-          <button type="button" class="btn-secondary" title="@Resources.Remove" disabled>
+          <button type="button" class="btn btn-secondary btn-sm" title="@Resources.Remove" disabled>
             <span class="oi oi-trash"></span>
           </button>
         }
       }
       else if ((this.Server.ServerState == ServerState.Stopped))
       {
-        <button type="button" class="btn-success" title="@Resources.Start" @onclick="this.OnStartClickAsync">
+        <button type="button" class="btn btn-success btn-sm" title="@Resources.Start" @onclick="this.OnStartClickAsync">
           <span class="oi oi-media-play"></span>
         </button>
-        <button type="button" class="btn-secondary" title="@Resources.Stop" disabled>
+        <button type="button" class="btn btn-secondary btn-sm" title="@Resources.Stop" disabled>
           <span class="oi oi-media-pause"></span>
         </button>
         @if (this.Server.Type is ServerType.GameServer or ServerType.ConnectServer)
         {
-          <button type="button" class="btn-danger" title="@Resources.Remove" @onclick="this.OnDeleteServerClickAsync">
+          <button type="button" class="btn btn-danger btn-sm" title="@Resources.Remove" @onclick="this.OnDeleteServerClickAsync">
             <span class="oi oi-trash"></span>
           </button>
         }
       }
       else
       {
-        <button type="button" class="btn-secondary" title="@Resources.Start" disabled>
+        <button type="button" class="btn btn-secondary btn-sm" title="@Resources.Start" disabled>
           <span class="oi oi-media-play"></span>
         </button>
-        <button type="button" class="btn-secondary" title="@Resources.Stop" disabled>
+        <button type="button" class="btn btn-secondary btn-sm" title="@Resources.Stop" disabled>
           <span class="oi oi-media-pause"></span>
         </button>
         @if (this.Server.Type is ServerType.GameServer or ServerType.ConnectServer)
         {
-          <button type="button" class="btn-secondary" title="@Resources.Remove" disabled>
+          <button type="button" class="btn btn-secondary btn-sm" title="@Resources.Remove" disabled>
             <span class="oi oi-trash"></span>
           </button>
         }
@@ -178,12 +181,12 @@
 
     private async Task OnPauseClickAsync()
     {
-        await this.Server.StopAsync(default);
+        await this.RunOperationAsync(() => this.Operations.StopAsync(this.Server.Id, this.Server.Type, default)).ConfigureAwait(true);
     }
 
     private async Task OnStartClickAsync()
     {
-      await this.Server.StartAsync(default);
+      await this.RunOperationAsync(() => this.Operations.StartAsync(this.Server.Id, this.Server.Type, default)).ConfigureAwait(true);
     }
 
     private async Task OnDeleteServerClickAsync()
@@ -201,7 +204,11 @@
         return;
       }
 
-      await this.Server.StopAsync(default);
+      if (!await this.RunOperationAsync(() => this.Operations.StopAsync(this.Server.Id, this.Server.Type, default)).ConfigureAwait(true))
+      {
+        return;
+      }
+
       if (this.Server.Type == ServerType.GameServer)
       {
         await this.GameServerInstanceManager.RemoveGameServerAsync((byte)this.Server.Id);
@@ -211,6 +218,20 @@
       {
         await this.ConnectServerInstanceManager.RemoveConnectServerAsync(this.Server.ConfigurationId);
         await this.DeleteAsync<ConnectServerDefinition>(s => s.ConfigurationId == this.Server.ConfigurationId);
+      }
+    }
+
+    private async Task<bool> RunOperationAsync(Func<ValueTask<System.Text.Json.Nodes.JsonObject>> operation)
+    {
+      try
+      {
+        await operation().ConfigureAwait(true);
+        return true;
+      }
+      catch (AdminOperationException ex)
+      {
+        this.ToastService.ShowError(ex.Message);
+        return false;
       }
     }
 

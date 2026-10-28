@@ -4,6 +4,7 @@
 
 namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands;
 
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
 using MUnique.OpenMU.Interfaces;
@@ -15,13 +16,13 @@ using MUnique.OpenMU.PlugIns;
 [Guid("1E895A6F-3056-4A78-BA64-96E24363B8BC")]
 [PlugIn]
 [Display(Name = nameof(PlugInResources.ClearInventoryChatCommandPlugIn_Name), Description = nameof(PlugInResources.ClearInventoryChatCommandPlugIn_Description), ResourceType = typeof(PlugInResources))]
-[ChatCommandHelp(Command, null, MinimumStatus)]
+[ChatCommandHelp(Command, typeof(Arguments), MinimumStatus)]
 public class ClearInventoryChatCommandPlugIn : ChatCommandPlugInBase<ClearInventoryChatCommandPlugIn.Arguments>, ISupportCustomConfiguration<ClearInventoryChatCommandPlugIn.ClearInventoryConfiguration>, ISupportDefaultCustomConfiguration, IDisabledByDefault
 {
     private const string Command = "/clearinv";
     private const CharacterStatus MinimumStatus = CharacterStatus.Normal;
     private const int ConfirmationTimeoutSeconds = 10;
-    private readonly Dictionary<Guid, DateTime> pendingConfirmations = new();
+    private readonly ConcurrentDictionary<Guid, DateTime> _pendingConfirmations = new();
 
     /// <summary>
     /// Gets or sets the configuration.
@@ -72,9 +73,9 @@ public class ClearInventoryChatCommandPlugIn : ChatCommandPlugInBase<ClearInvent
         if (!isGameMaster && configuration.RequireConfirmation)
         {
             var playerId = selectedCharacter!.Id;
-            if (!this.pendingConfirmations.TryGetValue(playerId, out var confirmationTime) || (DateTime.UtcNow - confirmationTime).TotalSeconds > ConfirmationTimeoutSeconds)
+            if (!this._pendingConfirmations.TryRemove(playerId, out var confirmationTime) || (DateTime.UtcNow - confirmationTime).TotalSeconds > ConfirmationTimeoutSeconds)
             {
-                this.pendingConfirmations[playerId] = DateTime.UtcNow;
+                this._pendingConfirmations[playerId] = DateTime.UtcNow;
                 if (configuration.ConfirmationMessage.GetTranslation(player.Culture) is { Length: > 0 } message)
                 {
                     await player.ShowBlueMessageAsync(message).ConfigureAwait(false);
@@ -82,8 +83,6 @@ public class ClearInventoryChatCommandPlugIn : ChatCommandPlugInBase<ClearInvent
 
                 return;
             }
-
-            this.pendingConfirmations.Remove(playerId);
         }
 
         var itemsToRemove = targetPlayer.Inventory.Items

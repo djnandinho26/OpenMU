@@ -10,14 +10,14 @@ using MUnique.OpenMU.Pathfinding;
 using Nito.AsyncEx;
 
 /// <summary>
-/// An item which got dropped on the ground of a map.
+/// An item that got dropped on the ground of a map.
 /// </summary>
 public sealed class DroppedItem : AsyncDisposable, ILocateable
 {
     private static readonly TimeSpan TimeUntilDropIsFree = TimeSpan.FromSeconds(10);
 
     /// <summary>
-    /// Gets the pickup lock. Used to synchronize pick up requests from the players.
+    /// Gets the pickup lock. Used to synchronize pickup requests from the players.
     /// </summary>
     private readonly AsyncLock _pickupLock = new();
 
@@ -86,15 +86,20 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
     public GameMap CurrentMap { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the owner-pickup priority period is still active.
+    /// </summary>
+    public bool IsOwnerPickupPriorityActive => DateTime.UtcNow < this._dropTimestamp.Add(TimeUntilDropIsFree);
+
+    /// <summary>
     /// Tries to pick the item up by the specified player.
     /// </summary>
     /// <param name="player">The player.</param>
     /// <returns>
     /// The success.
-    /// StackTarget: If the success is <c>true</c>, and this is not <c>null</c>, this dropped item was stacked on an existing item of the players inventory.
+    /// StackTarget: If the success is <c>true</c>, and this is not <c>null</c>, this dropped item was stacked on an existing item of the player inventory.
     /// </returns>
     /// <remarks>
-    /// Can be overwritten, for example for quest items which dropped only for a specific player.
+    /// Can be overwritten, for example, for quest items which dropped only for a specific player.
     /// </remarks>
     public async ValueTask<(bool Success, Item? StackTarget)> TryPickUpByAsync(Player player)
     {
@@ -131,6 +136,16 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
         }
 
         return (await this.TryPickUpAsync(player).ConfigureAwait(false), stackTarget);
+    }
+
+    /// <summary>
+    /// Determines whether the specified player is an owner of this dropped item.
+    /// </summary>
+    /// <param name="player">The player.</param>
+    /// <returns><c>true</c> if the player is an owner; otherwise, <c>false</c>.</returns>
+    public bool IsPlayerAnOwner(Player player)
+    {
+        return this._owners?.Contains(player) ?? true;
     }
 
     /// <inheritdoc/>
@@ -174,11 +189,6 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
         }
     }
 
-    private bool IsPlayerAnOwner(Player player)
-    {
-        return this._owners?.Contains(player) ?? true;
-    }
-
     private async ValueTask<bool> TryPickUpAsync(Player player)
     {
         player.Logger.LogDebug("Player {0} tries to pick up {1}", player, this);
@@ -190,7 +200,7 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
         }
 
         var itemWasTemporary = this.Item is TemporaryItem;
-        using (await this._pickupLock.LockAsync())
+        using (await this._pickupLock.LockAsync().ConfigureAwait(false))
         {
             if (!this._availableToPick)
             {
@@ -200,7 +210,7 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
 
             if (!itemWasTemporary)
             {
-                // We already attach it here, so that the next changes are in the context.
+                // We already attach it here so that the next changes are in the context.
                 player.PersistenceContext.Attach(this.Item);
             }
 
@@ -219,8 +229,8 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
             if (itemWasTemporary)
             {
                 // We set the item slot in a temporary item manually, so the further logic can report to the client where the item has been added.
-                // If it's temporary, it has been converted into a persistent item before it was added to the inventory. So it's not the same instance.
-                // If it's not temporary, this step is not required, because the inventory already set the ItemSlot in the same instance we're holding here.
+                // If it's temporary, it has been converted into a persistent item before it was added to the inventory. So it's different instance.
+                // If it's not temporary, this step is not required because the inventory already set the ItemSlot in the same instance we're holding here.
                 this.Item.ItemSlot = (byte)slot;
             }
 
@@ -228,7 +238,23 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
         }
 
         player.Logger.LogDebug("Item '{0}' was picked up by player '{1}' and added to his inventory.", this, player);
+        var dropper = this._dropper;
         await this.DisposeAsync().ConfigureAwait(false);
+
+        if (!itemWasTemporary)
+        {
+            // The row of this item has no storage since it was dropped. We save right away, so it
+            // doesn't stay like that until the next periodic save (or forever, if that one fails).
+            player.Logger.LogInformation("Item picked up: {Player} picked up '{DroppedItem}', dropped by {Dropper}.", player, this, dropper);
+            try
+            {
+                await player.SaveProgressAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                player.Logger.LogError(ex, "Couldn't save after {Player} picked up '{DroppedItem}'.", player, this);
+            }
+        }
 
         return true;
     }
@@ -236,7 +262,7 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
     private async ValueTask<bool> TryStackOnItemAsync(Player player, Item stackTarget)
     {
         player.Logger.LogDebug("Player {0} tries to pick up {1}, trying to add to an existing item at slot {2}", player, this, stackTarget.ItemSlot);
-        using (await this._pickupLock.LockAsync())
+        using (await this._pickupLock.LockAsync().ConfigureAwait(false))
         {
             if (!this._availableToPick)
             {
@@ -277,6 +303,7 @@ public sealed class DroppedItem : AsyncDisposable, ILocateable
             context.Attach(this.Item);
             await context.DeleteAsync(this.Item).ConfigureAwait(false);
             await context.SaveChangesAsync().ConfigureAwait(false);
+            player.Logger.LogInformation("Item expired: '{DroppedItem}', dropped by {Player}, wasn't picked up and got deleted.", this, player);
         }
         catch (Exception e)
         {

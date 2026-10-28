@@ -1,4 +1,4 @@
-﻿// <copyright file="InvasionMobsInitialization.cs" company="MUnique">
+// <copyright file="InvasionMobsInitialization.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -6,7 +6,9 @@ namespace MUnique.OpenMU.Persistence.Initialization.VersionSeasonSix;
 
 using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Configuration;
+using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
 using MUnique.OpenMU.Persistence.Initialization.Skills;
 
 /// <summary>
@@ -25,15 +27,21 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
     }
 
     /// <inheritdoc />
+    public override void Initialize()
+    {
+        base.Initialize();
+        this.InitializeWhiteWizardInvasionMobs();
+    }
+
+    /// <inheritdoc />
     protected override void InitializeGoldenInvasionMobs()
     {
         base.InitializeGoldenInvasionMobs();
-
         {
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 78;
-            monster.Designation = "Golden Goblin";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.GoldenGoblin);
             monster.MoveRange = 3;
             monster.AttackRange = 1;
             monster.ViewRange = 7;
@@ -65,7 +73,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 79;
-            monster.Designation = "Golden Dragon";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.GoldenDragon);
             monster.MoveRange = 3;
             monster.AttackRange = 2;
             monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
@@ -98,7 +106,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 81;
-            monster.Designation = "Golden Vepar";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.GoldenVepar);
             monster.MoveRange = 3;
             monster.AttackRange = 4;
             monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.EnergyBall);
@@ -127,7 +135,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 80;
-            monster.Designation = "Golden Lizard King";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.GoldenLizardKing);
             monster.MoveRange = 3;
             monster.AttackRange = 3;
             monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.Lightning);
@@ -160,7 +168,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 83;
-            monster.Designation = "Golden Wheel";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.GoldenWheel);
             monster.MoveRange = 3;
             monster.AttackRange = 4;
             monster.ViewRange = 7;
@@ -191,7 +199,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
             monster.Number = 82;
-            monster.Designation = "Golden Tantallos";
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.GoldenTantallos);
             monster.MoveRange = 3;
             monster.AttackRange = 2;
             monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
@@ -221,45 +229,124 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
         }
     }
 
-    private void InitializeRedDragonInvasionMobs()
+    private void InitializeWhiteWizardInvasionMobs()
     {
+        // White Wizard (135)
         {
             var monster = this.Context.CreateNew<MonsterDefinition>();
             this.GameConfiguration.Monsters.Add(monster);
-            monster.Number = 44;
-            monster.Designation = "Red Dragon";
-            monster.MoveRange = 3;
-            monster.AttackRange = 2;
-            monster.ViewRange = 7;
+            monster.Number = 135;
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.WhiteWizard);
+            monster.MoveRange = 4;
+            monster.AttackRange = 5;
+            monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
+            monster.ViewRange = 6;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
-            monster.AttackDelay = new TimeSpan(1800 * TimeSpan.TicksPerMillisecond);
-            monster.RespawnDelay = new TimeSpan(100 * TimeSpan.TicksPerSecond);
+            monster.AttackDelay = new TimeSpan(1400 * TimeSpan.TicksPerMillisecond);
+            monster.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
             var attributes = new Dictionary<AttributeDefinition, float>
             {
-                { Stats.Level, 47 },
-                { Stats.MaximumHealth, 15000 },
-                { Stats.MinimumPhysBaseDmg, 190 },
-                { Stats.MaximumPhysBaseDmg, 210 },
-                { Stats.DefenseBase, 120 },
-                { Stats.AttackRatePvm, 400 },
-                { Stats.DefenseRatePvm, 88 },
-                { Stats.PoisonResistance, 9f / 255 },
-                { Stats.IceResistance, 7f / 255 },
-                { Stats.WaterResistance, 9f / 255 },
-                { Stats.FireResistance, 9f / 255 },
+                { Stats.Level, 87 },
+                { Stats.MaximumHealth, 26000 },
+                { Stats.MinimumPhysBaseDmg, 370 },
+                { Stats.MaximumPhysBaseDmg, 410 },
+                { Stats.DefenseBase, 400 },
+                { Stats.AttackRatePvm, 550 },
+                { Stats.DefenseRatePvm, 200 },
+                { Stats.IceResistance, 15f / 255 },
+                { Stats.PoisonResistance, 15f / 255 },
+                { Stats.LightningResistance, 20f / 255 },
+                { Stats.FireResistance, 15f / 255 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 
             var itemDrop = this.Context.CreateNew<DropItemGroup>();
-
-            itemDrop.Chance = 1;
-            itemDrop.Description = "Items from red dragon";
+            itemDrop.Chance = 1.0;
+            itemDrop.Description = LocalizedString.FromResource(() => DropGroupDescriptions.JewelOfBlessFromWhiteWizard);
             itemDrop.Monster = monster;
-            itemDrop.PossibleItems.Add(this.GameConfiguration.Items.First(item => item.Group == 14 && item.Number == 13)); // Jewel of Bless
-            itemDrop.PossibleItems.Add(this.GameConfiguration.Items.First(item => item.Group == 14 && item.Number == 14)); // Jewel of Soul
-            itemDrop.PossibleItems.Add(this.GameConfiguration.Items.First(item => item.Group == 12 && item.Number == 15)); // Jewel of Chaos
+            itemDrop.PossibleItems.Add(this.GameConfiguration.Items.First(item => item.Number == ItemConstants.JewelOfBless.Number && item.Group == ItemConstants.JewelOfBless.Group));
+            monster.DropItemGroups.Add(itemDrop);
+            this.GameConfiguration.DropItemGroups.Add(itemDrop);
+        }
+
+        // Destructive Ogre Soldier (136)
+        {
+            var monster = this.Context.CreateNew<MonsterDefinition>();
+            this.GameConfiguration.Monsters.Add(monster);
+            monster.Number = 136;
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.DestructiveOgreSoldier);
+            monster.MoveRange = 3;
+            monster.AttackRange = 1;
+            monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
+            monster.ViewRange = 3;
+            monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
+            monster.AttackDelay = new TimeSpan(1400 * TimeSpan.TicksPerMillisecond);
+            monster.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
+            monster.Attribute = 2;
+            monster.NumberOfMaximumItemDrops = 1;
+            var attributes = new Dictionary<AttributeDefinition, float>
+            {
+                { Stats.Level, 70 },
+                { Stats.MaximumHealth, 9500 },
+                { Stats.MinimumPhysBaseDmg, 210 },
+                { Stats.MaximumPhysBaseDmg, 240 },
+                { Stats.DefenseBase, 180 },
+                { Stats.AttackRatePvm, 400 },
+                { Stats.DefenseRatePvm, 125 },
+                { Stats.IceResistance, 7f / 255 },
+                { Stats.PoisonResistance, 7f / 255 },
+                { Stats.LightningResistance, 7f / 255 },
+                { Stats.FireResistance, 7f / 255 },
+            };
+            monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
+
+            var itemDrop = this.Context.CreateNew<DropItemGroup>();
+            itemDrop.Chance = 0.8;
+            itemDrop.Description = LocalizedString.FromResource(() => DropGroupDescriptions.WizardsRingFromDestructiveOgreSoldier);
+            itemDrop.Monster = monster;
+            itemDrop.PossibleItems.Add(this.GameConfiguration.Items.First(item => item.Number == ItemConstants.WizardsRing.Number && item.Group == ItemConstants.WizardsRing.Group));
+            monster.DropItemGroups.Add(itemDrop);
+            this.GameConfiguration.DropItemGroups.Add(itemDrop);
+        }
+
+        // Destructive Ogre Archer (137)
+        {
+            var monster = this.Context.CreateNew<MonsterDefinition>();
+            this.GameConfiguration.Monsters.Add(monster);
+            monster.Number = 137;
+            monster.Designation = LocalizedString.FromResource(() => MonsterNames.DestructiveOgreArcher);
+            monster.MoveRange = 3;
+            monster.AttackRange = 5;
+            monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
+            monster.ViewRange = 5;
+            monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
+            monster.AttackDelay = new TimeSpan(1600 * TimeSpan.TicksPerMillisecond);
+            monster.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
+            monster.Attribute = 2;
+            monster.NumberOfMaximumItemDrops = 1;
+            var attributes = new Dictionary<AttributeDefinition, float>
+            {
+                { Stats.Level, 74 },
+                { Stats.MaximumHealth, 12000 },
+                { Stats.MinimumPhysBaseDmg, 220 },
+                { Stats.MaximumPhysBaseDmg, 260 },
+                { Stats.DefenseBase, 190 },
+                { Stats.AttackRatePvm, 440 },
+                { Stats.DefenseRatePvm, 130 },
+                { Stats.IceResistance, 8f / 255 },
+                { Stats.PoisonResistance, 8f / 255 },
+                { Stats.LightningResistance, 8f / 255 },
+                { Stats.FireResistance, 8f / 255 },
+            };
+            monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
+
+            var itemDrop = this.Context.CreateNew<DropItemGroup>();
+            itemDrop.Chance = 0.8;
+            itemDrop.Description = LocalizedString.FromResource(() => DropGroupDescriptions.WizardsRingFromDestructiveOgreArcher);
+            itemDrop.Monster = monster;
+            itemDrop.PossibleItems.Add(this.GameConfiguration.Items.First(item => item.Number == ItemConstants.WizardsRing.Number && item.Group == ItemConstants.WizardsRing.Group));
             monster.DropItemGroups.Add(itemDrop);
             this.GameConfiguration.DropItemGroups.Add(itemDrop);
         }

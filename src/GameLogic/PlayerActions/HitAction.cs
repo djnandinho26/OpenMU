@@ -1,10 +1,11 @@
-﻿// <copyright file="HitAction.cs" company="MUnique">
+// <copyright file="HitAction.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace MUnique.OpenMU.GameLogic.PlayerActions;
 
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.GameLogic.PlugIns;
 using MUnique.OpenMU.GameLogic.Views.World;
 
 /// <summary>
@@ -44,6 +45,16 @@ public class HitAction
             return;
         }
 
+        if (player.GameContext.PlugInManager.GetPlugInPoint<ISpeedHackCheatCheckPlugIn>() is { } speedCheck)
+        {
+            var eventArgs = new SpeedHackCheckEventArgs();
+            await speedCheck.AttackCheatCheckAsync(player, eventArgs).ConfigureAwait(false);
+            if (eventArgs.IsCheatDetected)
+            {
+                return;
+            }
+        }
+
         if (target.IsAtSafezone())
         {
             return;
@@ -51,7 +62,7 @@ public class HitAction
 
         if (target is IObservable targetAsObservable)
         {
-            using var readerLock = await targetAsObservable.ObserverLock.ReaderLockAsync();
+            using var readerLock = await targetAsObservable.ObserverLock.ReaderLockAsync().ConfigureAwait(false);
             if (!targetAsObservable.Observers.Contains(player))
             {
                 // Target out of range
@@ -90,7 +101,7 @@ public class HitAction
         // Currently, we just support one effect for monsters.
         // E.g. Poison for Poison BullFighters.
         if (skill.MagicEffectDef is { Duration: not null } effectDefinition
-            && !target.MagicEffectList.ActiveEffects.ContainsKey(effectDefinition.Number)
+            && !target.MagicEffectList.ContainsEffect(effectDefinition.Number)
             && effectDefinition.PowerUpDefinitions.FirstOrDefault() is { Boost: not null } powerUpDef)
         {
             var powerUp = target.Attributes.CreateElement(powerUpDef);

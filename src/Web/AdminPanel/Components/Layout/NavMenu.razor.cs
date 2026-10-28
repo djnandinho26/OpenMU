@@ -7,9 +7,9 @@ namespace MUnique.OpenMU.Web.AdminPanel.Components.Layout;
 using System.Threading;
 using Microsoft.AspNetCore.Components;
 
+using MUnique.OpenMU.Network.Analyzer;
 using MUnique.OpenMU.Persistence;
 using MUnique.OpenMU.Persistence.Initialization.Updates;
-using MUnique.OpenMU.Web.AdminPanel.Services;
 using MUnique.OpenMU.Web.Shared.Services;
 
 /// <summary>
@@ -32,13 +32,23 @@ public partial class NavMenu : IDisposable
     private SetupService SetupService { get; set; } = null!;
 
     [Inject]
-    private IUserService UserService { get; set; } = null!;
-
-    [Inject]
     private DataUpdateService UpdateService { get; set; } = null!;
 
     [Inject]
     private NavigationHistory NavigationHistory { get; set; } = null!;
+
+    [Inject]
+    private IServiceProvider ServiceProvider { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the network analyzer is available. It needs the
+    /// servers in the same process, so it's only registered in the all-in-one deployment.
+    /// </summary>
+    /// <remarks>
+    /// It's determined once, because the menu also renders when its background loading completes,
+    /// which can be after the services of the closed connection were disposed.
+    /// </remarks>
+    private bool IsNetworkAnalyzerAvailable { get; set; }
 
     private Guid? GameConfigurationId { get; set; }
 
@@ -59,6 +69,7 @@ public partial class NavMenu : IDisposable
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
+        this.IsNetworkAnalyzerAvailable = this.ServiceProvider.GetService(typeof(IPacketCaptureService)) is not null;
         await base.OnInitializedAsync().ConfigureAwait(false);
         this.SetupService.DatabaseInitialized += this.OnDatabaseInitializedAsync;
         this.UpdateService.UpdatesInstalled += this.OnUpdatesInstalledAsync;

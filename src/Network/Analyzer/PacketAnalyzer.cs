@@ -12,86 +12,95 @@ using MUnique.OpenMU.Network.PlugIns;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 /// <summary>
-/// Analyzer which analyzes data packets by considering the configuration files.
+/// Analyzer that analyzes data packets by considering the configuration files.
 /// </summary>
 public sealed class PacketAnalyzer : IDisposable
 {
-    private const string ClientToServerPacketsFile = "ClientToServerPackets.xml";
-    private const string ServerToClientPacketsFile = "ServerToClientPackets.xml";
     private const string CommonFile = "CommonEnums.xml";
     private const int DefaultVersionValue = 100;
-    private const int ExtendedVersionValue = 106 * 100 + 3;
+    private const int ExtendedVersionValue = (106 * 100) + 3;
 
     private readonly IList<IDisposable> _watchers = new List<IDisposable>();
-    private PacketDefinitions? _clientPacketDefinitions;
-    private PacketDefinitions? _serverPacketDefinitions;
+
+    /// <summary>
+    /// The loaded packet definitions of the <see cref="DefinitionSet"/>. The array has one
+    /// slot per file, so that a reloaded file can simply replace its previous content.
+    /// </summary>
+    private readonly PacketDefinitions?[] _packetDefinitions;
+
     private PacketDefinitions? _commonDefinitions;
-    private ClientVersion _clientVersion;
-    private int _clientVersionValue = DefaultVersionValue;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PacketAnalyzer"/> class.
-    /// The configuration is automatically loaded from the configuration files.
+    /// Initializes a new instance of the <see cref="PacketAnalyzer" /> class.
+    /// The definitions are automatically loaded from the configuration files.
     /// </summary>
-    public PacketAnalyzer()
+    /// <param name="definitionSet">The set of packet definitions which should be used.</param>
+    /// <param name="watchFiles">If set to <c>true</c>, the definition files are watched and
+    /// automatically reloaded when they change. That's useful when new packet definitions are
+    /// developed, but usually not required when just analyzing the traffic.</param>
+    public PacketAnalyzer(PacketDefinitionSet definitionSet = PacketDefinitionSet.GameServer, bool watchFiles = false)
     {
-        this.LoadAndWatchConfiguration(def => this._serverPacketDefinitions = def, ServerToClientPacketsFile);
-        this.LoadAndWatchConfiguration(def => this._clientPacketDefinitions = def, ClientToServerPacketsFile);
-        this.LoadAndWatchConfiguration(def => this._commonDefinitions = def, CommonFile);
-    }
+        this.DefinitionSet = definitionSet;
 
-    /// <summary>
-    /// Gets or sets the client version.
-    /// </summary>
-    public ClientVersion ClientVersion
-    {
-        get => this._clientVersion;
-        set
+        var files = GetDefinitionFiles(definitionSet);
+        this._packetDefinitions = new PacketDefinitions?[files.Length];
+        for (int i = 0; i < files.Length; i++)
         {
-            this._clientVersion = value;
-            this._clientVersionValue = value.Season * 100 + value.Episode;
+            var index = i;
+            this.LoadConfiguration(def => this._packetDefinitions[index] = def, files[index], watchFiles);
         }
+
+        this.LoadConfiguration(def => this._commonDefinitions = def, CommonFile, watchFiles);
     }
+
+    /// <summary>
+    /// Gets the set of packet definitions which is used by this instance.
+    /// </summary>
+    public PacketDefinitionSet DefinitionSet { get; }
 
     /// <summary>
     /// Extracts the information of the packet and returns it as a formatted string.
     /// </summary>
     /// <param name="packet">The packet.</param>
+    /// <param name="clientVersion">The client version of the connection, which decides which
+    /// packet definition applies when more than one matches.</param>
     /// <returns>The formatted string with the extracted information.</returns>
-    public string ExtractInformation(Packet packet)
+    public string ExtractInformation(Packet packet, ClientVersion clientVersion)
     {
-        var definitions = packet.ToServer ? this._clientPacketDefinitions : this._serverPacketDefinitions;
-        var definition = this.DeterminePacketDefinition(packet);
-        if (definition != null)
+        if (this.DeterminePacketDefinition(packet, clientVersion) is not { } match)
         {
-            var stringBuilder = new StringBuilder()
-                .Append(definition.Caption ?? definition.Name);
-            foreach (var field in definition.Fields ?? Enumerable.Empty<Field>())
-            {
-                stringBuilder.Append(Environment.NewLine)
-                    .Append(field.Name).Append(": ").Append(this.ExtractFieldValueOrGetError(packet.Data.AsSpan(), field, definition, definitions!));
-            }
-
-            return stringBuilder.ToString();
+            return string.Empty;
         }
 
-        return string.Empty;
+        var (definition, definitions) = match;
+        var clientVersionValue = GetVersionValue(clientVersion);
+        var stringBuilder = new StringBuilder()
+            .Append(definition.Caption ?? definition.Name);
+        foreach (var field in definition.Fields ?? Enumerable.Empty<Field>())
+        {
+            stringBuilder.Append(Environment.NewLine)
+                .Append(field.Name).Append(": ").Append(this.ExtractFieldValueOrGetError(packet.Data.AsSpan(), field, definition, definitions, clientVersionValue));
+        }
+
+        return stringBuilder.ToString();
     }
 
     /// <summary>
     /// Extracts the information of the packet and returns it as a short, formatted string.
     /// </summary>
     /// <param name="packet">The packet.</param>
+    /// <param name="clientVersion">The client version of the connection, which decides which
+    /// packet definition applies when more than one matches.</param>
     /// <returns>The formatted string with the extracted information.</returns>
-    public (string, PacketDefinition?) ExtractShortInformation(Packet packet)
+    public (string Data, PacketDefinition? Definition) ExtractShortInformation(Packet packet, ClientVersion clientVersion)
     {
-        var definitions = packet.ToServer ? this._clientPacketDefinitions : this._serverPacketDefinitions;
-        var definition = this.DeterminePacketDefinition(packet);
-        if (definition is null)
+        if (this.DeterminePacketDefinition(packet, clientVersion) is not { } match)
         {
             return (packet.PacketData, null);
         }
 
+        var (definition, definitions) = match;
+        var clientVersionValue = GetVersionValue(clientVersion);
         var stringBuilder = new StringBuilder(definition.Caption ?? definition.Name ?? string.Empty);
         var relevantFields = definition.Fields?
             .Where(f => f.Type != FieldType.Binary && f.Type != FieldType.StructureArray)
@@ -112,7 +121,7 @@ public sealed class PacketAnalyzer : IDisposable
 
                 stringBuilder.Append(field.Name)
                     .Append(": ")
-                    .Append(this.ExtractFieldValueOrGetError(packet.Data.AsSpan(), field, definition, definitions!));
+                    .Append(this.ExtractFieldValueOrGetError(packet.Data.AsSpan(), field, definition, definitions, clientVersionValue));
             }
 
             stringBuilder.Append(")");
@@ -134,13 +143,26 @@ public sealed class PacketAnalyzer : IDisposable
         this._watchers.Clear();
     }
 
-    private PacketDefinition? DeterminePacketDefinition(Packet packet)
+    private static int GetVersionValue(ClientVersion clientVersion)
     {
-        var allDefinitions = packet.ToServer ? this._clientPacketDefinitions : this._serverPacketDefinitions;
-        if (allDefinitions is null)
+        return (clientVersion.Season * 100) + clientVersion.Episode;
+    }
+
+    private static string[] GetDefinitionFiles(PacketDefinitionSet definitionSet)
+    {
+        return definitionSet switch
         {
-            return null;
-        }
+            PacketDefinitionSet.GameServer => ["ClientToServerPackets.xml", "ServerToClientPackets.xml"],
+            PacketDefinitionSet.ConnectServer => ["ConnectServerPackets.xml"],
+            PacketDefinitionSet.ChatServer => ["ChatServerPackets.xml"],
+            _ => throw new ArgumentOutOfRangeException(nameof(definitionSet), definitionSet, "Unknown packet definition set."),
+        };
+    }
+
+    private (PacketDefinition Definition, PacketDefinitions Owner)? DeterminePacketDefinition(Packet packet, ClientVersion clientVersion)
+    {
+        var direction = packet.ToServer ? Direction.ClientToServer : Direction.ServerToClient;
+        var clientVersionValue = GetVersionValue(clientVersion);
 
         int GetVersion(string name)
         {
@@ -158,51 +180,55 @@ public sealed class PacketAnalyzer : IDisposable
             return DefaultVersionValue;
         }
 
-        var filteredDefinitions = allDefinitions.Packets?
-            .Where(p => (byte)p.Type == packet.Type && p.Code == packet.Code && (!p.SubCodeSpecified || p.SubCode == packet.SubCode))
-            .Select(p => (Version: GetVersion(p.Name ?? string.Empty), Definition: p))
+        var filteredDefinitions = this._packetDefinitions
+            .Where(definitions => definitions is not null)
+            .SelectMany(definitions => (definitions!.Packets ?? Enumerable.Empty<PacketDefinition>())
+                .Select(p => (Definition: p, Owner: definitions)))
+            .Where(pair => pair.Definition.Direction == direction || pair.Definition.Direction == Direction.Bidirectional)
+            .Where(pair => (byte)pair.Definition.Type == packet.Type && pair.Definition.Code == packet.Code && (!pair.Definition.SubCodeSpecified || pair.Definition.SubCode == packet.SubCode))
+            .Select(pair => (Version: GetVersion(pair.Definition.Name ?? string.Empty), pair.Definition, pair.Owner))
             .OrderBy(pair => pair.Version)
             .ToList();
 
-        if (filteredDefinitions is null || !filteredDefinitions.Any())
+        if (filteredDefinitions.Count == 0)
         {
             return null;
         }
 
         if (filteredDefinitions.Count == 1)
         {
-            return filteredDefinitions[0].Definition;
+            return (filteredDefinitions[0].Definition, filteredDefinitions[0].Owner);
         }
 
-        if (filteredDefinitions.FirstOrDefault(d => d.Version == this._clientVersionValue) is { Definition: { Name: { } } } exactMatch)
+        if (filteredDefinitions.FirstOrDefault(d => d.Version == clientVersionValue) is { Definition: { Name: { } } } exactMatch)
         {
-            return exactMatch.Definition;
+            return (exactMatch.Definition, exactMatch.Owner);
         }
 
-        var sameLengthPackets = filteredDefinitions.Where(d => d.Definition.Length == packet.Size).Select(d => d.Definition).ToList();
+        var sameLengthPackets = filteredDefinitions.Where(d => d.Definition.Length == packet.Size).ToList();
         if (sameLengthPackets.Count > 0)
         {
-            if (sameLengthPackets.Count == 1 && sameLengthPackets.First() is { Name: { } } sameLengthMatch)
+            if (sameLengthPackets.Count == 1 && sameLengthPackets[0] is { Definition.Name: { } } sameLengthMatch)
             {
-                return sameLengthMatch;
+                return (sameLengthMatch.Definition, sameLengthMatch.Owner);
             }
 
-            var filteredByDefaults = this.GetPacketDefinitionsFilteredByDefaultValues(packet, sameLengthPackets, allDefinitions).ToList();
+            var filteredByDefaults = this.GetPacketDefinitionsFilteredByDefaultValues(packet, sameLengthPackets, clientVersionValue).ToList();
             if (filteredByDefaults.Count == 1)
             {
-                return filteredByDefaults.First();
+                return (filteredByDefaults[0].Definition, filteredByDefaults[0].Owner);
             }
 
             if (filteredByDefaults.Count > 0)
             {
-                filteredDefinitions.RemoveAll(def => !filteredByDefaults.Contains(def.Definition));
+                filteredDefinitions.RemoveAll(def => !filteredByDefaults.Any(f => ReferenceEquals(f.Definition, def.Definition)));
             }
         }
 
-        var current = filteredDefinitions.First();
+        var current = filteredDefinitions[0];
         foreach (var def in filteredDefinitions.Skip(1))
         {
-            if (def.Version > this._clientVersionValue)
+            if (def.Version > clientVersionValue)
             {
                 break;
             }
@@ -210,39 +236,54 @@ public sealed class PacketAnalyzer : IDisposable
             current = def;
         }
 
-        return current.Definition;
+        return (current.Definition, current.Owner);
     }
 
-    private IEnumerable<PacketDefinition> GetPacketDefinitionsFilteredByDefaultValues(Packet packet, IEnumerable<PacketDefinition> definitions, PacketDefinitions allDefinitions)
+    private IEnumerable<(int Version, PacketDefinition Definition, PacketDefinitions Owner)> GetPacketDefinitionsFilteredByDefaultValues(Packet packet, IEnumerable<(int Version, PacketDefinition Definition, PacketDefinitions Owner)> definitions, int clientVersionValue)
     {
-        foreach (var def in definitions)
+        foreach (var candidate in definitions)
         {
+            var def = candidate.Definition;
             var defaultFields = def.Fields?.TakeWhile(f => !string.IsNullOrWhiteSpace(f.DefaultValue)).ToList();
             if (defaultFields is null or { Count: 0 })
             {
                 break;
             }
 
-            if (defaultFields.TrueForAll(field => int.TryParse(this.ExtractFieldValueOrGetError(packet.Data, field, def, allDefinitions), out var actual)
+            if (defaultFields.TrueForAll(field => int.TryParse(this.ExtractFieldValueOrGetError(packet.Data, field, def, candidate.Owner, clientVersionValue), out var actual)
                                                   && (int.TryParse(field.DefaultValue, out var target) || int.TryParse(field.DefaultValue!.Replace("0x", string.Empty), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out target))
                                                   && actual == target))
             {
-                yield return def;
+                yield return candidate;
             }
         }
     }
 
-    private void LoadAndWatchConfiguration(Action<PacketDefinitions?> assignAction, string fileName)
+    private void LoadConfiguration(Action<PacketDefinitions?> assignAction, string fileName, bool watchFile)
     {
-        assignAction(PacketDefinitions.Load(fileName));
-        var watcher = new FileSystemWatcher(Environment.CurrentDirectory, fileName);
+        // The definition files are copied next to the binaries, which is not necessarily the
+        // working directory of the process - a server is usually not started from its own
+        // folder.
+        var directory = AppContext.BaseDirectory;
+        var filePath = Path.Combine(directory, fileName);
+        if (File.Exists(filePath))
+        {
+            assignAction(PacketDefinitions.Load(filePath));
+        }
+
+        if (!watchFile)
+        {
+            return;
+        }
+
+        var watcher = new FileSystemWatcher(directory, fileName);
 
         watcher.Changed += (_, _) =>
         {
             PacketDefinitions? definitions;
             try
             {
-                definitions = PacketDefinitions.Load(fileName);
+                definitions = PacketDefinitions.Load(filePath);
             }
             catch
             {
@@ -268,14 +309,15 @@ public sealed class PacketAnalyzer : IDisposable
     /// <param name="field">The field definition.</param>
     /// <param name="packet">The packet.</param>
     /// <param name="definitions">The definitions.</param>
+    /// <param name="clientVersionValue">The numeric client version of the connection.</param>
     /// <returns>
     /// The value of the field or the error message.
     /// </returns>
-    private string ExtractFieldValueOrGetError(Span<byte> data, Field field, PacketDefinition packet, PacketDefinitions definitions)
+    private string ExtractFieldValueOrGetError(Span<byte> data, Field field, PacketDefinition packet, PacketDefinitions definitions, int clientVersionValue)
     {
         try
         {
-            return this.ExtractFieldValue(data, field, packet, definitions);
+            return this.ExtractFieldValue(data, field, packet, definitions, clientVersionValue);
         }
         catch (Exception e)
         {
@@ -290,10 +332,11 @@ public sealed class PacketAnalyzer : IDisposable
     /// <param name="field">The field definition.</param>
     /// <param name="packet">The packet.</param>
     /// <param name="definitions">The definitions.</param>
+    /// <param name="clientVersionValue">The numeric client version of the connection.</param>
     /// <returns>
     /// The value of the field.
     /// </returns>
-    private string ExtractFieldValue(Span<byte> data, Field field, PacketDefinition packet, PacketDefinitions definitions)
+    private string ExtractFieldValue(Span<byte> data, Field field, PacketDefinition packet, PacketDefinitions definitions, int clientVersionValue)
     {
         var fieldSize = field.GetFieldSizeInBytes();
         if (field.Type == FieldType.String && field.Index < data.Length)
@@ -326,14 +369,14 @@ public sealed class PacketAnalyzer : IDisposable
             FieldType.LongLittleEndian => ReadUInt64LittleEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
             FieldType.LongBigEndian => ReadUInt64BigEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
             FieldType.Enum => this.ExtractEnumValue(data, field, packet, definitions),
-            FieldType.StructureArray => this.ExtractStructureArrayValues(data, field, packet, definitions),
+            FieldType.StructureArray => this.ExtractStructureArrayValues(data, field, packet, definitions, clientVersionValue),
             FieldType.Float => ReadSingleLittleEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
             FieldType.Double => ReadDoubleBigEndian(data[field.Index..]).ToString(CultureInfo.InvariantCulture),
             _ => string.Empty,
         };
     }
 
-    private string ExtractStructureArrayValues(Span<byte> data, Field arrayField, PacketDefinition packet, PacketDefinitions definitions)
+    private string ExtractStructureArrayValues(Span<byte> data, Field arrayField, PacketDefinition packet, PacketDefinitions definitions, int clientVersionValue)
     {
         var elementType = packet.Structures?.FirstOrDefault(s => s.Name == arrayField.TypeName)
                    ?? definitions.Structures?.FirstOrDefault(s => s.Name == arrayField.TypeName)
@@ -345,20 +388,20 @@ public sealed class PacketAnalyzer : IDisposable
 
         var countField = packet.Fields?.FirstOrDefault(f => f.Name == arrayField.ItemCountField)
                          ?? packet.Structures?.SelectMany(s => s.Fields ?? Enumerable.Empty<Field>()).FirstOrDefault(f => f.Name == arrayField.ItemCountField);
-        int count = countField is null ? 0 : int.Parse(this.ExtractFieldValue(data, countField, packet, definitions), CultureInfo.InvariantCulture);
+        int count = countField is null ? 0 : int.Parse(this.ExtractFieldValue(data, countField, packet, definitions, clientVersionValue), CultureInfo.InvariantCulture);
         if (count == 0)
         {
             return string.Empty;
         }
 
         var typeLength = elementType.Length > 0 ? elementType.Length : this.DetermineFixedStructLength(data, arrayField, elementType, count);
-        var fixedLengthByCount = CalcFixStructLengthBySizeAndCount(data, arrayField, elementType, count);
+        var fixedLengthByCount = this.CalcFixStructLengthBySizeAndCount(data, arrayField, elementType, count);
         var stringBuilder = new StringBuilder();
         var restData = data[arrayField.Index..];
 
         for (int i = 0; i < count; i++)
         {
-            var currentLength = typeLength ?? this.DetermineDynamicStructLength(restData, elementType, packet) ?? fixedLengthByCount;
+            var currentLength = typeLength ?? this.DetermineDynamicStructLength(restData, elementType, packet, clientVersionValue) ?? fixedLengthByCount;
             if (currentLength is null)
             {
                 break;
@@ -374,7 +417,7 @@ public sealed class PacketAnalyzer : IDisposable
             foreach (var structField in elementType.Fields ?? Enumerable.Empty<Field>())
             {
                 stringBuilder.Append(Environment.NewLine)
-                    .Append("  ").Append(structField.Name).Append(": ").Append(this.ExtractFieldValue(elementData, structField, packet, definitions));
+                    .Append("  ").Append(structField.Name).Append(": ").Append(this.ExtractFieldValue(elementData, structField, packet, definitions, clientVersionValue));
             }
         }
 
@@ -397,6 +440,7 @@ public sealed class PacketAnalyzer : IDisposable
         {
             return type.Length;
         }
+
         return null;
     }
 
@@ -417,8 +461,9 @@ public sealed class PacketAnalyzer : IDisposable
     /// <param name="restData">The rest data.</param>
     /// <param name="type">The type.</param>
     /// <param name="packetType">Type of the packet.</param>
+    /// <param name="clientVersionValue">The numeric client version of the connection.</param>
     /// <returns>The dynamic length of a struct with a nested structure array.</returns>
-    private int? DetermineDynamicStructLength(Span<byte> restData, Structure type, PacketDefinition packetType)
+    private int? DetermineDynamicStructLength(Span<byte> restData, Structure type, PacketDefinition packetType, int clientVersionValue)
     {
         if (type.Fields is null)
         {
@@ -428,23 +473,22 @@ public sealed class PacketAnalyzer : IDisposable
         if (packetType.Structures is not null
             && type.Fields.FirstOrDefault(f => f.Type == FieldType.StructureArray) is { } nestedStructField)
         {
-
             var countField = type.Fields.First(f => f.Name == nestedStructField.ItemCountField);
             var count = restData[countField.Index];
             var nestedStructType = packetType.Structures.First(s => s.Name == nestedStructField.TypeName);
             return nestedStructField.Index + (count * nestedStructType.Length);
-
         }
-        if (this._clientVersionValue == ExtendedVersionValue
+
+        if (clientVersionValue == ExtendedVersionValue
             && type.Fields.FirstOrDefault(f => f.Type == FieldType.Binary) is { } binaryField
             && binaryField.Name?.EndsWith("ItemData") is true)
         {
-            return binaryField.Index + DetermineItemSize(restData, binaryField);
+            return binaryField.Index + this.DetermineItemSize(restData, binaryField);
         }
 
-        if (type.Fields.MaxBy(f => f.Index) is { Type: not (FieldType.Binary or FieldType.StructureArray)} lastField)
+        if (type.Fields.MaxBy(f => f.Index) is { Type: not (FieldType.Binary or FieldType.StructureArray) } lastField)
         {
-            return lastField.Index + FieldSize(lastField.Type);
+            return lastField.Index + this.FieldSize(lastField.Type);
         }
 
         return null;
@@ -455,27 +499,33 @@ public sealed class PacketAnalyzer : IDisposable
         var itemData = restData.Slice(binaryField.Index);
         var size = 5;
         var options = itemData[4];
-        if ((options & 1) == 1) // Option
+
+        // Option
+        if ((options & 1) == 1)
         {
             size++;
         }
 
-        if ((options & 8) == 8) // Excellent
+        // Excellent
+        if ((options & 8) == 8)
         {
             size++;
         }
 
-        if ((options & 0x10) == 0x10) // Ancient
+        // Ancient
+        if ((options & 0x10) == 0x10)
         {
             size++;
         }
 
-        if ((options & 0x20) == 0x20) // Harmony
+        // Harmony
+        if ((options & 0x20) == 0x20)
         {
             size++;
         }
 
-        if ((options & 0x80) == 0x80) // Sockets
+        // Sockets
+        if ((options & 0x80) == 0x80)
         {
             size++;
             var socketCount = itemData[size] & 0xF;

@@ -5,6 +5,7 @@
 namespace MUnique.OpenMU.Persistence.Initialization.VersionSeasonSix.Maps;
 
 using MUnique.OpenMU.DataModel.Configuration;
+using MUnique.OpenMU.Interfaces;
 
 /// <summary>
 /// The initialization for the Santa Village map.
@@ -21,8 +22,6 @@ internal class SantaVillage : BaseMapInitializer
     /// </summary>
     internal const string Name = "Santa Village";
 
-
-
     /// <summary>
     /// Initializes a new instance of the <see cref="SantaVillage"/> class.
     /// </summary>
@@ -37,7 +36,7 @@ internal class SantaVillage : BaseMapInitializer
     protected override byte MapNumber => Number;
 
     /// <inheritdoc/>
-    protected override string MapName => Name;
+    protected override LocalizedString MapName => LocalizedString.FromResource(() => MapNames.SantaVillage);
 
     /// <inheritdoc/>
     protected override byte SafezoneMapNumber => Devias.Number;

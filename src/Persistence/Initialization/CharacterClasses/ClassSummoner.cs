@@ -7,25 +7,15 @@ namespace MUnique.OpenMU.Persistence.Initialization.CharacterClasses;
 using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
+using MUnique.OpenMU.Persistence.Initialization.Properties;
 
 /// <summary>
 /// Initialization of character classes data.
 /// </summary>
 internal partial class CharacterClassInitialization
 {
-    private CharacterClass CreateBloodySummoner(CharacterClass dimensionMaster)
-    {
-        return this.CreateSummoner(CharacterClassNumber.BloodySummoner, "Bloody Summoner", false, dimensionMaster, false);
-    }
-
-    private CharacterClass CreateDimensionMaster()
-    {
-        var result = this.CreateSummoner(CharacterClassNumber.DimensionMaster, "Dimension Master", true, null, false);
-        result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.MasterLevel, 0, false));
-        return result;
-    }
-
-    private CharacterClass CreateSummoner(CharacterClassNumber number, string name, bool isMaster, CharacterClass? nextGenerationClass, bool canGetCreated)
+    private CharacterClass CreateSummoner(CharacterClassNumber number, LocalizedString name, bool isMaster, CharacterClass? nextGenerationClass, bool canGetCreated)
     {
         var statsDefense = this.Context.CreateNew<AttributeDefinition>(Guid.NewGuid(), "Stats defense", string.Empty);
         this.GameConfiguration.Attributes.Add(statsDefense);
@@ -59,7 +49,9 @@ internal partial class CharacterClassInitialization
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.CurrentAbility, 1, false));
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.CurrentShield, 1, false));
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.IsInSafezone, 1, false));
+        result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.IsResting, 0, false));
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.Resets, 0, false));
+        result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.NearbyPartyMemberCount, 0, false));
 
         this.AddCommonAttributeRelationships(result.AttributeCombinations);
 
@@ -150,7 +142,7 @@ internal partial class CharacterClassInitialization
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1, Stats.SkillMultiplier));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1.0f, Stats.WizardryAttackDamageIncrease));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1.0f, Stats.CurseAttackDamageIncrease));
-        result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1.0f / 33f, Stats.AbilityRecoveryMultiplier));
+        result.BaseAttributeValues.Add(this.CreateConstValueAttribute(0.03f, Stats.AbilityRecoveryMultiplier));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1, Stats.WizardryBaseDmgIncrease));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(0, Stats.BerserkerManaMultiplier)); // placeholder value
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(0, Stats.BerserkerHealthDecrement)); // placeholder value
@@ -159,6 +151,18 @@ internal partial class CharacterClassInitialization
 
         this.AddCommonBaseAttributeValues(result.BaseAttributeValues, isMaster);
 
+        return result;
+    }
+
+    private CharacterClass CreateBloodySummoner(CharacterClass dimensionMaster)
+    {
+        return this.CreateSummoner(CharacterClassNumber.BloodySummoner, LocalizedString.FromResource(() => CharacterClassNames.BloodySummoner), false, dimensionMaster, false);
+    }
+
+    private CharacterClass CreateDimensionMaster()
+    {
+        var result = this.CreateSummoner(CharacterClassNumber.DimensionMaster, LocalizedString.FromResource(() => CharacterClassNames.DimensionMaster), true, null, false);
+        result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.MasterLevel, 0, false));
         return result;
     }
 }

@@ -1,4 +1,4 @@
-﻿// <copyright file="MonsterSpawnArea.cs" company="MUnique">
+// <copyright file="MonsterSpawnArea.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -65,10 +65,10 @@ public enum SpawnTrigger
 }
 
 /// <summary>
-/// Defines an monster spawn area.
+/// Defines a monster spawn area.
 /// </summary>
 [Cloneable]
-public partial class MonsterSpawnArea
+public partial class MonsterSpawnArea : IMapArea
 {
     /// <summary>
     /// Gets or sets the monster definition.
@@ -133,12 +133,12 @@ public partial class MonsterSpawnArea
     {
         var isPoint = this.IsPoint();
         var result = isPoint
-            ? $"{this.MonsterDefinition?.Designation} - Qty: {this.Quantity} @ {this.X1}/{this.Y1}"
-            : $"{this.MonsterDefinition?.Designation} - Qty: {this.Quantity} @ {this.X1}/{this.Y1} to {this.X2}/{this.Y2}";
+            ? string.Format(MUnique.OpenMU.DataModel.Properties.Resources.SpawnPointSummary, this.MonsterDefinition?.Designation, this.Quantity, this.X1, this.Y1)
+            : string.Format(MUnique.OpenMU.DataModel.Properties.Resources.SpawnAreaSummary, this.MonsterDefinition?.Designation, this.Quantity, this.X1, this.Y1, this.X2, this.Y2);
 
         if (this.SpawnTrigger == SpawnTrigger.AutomaticDuringWave || this.SpawnTrigger == SpawnTrigger.OnceAtWaveStart)
         {
-            result += $" - Wave: {this.WaveNumber}";
+            result += string.Format(MUnique.OpenMU.DataModel.Properties.Resources.SpawnWaveSummary, this.WaveNumber);
         }
 
         return result;

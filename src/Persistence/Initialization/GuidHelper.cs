@@ -23,7 +23,7 @@ internal static class GuidHelper
     private static readonly Dictionary<Type, short> TypeIds = new();
 
     /// <summary>
-    /// Initializes the <see cref="GuidHelper" /> class.
+    /// Initializes static members of the <see cref="GuidHelper"/> class.
     /// </summary>
     static GuidHelper()
     {
@@ -63,6 +63,8 @@ internal static class GuidHelper
         TypeIds.Add(typeof(LevelBonus), 0x91);
         TypeIds.Add(typeof(ItemSetGroup), 0x92);
         TypeIds.Add(typeof(ItemOfItemSet), 0x93);
+        TypeIds.Add(typeof(ItemPriceDefinition), 0x94);
+        TypeIds.Add(typeof(ItemLevelPrice), 0x95);
 
         TypeIds.Add(typeof(ItemCrafting), 0x100);
         TypeIds.Add(typeof(ItemCraftingRequiredItem), 0x101);
@@ -114,7 +116,7 @@ internal static class GuidHelper
     /// <typeparam name="T">The type of object which should get the id.</typeparam>
     /// <param name="obj">The object.</param>
     /// <param name="guid">The unique identifier.</param>
-    /// <exception cref="System.InvalidOperationException">Object is not identifiable</exception>
+    /// <exception cref="System.InvalidOperationException">Object is not identifiable.</exception>
     public static void SetGuid<T>(this T obj, Guid guid)
     {
         if (obj is IIdentifiable identifiable)

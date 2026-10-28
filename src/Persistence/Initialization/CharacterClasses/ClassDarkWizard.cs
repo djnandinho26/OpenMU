@@ -7,6 +7,8 @@ namespace MUnique.OpenMU.Persistence.Initialization.CharacterClasses;
 using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
+using MUnique.OpenMU.Persistence.Initialization.Properties;
 
 /// <summary>
 /// Initialization of character classes data.
@@ -22,7 +24,7 @@ internal partial class CharacterClassInitialization
     /// <param name="nextGenerationClass">The next generation class.</param>
     /// <param name="canGetCreated">If set to <c>true</c>, it can get created by the player.</param>
     /// <returns>The created character class.</returns>
-    protected CharacterClass CreateDarkWizard(CharacterClassNumber number, string name, bool isMaster, CharacterClass? nextGenerationClass, bool canGetCreated)
+    protected CharacterClass CreateDarkWizard(CharacterClassNumber number, LocalizedString name, bool isMaster, CharacterClass? nextGenerationClass, bool canGetCreated)
     {
         var result = this.Context.CreateNew<CharacterClass>();
         result.SetGuid((byte)number);
@@ -42,9 +44,10 @@ internal partial class CharacterClassInitialization
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.CurrentHealth, 60, false));
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.CurrentMana, 60, false));
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.CurrentAbility, 1, false));
-
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.IsInSafezone, 1, false));
+        result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.IsResting, 0, false));
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.Resets, 0, false));
+        result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.NearbyPartyMemberCount, 0, false));
 
         this.AddCommonAttributeRelationships(result.AttributeCombinations);
 
@@ -111,7 +114,7 @@ internal partial class CharacterClassInitialization
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(30, Stats.MaximumHealth));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1, Stats.SkillMultiplier));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1.0f, Stats.WizardryAttackDamageIncrease));
-        result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1.0f / 33f, Stats.AbilityRecoveryMultiplier));
+        result.BaseAttributeValues.Add(this.CreateConstValueAttribute(0.03f, Stats.AbilityRecoveryMultiplier));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(1, Stats.WizardryBaseDmgIncrease));
         result.BaseAttributeValues.Add(this.CreateConstValueAttribute(0, Stats.NovaStageDamage)); // placeholder value
 
@@ -122,12 +125,12 @@ internal partial class CharacterClassInitialization
 
     private CharacterClass CreateSoulMaster(CharacterClass grandMaster)
     {
-        return this.CreateDarkWizard(CharacterClassNumber.SoulMaster, "Soul Master", false, grandMaster, false);
+        return this.CreateDarkWizard(CharacterClassNumber.SoulMaster, LocalizedString.FromResource(() => CharacterClassNames.SoulMaster), false, grandMaster, false);
     }
 
     private CharacterClass CreateGrandMaster()
     {
-        var result = this.CreateDarkWizard(CharacterClassNumber.GrandMaster, "Grand Master", true, null, false);
+        var result = this.CreateDarkWizard(CharacterClassNumber.GrandMaster, LocalizedString.FromResource(() => CharacterClassNames.GrandMaster), true, null, false);
         result.StatAttributes.Add(this.CreateStatAttributeDefinition(Stats.MasterLevel, 0, false));
         return result;
     }

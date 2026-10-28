@@ -53,7 +53,7 @@ public class GameConfigurationInitializer : GameConfigurationInitializerBase
         this.GameConfiguration.ItemOptions.Add(this.CreateOptionDefinition(Stats.CurseBaseDmg, ItemOptionDefinitionNumbers.CurseAttack));
 
         var maximumAllianceSizeDef = Stats.MaximumAllianceSize.GetPersistent(this.GameConfiguration);
-        var maximumAllianceSizeValue = this.Context.CreateNew<ConstValueAttribute>(5f, maximumAllianceSizeDef);
+        var maximumAllianceSizeValue = this.Context.CreateNew<ConstValueAttribute>(5f, maximumAllianceSizeDef, AggregateType.AddRaw);
         this.GameConfiguration.GlobalBaseAttributeValues.Add(maximumAllianceSizeValue);
 
         new CharacterClassInitialization(this.Context, this.GameConfiguration).Initialize();
@@ -75,11 +75,13 @@ public class GameConfigurationInitializer : GameConfigurationInitializerBase
         new Jewelery(this.Context, this.GameConfiguration).Initialize();
         new AncientSets(this.Context, this.GameConfiguration).Initialize();
         new BoxOfLuck(this.Context, this.GameConfiguration).Initialize();
+        new GensRewardItems(this.Context, this.GameConfiguration).Initialize();
         this.CreateJewelMixes();
         new NpcInitialization(this.Context, this.GameConfiguration).Initialize();
         new InvasionMobsInitialization(this.Context, this.GameConfiguration).Initialize();
         new GameMapsInitializer(this.Context, this.GameConfiguration).Initialize();
         this.AssignCharacterClassHomeMaps();
+        this.WireRenaDropToEventMaps();
         new SocketSystem(this.Context, this.GameConfiguration).Initialize();
         new ChaosMixes(this.Context, this.GameConfiguration).Initialize();
         new Gates(this.Context, this.GameConfiguration).Initialize();
@@ -88,6 +90,41 @@ public class GameConfigurationInitializer : GameConfigurationInitializerBase
         new DevilSquareInitializer(this.Context, this.GameConfiguration).Initialize();
         new BloodCastleInitializer(this.Context, this.GameConfiguration).Initialize();
         new ChaosCastleInitializer(this.Context, this.GameConfiguration).Initialize();
+        new CastleSiegeInitializer(this.Context, this.GameConfiguration).Initialize();
+        new KanturuInitializer(this.Context, this.GameConfiguration).Initialize();
+        new DoppelgangerInitializer(this.Context, this.GameConfiguration).Initialize();
+        new ImperialGuardianInitializer(this.Context, this.GameConfiguration).Initialize();
+        new CrywolfInitializer(this.Context, this.GameConfiguration).Initialize();
+        new CashShopItems(this.Context, this.GameConfiguration).Initialize();
+
+        // After all items exist.
+        new ItemRules(this.Context, this.GameConfiguration).Initialize();
+        new CashShopInitializer(this.Context, this.GameConfiguration).Initialize();
+        new ItemPriceDefinitions(this.Context, this.GameConfiguration).Initialize();
+    }
+
+    /// <summary>
+    /// Wires the Rena <see cref="DropItemGroup"/> (created in <see cref="Misc"/>) to the Blood Castle
+    /// and Devil Square 5-7 event maps, so it only drops there instead of everywhere.
+    /// </summary>
+    private void WireRenaDropToEventMaps()
+    {
+        var renaDropGroup = this.GameConfiguration.DropItemGroups
+            .FirstOrDefault(g => g.PossibleItems.Any(i => i.Group == 14 && i.Number == 21));
+        if (renaDropGroup is null)
+        {
+            return;
+        }
+
+        var eventMaps = this.GameConfiguration.Maps
+            .Where(m => m.Name.Value?.StartsWith("Blood Castle") is true || m.Name.Value is "Devil Square 5" or "Devil Square 6" or "Devil Square 7");
+        foreach (var map in eventMaps)
+        {
+            if (!map.DropItemGroups.Contains(renaDropGroup))
+            {
+                map.DropItemGroups.Add(renaDropGroup);
+            }
+        }
     }
 
     private void CreateJewelMixes()

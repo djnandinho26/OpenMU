@@ -18,27 +18,37 @@ using Microsoft.Extensions.Logging;
 using MUnique.OpenMU.ChatServer;
 using MUnique.OpenMU.ConnectServer;
 using MUnique.OpenMU.DataModel.Configuration;
+using MUnique.OpenMU.Discord;
 using MUnique.OpenMU.FriendServer;
 using MUnique.OpenMU.GameLogic;
+using MUnique.OpenMU.GameLogic.TestActors;
+using MUnique.OpenMU.GameServer;
 using MUnique.OpenMU.GuildServer;
 using MUnique.OpenMU.Interfaces;
 using MUnique.OpenMU.LoginServer;
 using MUnique.OpenMU.Network;
+using MUnique.OpenMU.Network.Analyzer;
 using MUnique.OpenMU.Persistence;
+using MUnique.OpenMU.Persistence.AdminAuth;
 using MUnique.OpenMU.Persistence.EntityFramework;
+using MUnique.OpenMU.Persistence.EntityFramework.AdminAuth;
 using MUnique.OpenMU.Persistence.EntityFramework.Json;
-using MUnique.OpenMU.Persistence.Initialization;
+using MUnique.OpenMU.Persistence.Initialization.Updates;
 using MUnique.OpenMU.Persistence.Initialization.Version075;
 using MUnique.OpenMU.Persistence.InMemory;
 using MUnique.OpenMU.PlugIns;
+using MUnique.OpenMU.Startup.TestActors;
+using MUnique.OpenMU.Telemetry;
 using MUnique.OpenMU.Web.AdminPanel;
-using MUnique.OpenMU.Web.AdminPanel.Services;
-using MUnique.OpenMU.Web.API;
+using MUnique.OpenMU.Web.AdminPanel.API;
+using MUnique.OpenMU.Web.AdminPanel.Mcp;
+using MUnique.OpenMU.Web.Map;
 using MUnique.OpenMU.Web.Map.Map;
 using MUnique.OpenMU.Web.Shared;
 using Nito.AsyncEx.Synchronous;
 using Serilog;
 using Serilog.Debugging;
+using Serilog.Extensions.Logging;
 
 /// <summary>
 /// The startup class for an all-in-one game server.
@@ -51,6 +61,8 @@ internal sealed class Program : IDisposable
     private readonly IDictionary<int, IGameServer> _gameServers = new Dictionary<int, IGameServer>();
     private readonly IList<IManageableServer> _servers = new List<IManageableServer>();
     private readonly Serilog.ILogger _logger;
+    private readonly LoggerProviderCollection _loggerProviders = new();
+    private readonly IConfiguration _configuration;
 
     private IHost? _serverHost;
 
@@ -65,12 +77,21 @@ internal sealed class Program : IDisposable
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", false, true)
             .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true, true)
+            .AddEnvironmentVariables()
             .Build();
 
+        this._configuration = configuration;
         this._logger = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
+            .WriteTo.Providers(this._loggerProviders)
             .CreateLogger();
     }
+
+    /// <summary>
+    /// Gets the resolved server time zone (from <see cref="SystemConfiguration.TimeZoneId"/>),
+    /// used to interpret the times of periodic event schedules. Defaults to <see cref="TimeZoneInfo.Utc"/>.
+    /// </summary>
+    internal static TimeZoneInfo ServerTimeZone { get; private set; } = TimeZoneInfo.Utc;
 
     /// <summary>
     /// The main method.
@@ -112,7 +133,20 @@ internal sealed class Program : IDisposable
         };
 
         using var program = new Program();
-        await program.InitializeAsync(args).ConfigureAwait(false);
+        try
+        {
+            await program.InitializeAsync(args).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (FindStartupCancellation(ex) is { } cancellation)
+        {
+            Console.WriteLine(cancellation.Message);
+            Environment.ExitCode = 1;
+
+            // The exit handler above cancels the source unless it's cancelled already, but it's disposed when we return.
+            await exitCts.CancelAsync().ConfigureAwait(false);
+            return;
+        }
+
         while (!exitToken.IsCancellationRequested)
         {
             await Task.Delay(100).ConfigureAwait(false);
@@ -172,6 +206,23 @@ internal sealed class Program : IDisposable
         this._serverHost?.Dispose();
     }
 
+    /// <summary>
+    /// Finds the <see cref="StartupCancelledException"/> in the given exception, which can be wrapped, e.g. when the
+    /// context provider is created while the host resolves its services.
+    /// </summary>
+    /// <param name="exception">The exception.</param>
+    /// <returns>The found cancellation; <c>null</c>, if there is none.</returns>
+    private static StartupCancelledException? FindStartupCancellation(Exception exception)
+    {
+        return exception switch
+        {
+            StartupCancelledException cancellation => cancellation,
+            AggregateException aggregate => aggregate.InnerExceptions.Select(FindStartupCancellation).FirstOrDefault(found => found is not null),
+            { InnerException: { } inner } => FindStartupCancellation(inner),
+            _ => null,
+        };
+    }
+
     private static void DisplayCommands()
     {
         var commandList = "help, exit, gc, pid";
@@ -217,6 +268,47 @@ internal sealed class Program : IDisposable
         }
     }
 
+    private static IPacketCaptureService CreatePacketCaptureService(IServiceProvider serviceProvider)
+    {
+        var serverProvider = serviceProvider.GetService<IServerProvider>()
+                             ?? throw new InvalidOperationException($"{nameof(IServerProvider)} not registered.");
+        var bufferSize = _systemConfiguration?.NetworkAnalyzerLiveBufferSize ?? 0;
+        return new PacketCaptureService(
+            serverProvider,
+            bufferSize > 0 ? bufferSize : LiveCapturedConnection.DefaultMaximumPacketCount);
+    }
+
+    /// <summary>
+    /// Determines whether the database schema and the mandatory configuration updates are applied
+    /// at start without asking the user.
+    /// </summary>
+    /// <param name="contextProvider">The context provider.</param>
+    /// <returns><c>true</c>, if <see cref="SystemConfiguration.AutoUpdateSchema"/> is set.</returns>
+    private static async Task<bool> ShouldUpdateAutomaticallyAsync(IMigratableDatabaseContextProvider contextProvider)
+    {
+        return _systemConfiguration?.AutoUpdateSchema is true
+               || await contextProvider.ShouldDoAutoSchemaUpdateAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Creates a plugin manager with the configuration update plugins, which are active according to their plugin configurations.
+    /// </summary>
+    /// <param name="contextProvider">The context provider.</param>
+    /// <param name="loggerFactory">The logger factory.</param>
+    /// <returns>The plugin manager.</returns>
+    private static async Task<PlugInManager> CreateUpdatePlugInManagerAsync(IPersistenceContextProvider contextProvider, ILoggerFactory loggerFactory)
+    {
+        var plugInManager = new PlugInManager(null, loggerFactory, null, null);
+        plugInManager.DiscoverAndRegisterPlugInsOf<IConfigurationUpdatePlugIn>();
+
+        // An update which is deactivated in its plugin configuration isn't offered on the admin panel either.
+        var updateTypeIds = plugInManager.KnownPlugInTypes.Select(type => type.GUID).ToHashSet();
+        using var context = contextProvider.CreateNewTypedContext(typeof(PlugInConfiguration), false);
+        var configurations = await context.GetAsync<PlugInConfiguration>().ConfigureAwait(false);
+        plugInManager.ReadConfigurations(configurations.Where(configuration => updateTypeIds.Contains(configuration.TypeId)));
+        return plugInManager;
+    }
+
     private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         if (e.IsTerminating)
@@ -227,6 +319,35 @@ internal sealed class Program : IDisposable
         {
             this._logger.Error(e.ExceptionObject as Exception, "Unhandled exception: {0}", e.ExceptionObject);
         }
+    }
+
+    /// <summary>
+    /// Adds the logging with Serilog and, if an OTLP endpoint is configured, the export of
+    /// logs, metrics and traces with OpenTelemetry.
+    /// </summary>
+    /// <param name="builder">The web application builder.</param>
+    /// <remarks>
+    /// Serilog stays in charge of the log levels, the console and the log files.
+    /// It writes to the logger providers of the host as well, of which only the OpenTelemetry
+    /// one is left - otherwise, the console of the host would get every entry twice.
+    /// </remarks>
+    private void AddLoggingAndTelemetry(WebApplicationBuilder builder)
+    {
+        if (!builder.Configuration.IsOtlpExportConfigured())
+        {
+            builder.Host.UseSerilog(this._logger);
+            return;
+        }
+
+        builder.Logging.ClearProviders();
+        builder.AddOpenTelemetry("openmu");
+
+        var metricsRegistry = new MetricsRegistry();
+        metricsRegistry.AddNetworkMeters();
+        metricsRegistry.AddMeters(GameLogic.Metrics.Meters);
+        builder.AddOpenTelemetryMetrics(metricsRegistry);
+
+        builder.Host.UseSerilog(this._logger, providers: this._loggerProviders);
     }
 
     private async Task<IHost> CreateHostAsync(string[] args)
@@ -241,10 +362,31 @@ internal sealed class Program : IDisposable
 
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Host.UseSerilog(this._logger);
+        this.AddLoggingAndTelemetry(builder);
         if (addAdminPanel)
         {
+            // The storage of the admin panel users has to be registered before the panel itself,
+            // which only adds a fallback when nothing else is registered.
+            builder.Services.AddAdminUserRepository();
+            builder.Services.AddSingleton<IBackupService>(s =>
+            {
+                var contextProvider = s.GetRequiredService<IMigratableDatabaseContextProvider>();
+                if (contextProvider is IPersistenceContextProvider persistenceContextProvider)
+                {
+                    return new BackupService(persistenceContextProvider, s.GetRequiredService<IAdminUserRepository>());
+                }
+
+                return new InMemoryBackupService(s.GetRequiredService<IPersistenceContextProvider>(), s.GetRequiredService<IAdminUserRepository>());
+            });
+            if (!args.Contains("-demo"))
+            {
+                // A snapshot of the database is only possible when there is a real database.
+                builder.Services.AddSingleton<IDatabaseSnapshotService, DatabaseSnapshotService>();
+            }
+
+            builder.Services.AddSingleton(new MUnique.OpenMU.Web.AdminPanel.Operations.AdminAuditSettings { IsDemo = args.Contains("-demo") });
             builder.AddAdminPanel(includeMapApp: true);
+            builder.Services.AddAdminMcp(builder.Configuration);
         }
 
         builder.Services.AddSingleton(this._servers)
@@ -268,6 +410,7 @@ internal sealed class Program : IDisposable
             .AddSingleton<ILoginServer, LoginServer>()
             .AddSingleton<IGuildServer, GuildServer>()
             .AddSingleton<IFriendServer, FriendServer>()
+            .AddDiscordIntegration(builder.Configuration.GetSection(DiscordSettings.SectionName), () => ServerTimeZone)
             .AddSingleton<ChatServer>()
             .AddSingleton<IChatServer>(s => s.GetService<ChatServer>()!)
             .AddSingleton<ConnectServerFactory>()
@@ -275,13 +418,16 @@ internal sealed class Program : IDisposable
             .AddSingleton<IConnectServerInstanceManager>(provider => provider.GetService<ConnectServerContainer>()!)
             .AddSingleton<GameServerContainer>()
             .AddSingleton<IGameServerInstanceManager>(provider => provider.GetService<GameServerContainer>()!)
+            .AddSingleton<IEventPublisher>(provider => provider.GetRequiredService<GameServerContainer>().EventPublisher)
             .AddScoped<IMapFactory, JavascriptMapFactory>()
+            .AddCircuitConnectionState()
             .AddSingleton<SetupService>()
             .AddSingleton<IEnumerable<IConnectServer>>(provider => provider.GetService<ConnectServerContainer>() ?? throw new Exception($"{nameof(ConnectServerContainer)} not registered."))
             .AddSingleton<IGuildChangePublisher, GuildChangeToGameServerPublisher>()
             .AddSingleton<IFriendNotifier, FriendNotifierToGameServer>()
             .AddSingleton<PlugInManager>()
             .AddSingleton<IServerProvider, LocalServerProvider>()
+            .AddSingleton<IPacketCaptureService>(CreatePacketCaptureService)
             .AddSingleton<ICollection<PlugInConfiguration>>(this.PlugInConfigurationsFactory)
             .AddTransient<ReferenceHandler, ByDataSourceReferenceHandler>(provider =>
             {
@@ -289,8 +435,20 @@ internal sealed class Program : IDisposable
                 var dataSource = new GameConfigurationDataSource(
                     provider.GetService<ILogger<GameConfigurationDataSource>>()!,
                     persistenceContextProvider!);
-                var configId = persistenceContextProvider!.CreateNewConfigurationContext().GetDefaultGameConfigurationIdAsync(default).AsTask().WaitAndUnwrapException();
-                dataSource.GetOwnerAsync(configId!.Value).AsTask().WaitAndUnwrapException();
+                using var configurationContext = persistenceContextProvider!.CreateNewConfigurationContext();
+                var configId = configurationContext.GetDefaultGameConfigurationIdAsync(default).AsTask().WaitAndUnwrapException();
+                if (configId is { } gameConfigurationId)
+                {
+                    dataSource.GetOwnerAsync(gameConfigurationId).AsTask().WaitAndUnwrapException();
+                }
+                else
+                {
+                    // The database doesn't contain a game configuration yet. It's created later,
+                    // e.g. through the admin panel. The data source is then loaded again,
+                    // see OnDatabaseInitializedAsync.
+                    this._logger.Debug("No game configuration found in the database, so the data source is not loaded yet.");
+                }
+
                 var referenceHandler = new ByDataSourceReferenceHandler(dataSource);
                 return referenceHandler;
             })
@@ -299,17 +457,32 @@ internal sealed class Program : IDisposable
             .AddHostedService<GameServerContainer>()
             .AddHostedService(provider => provider.GetService<GameServerContainer>()!)
             .AddHostedService(provider => provider.GetService<ConnectServerContainer>()!)
+            .AddNetworkObservation()
             .AddControllers().AddApplicationPart(typeof(ServerController).Assembly);
 
+        this.AddActorControlEndpoint(builder.Services);
+
         var host = builder.Build();
+
+        // The bot is listed with the other servers, e.g. in the admin panel.
+        this._servers.Add(host.Services.GetRequiredService<DiscordIntegration>());
 
         // NpgsqlLoggingConfiguration.InitializeLogging(host.Services.GetRequiredService<ILoggerFactory>())
         this._logger.Information("Host created");
 
         if (addAdminPanel)
         {
+            host.UseAdminMcpProtection();
             host.ConfigureAdminPanel();
+            host.MapAdminMcp();
         }
+
+        // When the server is started with an uninitialized database, the plugin configurations
+        // are not available yet. They're created during the data initialization, so we have to
+        // load them afterwards. The subscribers are invoked one after another in the order of
+        // their registration, so we subscribe before the host is started (and with it, the
+        // server containers) to get the plugins ready before the servers are restarted.
+        host.Services.GetRequiredService<SetupService>().DatabaseInitialized += () => this.OnDatabaseInitializedAsync(host.Services);
 
         this._logger.Information("Starting host...");
         var stopwatch = new Stopwatch();
@@ -320,6 +493,38 @@ internal sealed class Program : IDisposable
         this._logger.Information("Host started, elapsed time: {elapsed}", stopwatch.Elapsed);
         this._logger.Information("Admin Panel bound to urls: {urls}", string.Join("; ", host.Urls));
         return host;
+    }
+
+    /// <summary>
+    /// Adds the test actor control endpoint, but only when <c>OPENMU_ACTOR_PORT</c> names a
+    /// port; it binds loopback unless <c>OPENMU_ACTOR_ADDRESS</c> says otherwise. It is
+    /// unauthenticated development tooling and stays off by default, and it is registered after
+    /// the server containers on purpose -
+    /// hosted services are stopped in reverse order, so the actors are logged out (and their
+    /// progress saved) before the game servers go down.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    private void AddActorControlEndpoint(IServiceCollection services)
+    {
+        if (ActorControlService.ConfiguredOptions is not { } actorOptions)
+        {
+            if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ActorControlService.PortVariableName)))
+            {
+                this._logger.Warning("{portVariable} is set, but it or {addressVariable} is not valid; the actor control endpoint stays off.", ActorControlService.PortVariableName, ActorControlService.AddressVariableName);
+            }
+
+            return;
+        }
+
+        this._logger.Information("Actor control endpoint enabled on {endPoint}", actorOptions.EndPoint);
+        services
+            .AddSingleton(actorOptions)
+            .AddSingleton<IGameServerContextLocator>(_ => new GameServerContextLocator(this._gameServers))
+            .AddSingleton<IActorFactory, ActorFactory>()
+            .AddSingleton<IActorRegistry, ActorRegistry>()
+            .AddSingleton<BotsController>()
+            .AddSingleton<ActorProtocolHandler>()
+            .AddHostedService<ActorControlService>();
     }
 
     private IIpAddressResolver CreateIpResolver(IServiceProvider serviceProvider, string[] args)
@@ -368,13 +573,70 @@ internal sealed class Program : IDisposable
         return configs;
     }
 
+    private async ValueTask OnDatabaseInitializedAsync(IServiceProvider services)
+    {
+        try
+        {
+            if (services.GetService<PlugInManager>() is not { } plugInManager
+                || services.GetService<IPersistenceContextProvider>() is not { } persistenceContextProvider)
+            {
+                return;
+            }
+
+            var configurations = await this.LoadPlugInConfigurationsAsync(plugInManager, persistenceContextProvider).ConfigureAwait(false);
+            plugInManager.ReadConfigurations(configurations);
+
+            if (services.GetService<ICollection<PlugInConfiguration>>() is { } registeredConfigurations)
+            {
+                // The registered collection was created before the data initialization
+                // and would keep the outdated (or empty) configurations otherwise.
+                registeredConfigurations.Clear();
+                configurations.ForEach(registeredConfigurations.Add);
+            }
+
+            this._logger.Information("Applied {count} plugin configurations after the database initialization.", configurations.Count);
+        }
+        catch (Exception ex)
+        {
+            this._logger.Error(ex, "Error when applying the plugin configurations after the database initialization.");
+        }
+    }
+
+    private async ValueTask<List<PlugInConfiguration>> LoadPlugInConfigurationsAsync(PlugInManager plugInManager, IPersistenceContextProvider persistenceContextProvider)
+    {
+        if (plugInManager.CustomConfigReferenceHandler is ByDataSourceReferenceHandler referenceHandler)
+        {
+            // The data source of the reference handler was loaded (or not) before the data
+            // initialization. Without reloading it, the references within the custom plugin
+            // configurations would be resolved on the previous - now deleted - game configuration.
+            var dataSource = referenceHandler.DataSource;
+            await dataSource.ForceDiscardChangesAsync().ConfigureAwait(false);
+            var gameConfiguration = await dataSource.GetOwnerAsync().ConfigureAwait(false);
+
+            // The configurations of the data source are used, so that they stay alive
+            // as long as the reference handler does.
+            return gameConfiguration.PlugInConfigurations.ToList();
+        }
+
+        using var context = persistenceContextProvider.CreateNewTypedContext(typeof(PlugInConfiguration), false);
+        return (await context.GetAsync<PlugInConfiguration>().ConfigureAwait(false)).ToList();
+    }
+
     private IEnumerable<PlugInConfiguration> CreateMissingPlugInConfigurations(IEnumerable<Type> plugInTypes, IPersistenceContextProvider persistenceContextProvider, ReferenceHandler referenceHandler)
     {
-        GameConfiguration gameConfiguration;
+        GameConfiguration? gameConfiguration;
 
         using (var context = persistenceContextProvider.CreateNewContext())
         {
-            gameConfiguration = context.GetAsync<GameConfiguration>().AsTask().WaitAndUnwrapException().First();
+            gameConfiguration = context.GetAsync<GameConfiguration>().AsTask().WaitAndUnwrapException().FirstOrDefault();
+        }
+
+        if (gameConfiguration is null)
+        {
+            // The database is not initialized yet - the plugin configurations are created
+            // together with the game configuration.
+            this._logger.Warning("No game configuration found in the database, so the missing plugin configurations can't be created yet.");
+            yield break;
         }
 
         using var saveContext = persistenceContextProvider.CreateNewContext(gameConfiguration);
@@ -390,6 +652,7 @@ internal sealed class Program : IDisposable
                 this.CreateDefaultPlugInConfiguration(plugInType, plugInConfiguration, referenceHandler);
             }
 
+            this._logger.Information("Created missing plugin configuration for plugin type {plugInType}", plugInType);
             yield return plugInConfiguration;
         }
 
@@ -475,14 +738,29 @@ internal sealed class Program : IDisposable
         var contextProvider = new PersistenceContextProvider(loggerFactory, changeListener);
         if (reinit || !await contextProvider.DatabaseExistsAsync().ConfigureAwait(false))
         {
-            this._logger.Information("The database is getting (re-)initialized...");
-            using var update = await contextProvider.ReCreateDatabaseAsync().ConfigureAwait(false);
+            // The database can be provisioned externally (e.g. by a Kubernetes operator,
+            // infrastructure-as-code, or a managed cloud database), where the connecting role is
+            // typically not permitted to create or drop databases. Enabling
+            // Database:AssumeExternallyProvisioned keeps the existing database and only builds its
+            // schema via migrations, instead of dropping and recreating it. The default (false)
+            // preserves the original drop-and-recreate behaviour; an explicit -reinit always recreates.
+            var assumeExternallyProvisioned = !reinit
+                && this._configuration.GetValue<bool>("Database:AssumeExternallyProvisioned");
+
+            this._logger.Information(assumeExternallyProvisioned
+                ? "Building the schema on the externally-provisioned database (no drop/create)..."
+                : "The database is getting (re-)initialized...");
+            using var update = await contextProvider.ReCreateDatabaseAsync(dropExistingDatabase: !assumeExternallyProvisioned).ConfigureAwait(false);
             await this.InitializeDataAsync(version, loggerFactory, contextProvider).ConfigureAwait(false);
             this._logger.Information("...initialization finished.");
+
+            // The data initialization installs the configuration updates itself.
+            return contextProvider;
         }
-        else if (!await contextProvider.IsDatabaseUpToDateAsync().ConfigureAwait(false))
+
+        if (!await contextProvider.IsDatabaseUpToDateAsync().ConfigureAwait(false))
         {
-            if (_systemConfiguration?.AutoUpdateSchema is true || await contextProvider.ShouldDoAutoSchemaUpdateAsync())
+            if (await ShouldUpdateAutomaticallyAsync(contextProvider).ConfigureAwait(false))
             {
                 Console.WriteLine("The database schema needs to be updated before the server can be started. Updating...");
                 await contextProvider.ApplyAllPendingUpdatesAsync().ConfigureAwait(false);
@@ -499,17 +777,64 @@ internal sealed class Program : IDisposable
                 }
                 else
                 {
-                    Console.WriteLine("Cancelled the schema update process, can't start the server.");
-                    return null!;
+                    throw new StartupCancelledException("Cancelled the schema update process, can't start the server.");
                 }
             }
         }
-        else
+
+        await this.ApplyMandatoryConfigurationUpdatesAsync(contextProvider, loggerFactory).ConfigureAwait(false);
+        return contextProvider;
+    }
+
+    /// <summary>
+    /// Applies the pending mandatory configuration updates of an existing database, in the same way as the schema update:
+    /// automatically under the same condition, otherwise after asking the user. The game servers may require their data,
+    /// and the owner might not apply them on the admin panel before the servers are started.
+    /// </summary>
+    /// <param name="contextProvider">The context provider of the server.</param>
+    /// <param name="loggerFactory">The logger factory.</param>
+    /// <exception cref="StartupCancelledException">The user declined the updates.</exception>
+    private async Task ApplyMandatoryConfigurationUpdatesAsync(PersistenceContextProvider contextProvider, ILoggerFactory loggerFactory)
+    {
+        if (!await contextProvider.ConfigurationExistsAsync().ConfigureAwait(false))
         {
-            // everything is fine and ready
+            // Without data, there is nothing to update; the data initialization installs the updates itself.
+            return;
         }
 
-        return contextProvider;
+        // The changes are not published: nothing listens to them yet, and the change listener
+        // would require the context provider which is created right now.
+        var updateContextProvider = new PersistenceContextProvider(loggerFactory, null);
+        var plugInManager = await CreateUpdatePlugInManagerAsync(updateContextProvider, loggerFactory).ConfigureAwait(false);
+        var updateService = new DataUpdateService(updateContextProvider, plugInManager);
+        var updates = await updateService.DetermineMandatoryUpdatesAsync().ConfigureAwait(false);
+        if (updates.Count == 0)
+        {
+            return;
+        }
+
+        Console.WriteLine("The following mandatory configuration updates need to be applied before the server can be started:");
+        foreach (var update in updates)
+        {
+            Console.WriteLine($"  - {update.Name}");
+        }
+
+        if (await ShouldUpdateAutomaticallyAsync(contextProvider).ConfigureAwait(false))
+        {
+            Console.WriteLine("Updating...");
+        }
+        else
+        {
+            Console.WriteLine("Apply updates? (y/n)");
+            var key = Console.ReadLine()?.ToLowerInvariant();
+            if (key != "y")
+            {
+                throw new StartupCancelledException("Cancelled the configuration update process, can't start the server.");
+            }
+        }
+
+        await updateService.ApplyUpdatesAsync(updates, new Progress<(Guid CurrentUpdatingKey, bool IsCompleted)>()).ConfigureAwait(false);
+        Console.WriteLine("The mandatory configuration updates have been successfully applied.");
     }
 
     private async Task ReadSystemConfigurationAsync(IPersistenceContextProvider persistenceContextProvider)
@@ -519,6 +844,27 @@ internal sealed class Program : IDisposable
         if (config != null)
         {
             _systemConfiguration = config;
+        }
+
+        ServerTimeZone = this.ResolveServerTimeZone(_systemConfiguration?.TimeZoneId);
+    }
+
+    private TimeZoneInfo ResolveServerTimeZone(string? timeZoneId)
+    {
+        if (string.IsNullOrWhiteSpace(timeZoneId))
+        {
+            return TimeZoneInfo.Utc;
+        }
+
+        try
+        {
+            // FindSystemTimeZoneById accepts both IANA and Windows ids on all platforms since .NET 6 (ICU).
+            return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        }
+        catch (Exception ex) when (ex is TimeZoneNotFoundException or InvalidTimeZoneException)
+        {
+            this._logger.Warning(ex, "Could not resolve configured server time zone '{TimeZoneId}'. Falling back to UTC.", timeZoneId);
+            return TimeZoneInfo.Utc;
         }
     }
 

@@ -5,8 +5,7 @@
 namespace MUnique.OpenMU.GameLogic.PlugIns.ChatCommands;
 
 using System.Runtime.InteropServices;
-using MUnique.OpenMU.GameLogic.Attributes;
-using MUnique.OpenMU.GameLogic.Views.Character;
+using MUnique.OpenMU.GameLogic.Administration;
 using MUnique.OpenMU.PlugIns;
 
 /// <summary>
@@ -15,7 +14,7 @@ using MUnique.OpenMU.PlugIns;
 [Guid("4BE779C9-E6B6-47F2-BC23-2E71D82A6C1D")]
 [PlugIn]
 [Display(Name = nameof(PlugInResources.SetLevelChatCommandPlugIn_Name), Description = nameof(PlugInResources.SetLevelChatCommandPlugIn_Description), ResourceType = typeof(PlugInResources))]
-[ChatCommandHelp(Command, "Sets level of a player. Usage: /setlevel (level) (optional:character)", null)]
+[ChatCommandHelp(Command, typeof(Arguments), MinimumStatus)]
 public class SetLevelChatCommandPlugIn : ChatCommandPlugInBase<SetLevelChatCommandPlugIn.Arguments>, IDisabledByDefault
 {
     private const string Command = "/setlevel";
@@ -53,9 +52,7 @@ public class SetLevelChatCommandPlugIn : ChatCommandPlugInBase<SetLevelChatComma
             return;
         }
 
-        targetPlayer.Attributes![Stats.Level] = checked(arguments.Level);
-        await targetPlayer.InvokeViewPlugInAsync<IUpdateLevelPlugIn>(p => p.UpdateLevelAsync()).ConfigureAwait(false);
-        await targetPlayer.ForEachWorldObserverAsync<IShowEffectPlugIn>(p => p.ShowEffectAsync(targetPlayer, IShowEffectPlugIn.EffectType.LevelUp), true).ConfigureAwait(false);
+        await GameMasterActions.SetLevelAsync(targetPlayer, arguments.Level, false).ConfigureAwait(false);
         await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.SetLevelResult), arguments.Level).ConfigureAwait(false);
     }
 

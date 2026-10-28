@@ -8,6 +8,7 @@ using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Attributes;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
 
 /// <summary>
 /// Initializer for the berserker buff effect.
@@ -30,12 +31,13 @@ public class BerserkerEffectInitializer : InitializerBase
         var magicEffect = this.Context.CreateNew<MagicEffectDefinition>();
         this.GameConfiguration.MagicEffects.Add(magicEffect);
         magicEffect.Number = (short)MagicEffectNumber.Berserker;
-        magicEffect.Name = "Berserker Buff Skill Effect";
+        magicEffect.Name = LocalizedString.FromResource(() => MagicEffectNames.BerserkerBuffSkillEffect);
         magicEffect.InformObservers = true;
         magicEffect.SendDuration = false;
         magicEffect.StopByDeath = true;
         magicEffect.Duration = this.Context.CreateNew<PowerUpDefinitionValue>();
         magicEffect.Duration.ConstantValue.Value = 30; // 30 Seconds
+        magicEffect.Duration.MaximumValue = 180;
 
         var durationPerEnergy = this.Context.CreateNew<AttributeRelationship>();
         durationPerEnergy.InputAttribute = Stats.TotalEnergy.GetPersistent(this.GameConfiguration);
@@ -48,6 +50,7 @@ public class BerserkerEffectInitializer : InitializerBase
         magicEffect.PowerUpDefinitions.Add(manaPowerUpDefinition);
         manaPowerUpDefinition.TargetAttribute = Stats.BerserkerManaMultiplier.GetPersistent(this.GameConfiguration);
         manaPowerUpDefinition.Boost = this.Context.CreateNew<PowerUpDefinitionValue>();
+        manaPowerUpDefinition.Boost.MaximumValue = 1f; // 100% increase
 
         var manaMultiplier = this.Context.CreateNew<AttributeRelationship>();
         manaMultiplier.InputAttribute = Stats.TotalEnergy.GetPersistent(this.GameConfiguration);

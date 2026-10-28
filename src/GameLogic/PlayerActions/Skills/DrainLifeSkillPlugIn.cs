@@ -24,13 +24,28 @@ public class DrainLifeSkillPlugIn : IAreaSkillPlugIn
     /// <inheritdoc/>
     public async ValueTask AfterTargetGotAttackedAsync(IAttacker attacker, IAttackable target, SkillEntry skillEntry, Point targetAreaCenter, HitInfo? hitInfo)
     {
+        var isMiss = hitInfo is { HealthDamage: 0, ShieldDamage: 0 };
         if (attacker is not Player attackerPlayer
-            || hitInfo is not { HealthDamage: > 0 }
-            || attackerPlayer.Attributes is not { } playerAttributes)
+            || attackerPlayer.Attributes is not { } playerAttributes
+            || hitInfo is not { } hit
+            || isMiss)
         {
             return;
         }
 
-        playerAttributes[Stats.CurrentHealth] = (uint)Math.Min(playerAttributes[Stats.MaximumHealth], playerAttributes[Stats.CurrentHealth] + hitInfo.Value.HealthDamage);
+        var restoreHealth = playerAttributes[Stats.DrainLifeStrBonusHealing];
+
+        if (target is Player)
+        {
+            restoreHealth += (attackerPlayer.Attributes[Stats.TotalEnergy] / 23) + (hit.TotalDamage * 0.1f);
+        }
+        else
+        {
+            restoreHealth += (attackerPlayer.Attributes[Stats.TotalEnergy] / 15) + (target.Attributes[Stats.Level] / 2.5f);
+        }
+
+        playerAttributes[Stats.CurrentHealth] = (uint)Math.Min(
+            playerAttributes[Stats.MaximumHealth],
+            playerAttributes[Stats.CurrentHealth] + restoreHealth);
     }
 }

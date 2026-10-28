@@ -1,9 +1,12 @@
-﻿// <copyright file="PartyRequestAction.cs" company="MUnique">
+// <copyright file="PartyRequestAction.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace MUnique.OpenMU.GameLogic.PlayerActions.Party;
 
+using System.ComponentModel;
+using MUnique.OpenMU.GameLogic.MuHelper;
+using MUnique.OpenMU.GameLogic.PlugIns;
 using MUnique.OpenMU.GameLogic.Views.Party;
 
 /// <summary>
@@ -25,8 +28,26 @@ public class PartyRequestAction
             return;
         }
 
+        if (await IsPartyDeniedAsync(player, toRequest).ConfigureAwait(false))
+        {
+            return;
+        }
+
         if (toRequest.Party != null || toRequest.LastPartyRequester != null)
         {
+            // A server-side bot is asked as well when it is a plain member of its (bot) party: a living
+            // player takes precedence over the bot's own company, so it leaves that party and joins the
+            // inviter (see BotPartyHandler). Everyone else keeps the original rule - only the master of a
+            // party can answer an invitation.
+            var isBot = toRequest.Account?.IsBot == true;
+            if (toRequest.Party != null && (isBot || Equals(toRequest.Party.PartyMaster, toRequest)))
+            {
+                if (await PartyRequestHandler.TryAutoAcceptPartyRequestAsync(toRequest, player).ConfigureAwait(false))
+                {
+                    return;
+                }
+            }
+
             await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.PlayerIsAlreadyInParty), toRequest.Name).ConfigureAwait(false);
             return;
         }
@@ -37,11 +58,40 @@ public class PartyRequestAction
             return;
         }
 
+        if (toRequest is Offline.OfflinePlayer)
+        {
+            if (await PartyRequestHandler.TryAutoAcceptPartyRequestAsync(toRequest, player).ConfigureAwait(false))
+            {
+                return;
+            }
+
+            await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.PlayerIsAlreadyInParty), toRequest.Name).ConfigureAwait(false);
+            return;
+        }
+
         if (await toRequest.PlayerState.TryAdvanceToAsync(PlayerState.PartyRequest).ConfigureAwait(false))
         {
             await this.SendPartyRequestAsync(toRequest, player).ConfigureAwait(false);
             await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.RequestedPlayerForParty), toRequest.Name).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// Determines whether a <see cref="IPartyRequestingPlugIn"/> denies the party between the players.
+    /// </summary>
+    /// <param name="requester">The player which requested the party.</param>
+    /// <param name="target">The requested player.</param>
+    /// <returns><c>true</c>, if the party is denied; otherwise, <c>false</c>.</returns>
+    internal static async ValueTask<bool> IsPartyDeniedAsync(Player requester, Player target)
+    {
+        if (requester.GameContext.PlugInManager.GetPlugInPoint<IPartyRequestingPlugIn>() is not { } plugInPoint)
+        {
+            return false;
+        }
+
+        var eventArgs = new CancelEventArgs();
+        await plugInPoint.PartyRequestingAsync(requester, target, eventArgs).ConfigureAwait(false);
+        return eventArgs.Cancel;
     }
 
     private async ValueTask SendPartyRequestAsync(IPartyMember toRequest, IPartyMember requester)
@@ -52,6 +102,15 @@ public class PartyRequestAction
         }
 
         toRequest.LastPartyRequester = requester;
+
+        if (toRequest is Player receiver && requester is Player requesterPlayer)
+        {
+            if (await PartyRequestHandler.TryAutoAcceptPartyRequestAsync(receiver, requesterPlayer).ConfigureAwait(false))
+            {
+                return;
+            }
+        }
+
         await toRequest.InvokeViewPlugInAsync<IShowPartyRequestPlugIn>(p => p.ShowPartyRequestAsync(requester)).ConfigureAwait(false);
     }
 }

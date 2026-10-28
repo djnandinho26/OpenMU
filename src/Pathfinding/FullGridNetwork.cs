@@ -18,7 +18,7 @@ public class FullGridNetwork : BaseGridNetwork
     /// </summary>
     /// <param name="allowDiagonals">If set to <c>true</c>, diagonal traveling is allowed.</param>
     public FullGridNetwork(bool allowDiagonals)
-        :base(allowDiagonals)
+        : base(allowDiagonals)
     {
         this._nodes = new Node[0x10000];
     }
@@ -40,9 +40,10 @@ public class FullGridNetwork : BaseGridNetwork
     /// <inheritdoc/>
     public override bool Prepare(Point start, Point end, byte[,] grid, bool includeSafezone)
     {
-        foreach (var node in this._nodes.Where(n => n != null))
+        var nodes = this._nodes;
+        for (int i = 0; i < nodes.Length; i++)
         {
-            node.Status = NodeStatus.Undefined;
+            nodes[i]?.Status = NodeStatus.Undefined;
         }
 
         return base.Prepare(start, end, grid, includeSafezone);

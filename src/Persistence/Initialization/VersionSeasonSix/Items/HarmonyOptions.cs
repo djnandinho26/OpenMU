@@ -9,6 +9,8 @@ using MUnique.OpenMU.DataModel.Attributes;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.DataModel.Configuration.Items;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.Interfaces;
+using MUnique.OpenMU.Persistence.Initialization.Properties;
 
 /// <summary>
 /// Initializer for harmony options.
@@ -78,7 +80,7 @@ public class HarmonyOptions : InitializerBase
     {
         var definition = this.Context.CreateNew<ItemOptionDefinition>();
         this.GameConfiguration.ItemOptions.Add(definition);
-        definition.Name = WizardryAttackOptionsName;
+        definition.Name = LocalizedString.FromResource(() => ItemOptionNames.HarmonyWizardryAttackOptions);
         definition.MaximumOptionsPerItem = 1;
 
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(1, ItemOptionDefinitionNumbers.HarmonyWizardry, 40, Stats.WizardryBaseDmg, AggregateType.AddRaw, 0, 6, 8, 10, 12, 14, 16, 17, 18, 19, 21, 23, 25, 27, 31));
@@ -95,14 +97,14 @@ public class HarmonyOptions : InitializerBase
     {
         var definition = this.Context.CreateNew<ItemOptionDefinition>();
         this.GameConfiguration.ItemOptions.Add(definition);
-        definition.Name = PhysicalAttackOptionsName;
+        definition.Name = LocalizedString.FromResource(() => ItemOptionNames.HarmonyPhysicalAttackOptions);
         definition.MaximumOptionsPerItem = 1;
 
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(1, ItemOptionDefinitionNumbers.HarmonyPhysical, 40, Stats.MinimumPhysBaseDmg, AggregateType.AddRaw, 0, 2, 3, 4, 5, 6, 7, 9, 11, 12, 14, 15, 16, 17, 20));
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(2, ItemOptionDefinitionNumbers.HarmonyPhysical, 40, Stats.MaximumPhysBaseDmg, AggregateType.AddRaw, 0, 3, 4, 5, 6, 7, 8, 10, 12, 14, 17, 20, 23, 26, 29));
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(3, ItemOptionDefinitionNumbers.HarmonyPhysical, 40, Stats.RequiredStrengthReduction, AggregateType.AddRaw, 0, 6, 8, 10, 12, 14, 16, 20, 23, 26, 29, 32, 35, 37, 40));
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(4, ItemOptionDefinitionNumbers.HarmonyPhysical, 40, Stats.RequiredAgilityReduction, AggregateType.AddRaw, 0, 6, 8, 10, 12, 14, 16, 20, 23, 26, 29, 32, 35, 37, 40));
-        definition.PossibleOptions.Add(this.CreateHarmonyOptions(5, ItemOptionDefinitionNumbers.HarmonyPhysical, 30, Stats.PhysicalBaseDmg, AggregateType.AddRaw, 6, 7, 8, 9, 11, 12, 14, 16, 19));
+        definition.PossibleOptions.Add(this.CreateHarmonyOptions(5, ItemOptionDefinitionNumbers.HarmonyPhysical, 30, Stats.PhysicalBaseDmg, AggregateType.AddFinal, 6, 7, 8, 9, 11, 12, 14, 16, 19));
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(6, ItemOptionDefinitionNumbers.HarmonyPhysical, 30, Stats.CriticalDamageBonus, AggregateType.AddRaw, 6, 12, 14, 16, 18, 20, 22, 24, 30));
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(7, ItemOptionDefinitionNumbers.HarmonyPhysical, 20, Stats.SkillDamageBonus, AggregateType.AddRaw, 9, 12, 14, 16, 18, 22));
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(8, ItemOptionDefinitionNumbers.HarmonyPhysical, 20, Stats.AttackRatePvp, AggregateType.AddRaw, 9, 5, 7, 9, 11, 14));
@@ -114,7 +116,7 @@ public class HarmonyOptions : InitializerBase
     {
         var definition = this.Context.CreateNew<ItemOptionDefinition>();
         this.GameConfiguration.ItemOptions.Add(definition);
-        definition.Name = DefenseOptionsName;
+        definition.Name = LocalizedString.FromResource(() => ItemOptionNames.HarmonyDefenseOptions);
         definition.MaximumOptionsPerItem = 1;
 
         definition.PossibleOptions.Add(this.CreateHarmonyOptions(1, ItemOptionDefinitionNumbers.HarmonyDefense, 50, Stats.DefenseBase, AggregateType.AddFinal, 0, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 22, 25));

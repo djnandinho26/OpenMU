@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <PacketDefinitions xmlns="http://www.munique.net/OpenMU/PacketDefinitions">
   <Description>This file contains all packet definitions for packets which are sent from game client to the game server.</Description>
   <Structures>
@@ -394,6 +394,42 @@
           <Type>String</Type>
           <Name>PlayerName</Name>
           <Length>10</Length>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C3HeaderWithSubCode</HeaderType>
+      <Code>3F</Code>
+      <SubCode>09</SubCode>
+      <Name>PlayerShopSetItemPriceExtended</Name>
+      <Caption>Player Shop - Set Item Price (extended)</Caption>
+      <Length>13</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>The player wants to set a price of an item which is inside his personal item shop, in zen or in one of the price types which are allowed by the server (see PlayerShopPriceTypesExtended).</SentWhen>
+      <CausedReaction>The price is set for the specified item, if its price type is allowed and the amount is within the configured limits. Works only if the shop is currently closed. The server responds with a PlayerShopSetItemPriceResponse.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>MoneyPrice</Name>
+          <Description>The price in zen, or in account coins when PriceItemType is one of the account coin values. Encoded like the price of PlayerShopItemExtended.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>PriceItemType</Name>
+          <Description>The item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, when RequiredItemAmount is greater than 0. Otherwise, 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P) and 0xFFF2 = Goblin Points define an account coin price; any other value a zen price. Encoded like the price of PlayerShopItemExtended.</Description>
+        </Field>
+        <Field>
+          <Index>10</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>RequiredItemAmount</Name>
+          <Description>The number of pieces of the item which is defined by PriceItemType; 0, if the price is not paid with items. Encoded like the price of PlayerShopItemExtended.</Description>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>Byte</Type>
+          <Name>ItemSlot</Name>
         </Field>
       </Fields>
     </Packet>
@@ -1020,14 +1056,15 @@
       <Fields>
         <Field>
           <Index>4</Index>
-          <Type>Byte</Type>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeTaxType</TypeName>
           <Name>TaxType</Name>
-          <Description>0=Undefined, 1=ChaosMachine, 2 = Normal, 3 = EntranceFeeLandOfTrials</Description>
         </Field>
         <Field>
           <Index>5</Index>
           <Type>IntegerBigEndian</Type>
-          <Name>TaxRate</Name>
+          <Name>TaxValue</Name>
+          <Description>The percentage rate for shop and Chaos Machine taxes, or the entrance fee amount for the hunting zone.</Description>
         </Field>
       </Fields>
     </Packet>
@@ -1061,7 +1098,7 @@
         <Field>
           <Index>4</Index>
           <Type>Boolean</Type>
-          <Name>CloseState</Name>
+          <Name>IsOpen</Name>
         </Field>
         <Field>
           <Index>5</Index>
@@ -1098,9 +1135,9 @@
         </Field>
         <Field>
           <Index>7</Index>
-          <Type>Byte</Type>
+          <Type>Enum</Type>
+          <TypeName>CastleSiegeGuildCommandType</TypeName>
           <Name>Command</Name>
-          <Description>0 = Attack, 1 = Defend, 2 = Wait</Description>
         </Field>
       </Fields>
     </Packet>
@@ -2317,7 +2354,7 @@
       <Name>MagicEffectCancelRequest</Name>
       <Length>7</Length>
       <Direction>ClientToServer</Direction>
-      <SentWhen>A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardy Enhance'.</SentWhen>
+      <SentWhen>A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardry Enhance'.</SentWhen>
       <CausedReaction>The effect is cancelled and an update is sent to the player and all surrounding players.</CausedReaction>
       <Fields>
         <Field>
@@ -3129,6 +3166,7 @@
           <Index>4</Index>
           <Type>String</Type>
           <Name>GuildName</Name>
+          <Length>8</Length>
         </Field>
       </Fields>
     </Packet>
@@ -3878,7 +3916,7 @@
       <CausedReaction>The server checks if the player is not in a gens already and joins the player to the selected gens.</CausedReaction>
       <Fields>
         <Field>
-          <Index>3</Index>
+          <Index>4</Index>
           <Type>Enum</Type>
           <TypeName>GensType</TypeName>
           <Name>GensType</Name>
@@ -3907,7 +3945,7 @@
       <CausedReaction>The server checks if the player has enough points to get the reward, and sends a response.</CausedReaction>
       <Fields>
         <Field>
-          <Index>3</Index>
+          <Index>4</Index>
           <Type>Enum</Type>
           <TypeName>GensType</TypeName>
           <Name>GensType</Name>
@@ -4251,6 +4289,54 @@
       <Fields>
       </Fields>
     </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>00</SubCode>
+      <Name>ChatCommandListRequest</Name>
+      <Caption>Request chat command list</Caption>
+      <Length>4</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>A client which supports a user interface for chat commands requests the list of commands which are available to the player. It's usually sent after the character entered the game world.</SentWhen>
+      <CausedReaction>The server sends an AvailableChatCommand message for each available chat command.</CausedReaction>
+      <Fields />
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>02</SubCode>
+      <Name>DiscordIntegrationInfoRequest</Name>
+      <Caption>Request Discord integration info</Caption>
+      <Length>4</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>A client which supports the Discord integration requests how the server is connected to Discord. It's usually sent after the character entered the game world, and again when the player opens a Discord dialog. By sending it, the client also announces that it understands the ExternalChatMessage.</SentWhen>
+      <CausedReaction>The server sends a DiscordIntegrationInfo message, and from then on sends messages which were written in Discord as ExternalChatMessage.</CausedReaction>
+      <Fields />
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>04</SubCode>
+      <Name>DiscordLinkCodeRequest</Name>
+      <Caption>Request Discord link code</Caption>
+      <Length>4</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>The player wants to link the account to a Discord user, e.g. with a button of a Discord dialog.</SentWhen>
+      <CausedReaction>The server creates a one-time code and sends it with a DiscordLinkCode message. The player enters the code in Discord to complete the link.</CausedReaction>
+      <Fields />
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>F5</Code>
+      <SubCode>06</SubCode>
+      <Name>DiscordUnlinkRequest</Name>
+      <Caption>Request Discord unlink</Caption>
+      <Length>4</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>The player wants to remove the link of the account to a Discord user.</SentWhen>
+      <CausedReaction>The server removes the link and sends an updated DiscordIntegrationInfo message.</CausedReaction>
+      <Fields />
+    </Packet>
   </Packets>
   <Enums>
     <Enum>
@@ -4421,6 +4507,53 @@
         <EnumValue>
           <Name>Leave</Name>
           <Description>The leave type.</Description>
+          <Value>2</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeTaxType</Name>
+      <Description>Defines the castle tax or fee being changed.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Undefined</Name>
+          <Description>No tax type is selected.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>ChaosMachine</Name>
+          <Description>The Chaos Machine tax rate.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Store</Name>
+          <Description>The NPC store tax rate.</Description>
+          <Value>2</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>HuntingZoneEntranceFee</Name>
+          <Description>The hunting-zone entrance fee.</Description>
+          <Value>3</Value>
+        </EnumValue>
+      </Values>
+    </Enum>
+    <Enum>
+      <Name>CastleSiegeGuildCommandType</Name>
+      <Description>Defines a command placed on the Castle Siege mini-map.</Description>
+      <Values>
+        <EnumValue>
+          <Name>Attack</Name>
+          <Description>Orders the team to attack.</Description>
+          <Value>0</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Defend</Name>
+          <Description>Orders the team to defend.</Description>
+          <Value>1</Value>
+        </EnumValue>
+        <EnumValue>
+          <Name>Wait</Name>
+          <Description>Orders the team to wait.</Description>
           <Value>2</Value>
         </EnumValue>
       </Values>

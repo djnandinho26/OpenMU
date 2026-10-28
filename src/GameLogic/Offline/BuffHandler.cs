@@ -5,6 +5,8 @@
 namespace MUnique.OpenMU.GameLogic.Offline;
 
 using MUnique.OpenMU.DataModel.Entities;
+using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.GameLogic.Bots;
 using MUnique.OpenMU.GameLogic.MuHelper;
 using MUnique.OpenMU.GameLogic.PlayerActions.Skills;
 using MUnique.OpenMU.GameLogic.PlugIns;
@@ -25,6 +27,8 @@ public sealed class BuffHandler
     private int _nextSlotIndex;
     private bool _buffTimerTriggered;
     private DateTime? _nextPeriodicBuffTime;
+    private IList<int>? _cachedAutoBuffIds;
+    private int _cachedAutoBuffSkillCount = -1;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BuffHandler"/> class.
@@ -38,7 +42,9 @@ public sealed class BuffHandler
     }
 
     /// <summary>
-    /// Gets the configured buff skill IDs from the settings.
+    /// Gets the configured buff skill IDs from the settings. With <see cref="IMuHelperSettings.AutoSelectBuffs"/>
+    /// enabled (server-side bots), the character's learned buff skills are used instead of the explicitly
+    /// configured slots, so each class keeps its own buffs up without any per-character configuration.
     /// </summary>
     public IList<int> ConfiguredBuffIds
     {
@@ -47,6 +53,34 @@ public sealed class BuffHandler
             if (this._config is null)
             {
                 return [];
+            }
+
+            if (this._config.AutoSelectBuffs && this._player.SkillList is { } skillList)
+            {
+                // The learned buffs only change when a new skill is learned, so the list is cached and
+                // only rebuilt when the skill count changes - building it fresh with LINQ on every
+                // 500ms tick of hundreds of bots was measurable CPU for no benefit.
+                var skillCount = skillList.Skills.Count();
+                if (this._cachedAutoBuffIds is null || skillCount != this._cachedAutoBuffSkillCount)
+                {
+                    var learnedBuffs = skillList.Skills
+                        .Where(s => s.Skill is { SkillType: SkillType.Buff, MagicEffectDef: not null })
+                        .Select(s => (int)s.Skill!.Number)
+                        .OrderBy(n => n)
+                        .Take(BuffSlotCount)
+                        .ToList();
+
+                    // Pad to the fixed slot count - the caller indexes all three slots; 0 means "slot empty".
+                    while (learnedBuffs.Count < BuffSlotCount)
+                    {
+                        learnedBuffs.Add(0);
+                    }
+
+                    this._cachedAutoBuffIds = learnedBuffs;
+                    this._cachedAutoBuffSkillCount = skillCount;
+                }
+
+                return this._cachedAutoBuffIds;
             }
 
             return [this._config.BuffSkill0Id, this._config.BuffSkill1Id, this._config.BuffSkill2Id];
@@ -70,6 +104,21 @@ public sealed class BuffHandler
             return true;
         }
 
+        // Like for a human player (see TargetedSkillDefaultPlugin), buffs can't be cast in the safezone,
+        // except in mini games like Blood Castle.
+        if (this._player.IsAtSafezone() && this._player.CurrentMiniGame is null)
+        {
+            return true;
+        }
+
+        // A stunned or sleeping player can't cast skills (see TargetedSkillDefaultPlugin).
+        if (this._player.Attributes is not { } attributes
+            || attributes[Stats.IsStunned] > 0
+            || attributes[Stats.IsAsleep] > 0)
+        {
+            return true;
+        }
+
         this.UpdatePeriodicBuffTimer();
 
         for (int i = 0; i < BuffSlotCount; i++)
@@ -82,7 +131,8 @@ public sealed class BuffHandler
             }
 
             var skillEntry = this._player.SkillList?.GetSkill((ushort)buffId);
-            if (skillEntry?.Skill?.MagicEffectDef is null)
+            if (skillEntry?.Skill?.MagicEffectDef is null
+                || !this.CanCast(skillEntry.Skill))
             {
                 continue;
             }
@@ -99,6 +149,22 @@ public sealed class BuffHandler
         this._buffTimerTriggered = false;
         return true;
     }
+
+    /// <summary>
+    /// Whether the character currently meets the skill's own requirements, and can therefore cast it
+    /// at all. A character keeps its skills across a reset but not the level which unlocked them, so a
+    /// veteran back at level 12 still owns Swell Life, which asks for level 120.
+    /// <para>
+    /// Skipping it here is what keeps the whole helper running. A buff which targets the party goes
+    /// through the skill plugin, which refuses an unmet requirement deep inside and silently - and this
+    /// handler reports it as applied regardless. The buff step then ends every tick believing it had
+    /// just buffed, so the steps behind it, picking up loot and attacking, never ran at all: the
+    /// character stood in the world doing nothing, for good.
+    /// </para>
+    /// </summary>
+    /// <param name="skill">The skill to cast.</param>
+    private bool CanCast(Skill skill)
+        => BotProgression.MeetsRequirements(skill, attribute => this._player.Attributes?[attribute]);
 
     /// <summary>
     /// Attempts to apply the buff to self and, if applicable, to party members.
@@ -134,12 +200,30 @@ public sealed class BuffHandler
 
         if (skillEntry.Skill?.Target == SkillTarget.ImplicitParty)
         {
+            // The skill plugin refuses an unaffordable or forbidden cast silently. Reporting such a cast
+            // as applied would end every tick in the buff step, so the helper would never heal, pick up
+            // items or attack again. That's why the costs and the mini game are checked before, and the
+            // effect after the cast.
+            if (!this.IsAllowedInMiniGame(skillEntry.Skill, this._player)
+                || !this._player.HasEnoughResources(skillEntry))
+            {
+                return false;
+            }
+
             var strategy = this._player.GameContext.PlugInManager
-                               .GetStrategy<short, ITargetedSkillPlugin>(skillEntry.Skill!.Number)
+                               .GetStrategy<short, ITargetedSkillPlugin>(skillEntry.Skill.Number)
                            ?? DefaultPlugin;
 
             await strategy.PerformSkillAsync(this._player, this._player, (ushort)skillEntry.Skill.Number).ConfigureAwait(false);
-            return true;
+            return this.IsEffectActive(this._player, skillEntry);
+        }
+
+        // The effect is applied directly instead of through the skill plugin, so the restrictions
+        // of the mini game and the costs (mana, ability) have to be checked here, just like the skill plugin would do.
+        if (!this.IsAllowedInMiniGame(skillEntry.Skill!, this._player)
+            || !await this._player.TryConsumeForSkillAsync(skillEntry).ConfigureAwait(false))
+        {
+            return false;
         }
 
         await this._player.ForEachWorldObserverAsync<IShowSkillAnimationPlugIn>(
@@ -167,9 +251,17 @@ public sealed class BuffHandler
                 continue;
             }
 
-            if (!this.NeedsPartyBuff(member, skillEntry))
+            if (!this.NeedsPartyBuff(member, skillEntry)
+                || !this._player.IsInRange(member.Position, skillEntry.Skill!.Range + 2)
+                || !member.CheckSkillTargetRestrictions(this._player, skillEntry.Skill)
+                || !this.IsAllowedInMiniGame(skillEntry.Skill, member))
             {
                 continue;
+            }
+
+            if (!await this._player.TryConsumeForSkillAsync(skillEntry).ConfigureAwait(false))
+            {
+                return false;
             }
 
             await (member as IObservable ?? this._player).ForEachWorldObserverAsync<IShowSkillAnimationPlugIn>(
@@ -222,6 +314,16 @@ public sealed class BuffHandler
         return this._config!.BuffDurationForParty && this._buffTimerTriggered;
     }
 
+    /// <summary>
+    /// Determines whether the current mini game allows to cast the skill on the target,
+    /// e.g. Chaos Castle doesn't allow to buff other players.
+    /// </summary>
+    private bool IsAllowedInMiniGame(Skill skill, IAttackable target)
+    {
+        return this._player.CurrentMiniGame is not { } miniGame
+               || miniGame.IsSkillAllowed(skill, this._player, target);
+    }
+
     private bool IsSelfOnlySkill(SkillEntry skillEntry)
     {
         if (skillEntry.Skill is not { } skill)
@@ -235,7 +337,10 @@ public sealed class BuffHandler
 
     private bool IsTargetReachable(IAttackable target)
     {
-        return target.IsActive() && this._player.IsInRange(target, this._config!.HuntingRange);
+        // The range only compares the coordinates, so a party member on another map could be in range, too.
+        return target.IsActive()
+               && target.CurrentMap == this._player.CurrentMap
+               && this._player.IsInRange(target, this._config!.HuntingRange);
     }
 
     private bool IsEffectActive(IAttackable target, SkillEntry skillEntry)
@@ -246,8 +351,7 @@ public sealed class BuffHandler
             return false;
         }
 
-        return target.MagicEffectList.ActiveEffects.Values
-            .Any(e => e.Definition == effectDef);
+        return target.MagicEffectList.HasEffect(effectDef);
     }
 
     private void UpdatePeriodicBuffTimer()

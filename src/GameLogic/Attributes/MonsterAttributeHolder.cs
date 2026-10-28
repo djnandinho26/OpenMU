@@ -17,10 +17,11 @@ public class MonsterAttributeHolder : IAttributeSystem
         new Dictionary<AttributeDefinition, Func<AttackableNpcBase, float>>
         {
             { Stats.CurrentHealth, m => m.Health },
-            { Stats.DefensePvm, m => m.Attributes.GetValueOfAttribute(Stats.DefenseBase) + ((m as Monster)?.SummonedBy?.Attributes?[Stats.SummonedMonsterDefenseIncrease] ?? 0) },
-            { Stats.DefensePvp, m => m.Attributes.GetValueOfAttribute(Stats.DefenseBase) + ((m as Monster)?.SummonedBy?.Attributes?[Stats.SummonedMonsterDefenseIncrease] ?? 0) },
+            { Stats.DefensePvm, m => m.Attributes.GetValueOfAttribute(Stats.DefenseBase) * (1 + ((m as Monster)?.SummonedBy?.Attributes?[Stats.SummonedMonsterDefenseIncrease] ?? 0)) },
+            { Stats.DefensePvp, m => m.Attributes.GetValueOfAttribute(Stats.DefenseBase) * (1 + ((m as Monster)?.SummonedBy?.Attributes?[Stats.SummonedMonsterDefenseIncrease] ?? 0)) },
             { Stats.DamageReceiveDecrement, m => 1.0f },
             { Stats.AttackDamageIncrease, m => 1.0f },
+            { Stats.MovementSpeedFactor, m => 1.0f },
             { Stats.ShieldBypassChance, m => 1.0f },
             { Stats.DefenseDecrement, m => 1.0f - m.Attributes.GetValueOfAttribute(Stats.InnovationDefDecrement) },
         };
@@ -84,6 +85,17 @@ public class MonsterAttributeHolder : IAttributeSystem
             return attribute.Value;
         }
 
+        // A spawn area can override the maximum health of its npc (e.g. the blood castle gate
+        // and statue, or summoned monsters). AttackableNpcBase.Initialize starts them off with
+        // that health, so the maximum has to be reported accordingly. Otherwise every
+        // percentage-based readout divides the real health by the unrelated, usually much higher
+        // value of the monster definition.
+        if (attributeDefinition == Stats.MaximumHealth
+            && this._monster.SpawnArea.MaximumHealthOverride is { } maximumHealthOverride)
+        {
+            return maximumHealthOverride;
+        }
+
         if (this._statAttributes.TryGetValue(attributeDefinition, out float value))
         {
             return value;
@@ -131,7 +143,7 @@ public class MonsterAttributeHolder : IAttributeSystem
         if (attributes.TryGetValue(targetAttribute, out var attribute))
         {
             attribute.RemoveElement(element);
-            if (attribute.Elements.Skip(1).Take(1).Any())
+            if (!attribute.Elements.Skip(1).Any())
             {
                 attributes.Remove(targetAttribute);
             }
@@ -153,9 +165,28 @@ public class MonsterAttributeHolder : IAttributeSystem
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// This is required when a monster attacks with a skill which has attribute relationships, e.g. a skill
+    /// damage multiplier which depends on the <see cref="Stats.SkillMultiplier"/> of the monster.
+    /// The stats of a monster are fixed, so they're returned as constant. Attributes which got elements added,
+    /// e.g. by a magic effect, are returned as they are, so that they stay up to date.
+    /// Note that the constant is a snapshot: a relationship which is created from it doesn't see elements
+    /// which are added to the same attribute later. So it shouldn't be used for stats which change at runtime.
+    /// </remarks>
     public IElement GetOrCreateAttribute(AttributeDefinition attributeDefinition)
     {
-        throw new NotImplementedException();
+        IDictionary<AttributeDefinition, IComposableAttribute>? attributes;
+        lock (this._attributesLock)
+        {
+            attributes = this._attributes;
+        }
+
+        if (attributes is not null && attributes.TryGetValue(attributeDefinition, out var attribute))
+        {
+            return attribute;
+        }
+
+        return new ConstantElement(this.GetValueOfAttribute(attributeDefinition));
     }
 
     /// <summary>

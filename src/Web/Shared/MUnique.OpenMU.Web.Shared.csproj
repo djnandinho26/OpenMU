@@ -21,10 +21,6 @@
     <None Remove="wwwroot\js\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="compilerconfig.json" />
-  </ItemGroup>
-  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>..\..\..\bin\Debug\</OutputPath>
     <DocumentationFile>..\..\..\bin\Debug\MUnique.OpenMU.Web.Shared.xml</DocumentationFile>
@@ -38,7 +34,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <None Include="compilerconfig.json" />
     <None Include="wwwroot\css\open-iconic\FONT-LICENSE" />
     <None Include="wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
     <None Include="wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />
@@ -51,17 +46,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" />
-    <PackageReference Include="Blazored.Modal" />
-    <PackageReference Include="Blazored.Toast" />
     <PackageReference Include="BlazorInputFile" />
     <PackageReference Include="Mapster" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" />
     <PackageReference Include="Nito.AsyncEx" />
-    <PackageReference Include="SixLabors.ImageSharp" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" />
   </ItemGroup>
 
   <ItemGroup>
@@ -78,22 +71,11 @@
     </Compile>
   </ItemGroup>
 
-    <ItemGroup Condition="'$(ci)'!='true' and '$(OS)'=='Windows_NT'">
-        <PackageReference Include="BuildWebCompiler2022" />
-    </ItemGroup>
-
   <ItemGroup>
+    <ProjectReference Include="../AdminPanel.Operations/MUnique.OpenMU.Web.AdminPanel.Operations.csproj" />
     <ProjectReference Include="..\..\GameLogic\MUnique.OpenMU.GameLogic.csproj" />
     <ProjectReference Include="..\..\Persistence\MUnique.OpenMU.Persistence.csproj" />
     <ProjectReference Include="..\ItemEditor\MUnique.OpenMU.Web.ItemEditor.csproj" />
   </ItemGroup>
-
-  <Target Name="CompileSass" BeforeTargets="Build" Condition="'$(ci)'!='true' and '$(OS)'!='Windows_NT'">
-    <Exec Command="sass --version" IgnoreExitCode="true">
-      <Output TaskParameter="ExitCode" PropertyName="SassExists"/>
-    </Exec>
-    <Error Condition="'$(SassExists)'!='0'" Text="Dart Sass not installed. Install with: npm install -g sass."/>
-    <Exec Command="sass Styles/Site.scss:wwwroot/css/shared.css --style=expanded --no-source-map" />
-  </Target>
 
 </Project>

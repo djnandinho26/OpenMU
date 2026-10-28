@@ -7,7 +7,7 @@ namespace MUnique.OpenMU.Startup;
 using System.Threading;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MUnique.OpenMU.Web.AdminPanel.Services;
+using MUnique.OpenMU.Persistence;
 
 /// <summary>
 /// Base class for a server container, which reacts on database recreations.
@@ -32,6 +32,7 @@ public abstract class ServerContainerBase : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await this.StartInnerAsync(cancellationToken).ConfigureAwait(false);
+        this._setupService.DatabaseInitializing += this.OnDatabaseInitializingAsync;
         this._setupService.DatabaseInitialized += this.OnDatabaseInitializedAsync;
     }
 
@@ -39,6 +40,7 @@ public abstract class ServerContainerBase : IHostedService
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         await this.StopInnerAsync(cancellationToken).ConfigureAwait(false);
+        this._setupService.DatabaseInitializing -= this.OnDatabaseInitializingAsync;
         this._setupService.DatabaseInitialized -= this.OnDatabaseInitializedAsync;
     }
 
@@ -46,7 +48,6 @@ public abstract class ServerContainerBase : IHostedService
     /// Restarts all servers of this container.
     /// </summary>
     /// <param name="onDatabaseInit">If set to <c>true</c>, this method is called during a database initialization.</param>
-    /// <returns></returns>
     public virtual async ValueTask RestartAllAsync(bool onDatabaseInit)
     {
         await this.StopAsync(default).ConfigureAwait(false);
@@ -78,17 +79,31 @@ public abstract class ServerContainerBase : IHostedService
     /// </summary>
     /// <param name="onDatabaseInit">If set to <c>true</c>, this method is called during a database initialization.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns></returns>
     protected virtual async ValueTask BeforeStartAsync(bool onDatabaseInit, CancellationToken cancellationToken)
     {
         // can be overwritten
+    }
+
+    private async ValueTask OnDatabaseInitializingAsync()
+    {
+        try
+        {
+            // The database is dropped and created again. We stop the servers before that happens,
+            // so that they don't run into errors while they access the non-existing database.
+            // They are started again when the initialization finished.
+            await this.StopInnerAsync(default).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            this._logger.LogError(exception, "Unexpected error when stopping the servers for the database creation.");
+        }
     }
 
     private async ValueTask OnDatabaseInitializedAsync()
     {
         try
         {
-            await this.RestartAllAsync(true);
+            await this.RestartAllAsync(true).ConfigureAwait(false);
         }
         catch (Exception exception)
         {

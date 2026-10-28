@@ -12,10 +12,11 @@ using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.GameServer;
 using MUnique.OpenMU.Interfaces;
 using MUnique.OpenMU.Network;
+using MUnique.OpenMU.Network.Analyzer.Archive;
 using MUnique.OpenMU.Network.PlugIns;
 using MUnique.OpenMU.Persistence;
+using MUnique.OpenMU.Persistence.Initialization;
 using MUnique.OpenMU.PlugIns;
-using MUnique.OpenMU.Web.AdminPanel.Services;
 
 /// <summary>
 /// A container which keeps all <see cref="IGameServer"/>s in one <see cref="IHostedService"/>.
@@ -35,6 +36,9 @@ public sealed class GameServerContainer : ServerContainerBase, IGameServerInstan
     private readonly IConfigurationChangeMediator _changeMediator;
     private readonly IDictionary<int, IGameServer> _gameServers;
     private readonly IEventPublisher _eventPublisher;
+    private readonly IMapHostLocator _mapHostLocator;
+
+    private readonly IPacketArchive? _packetArchive;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GameServerContainer" /> class.
@@ -51,6 +55,8 @@ public sealed class GameServerContainer : ServerContainerBase, IGameServerInstan
     /// <param name="plugInManager">The plug in manager.</param>
     /// <param name="setupService">The setup service.</param>
     /// <param name="changeMediator">The change mediator.</param>
+    /// <param name="gameEventListeners">The listeners for the game events.</param>
+    /// <param name="packetArchive">The archive for the traffic of observed accounts.</param>
     public GameServerContainer(
         ILoggerFactory loggerFactory,
         IList<IManageableServer> servers,
@@ -63,7 +69,9 @@ public sealed class GameServerContainer : ServerContainerBase, IGameServerInstan
         IIpAddressResolver ipResolver,
         PlugInManager plugInManager,
         SetupService setupService,
-        IConfigurationChangeMediator changeMediator)
+        IConfigurationChangeMediator changeMediator,
+        IEnumerable<IGameEventListener> gameEventListeners,
+        IPacketArchive? packetArchive = null)
         : base(setupService, loggerFactory.CreateLogger<GameServerContainer>())
     {
         this._loggerFactory = loggerFactory;
@@ -79,8 +87,15 @@ public sealed class GameServerContainer : ServerContainerBase, IGameServerInstan
         this._changeMediator = changeMediator;
 
         this._logger = this._loggerFactory.CreateLogger<GameServerContainer>();
-        this._eventPublisher = new InMemoryEventPublisher(this._gameServers, this._friendServer, this._guildServer);
+        this._eventPublisher = new InMemoryEventPublisher(this._gameServers, this._friendServer, this._guildServer, gameEventListeners, this._loggerFactory.CreateLogger<InMemoryEventPublisher>());
+        this._mapHostLocator = new InProcessMapHostLocator(this._gameServers);
+        this._packetArchive = packetArchive;
     }
+
+    /// <summary>
+    /// Gets the publisher of the events between the servers of this application.
+    /// </summary>
+    public IEventPublisher EventPublisher => this._eventPublisher;
 
     /// <inheritdoc />
     public void Dispose()
@@ -122,7 +137,7 @@ public sealed class GameServerContainer : ServerContainerBase, IGameServerInstan
     /// <inheritdoc />
     protected override async ValueTask BeforeStartAsync(bool onDatabaseInit, CancellationToken cancellationToken)
     {
-        await base.BeforeStartAsync(onDatabaseInit, cancellationToken);
+        await base.BeforeStartAsync(onDatabaseInit, cancellationToken).ConfigureAwait(false);
         if (!onDatabaseInit)
         {
             (this._persistenceContextProvider as IMigratableDatabaseContextProvider)?.ResetCache();
@@ -157,6 +172,14 @@ public sealed class GameServerContainer : ServerContainerBase, IGameServerInstan
         foreach (var gameServer in this._gameServers.Values)
         {
             await gameServer.StopAsync(cancellationToken).ConfigureAwait(false);
+
+            // The game servers are created again when this container is started, so we dispose them here.
+            // Otherwise, the periodic tasks of their game context (e.g. of the castle siege) would still run.
+            if (gameServer is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            }
+
             this._servers.Remove(gameServer);
         }
 
@@ -166,7 +189,8 @@ public sealed class GameServerContainer : ServerContainerBase, IGameServerInstan
     private void InitializeGameServer(GameServerDefinition gameServerDefinition)
     {
         using var loggerScope = this._logger.BeginScope("GameServer: {0}", gameServerDefinition.ServerID);
-        var gameServer = new GameServer(gameServerDefinition, this._guildServer, this._eventPublisher, this._loginServer, this._persistenceContextProvider, this._friendServer, this._loggerFactory, this._plugInManager, this._changeMediator);
+        var gameServer = new GameServer(gameServerDefinition, this._guildServer, this._eventPublisher, this._loginServer, this._persistenceContextProvider, this._friendServer, this._loggerFactory, this._plugInManager, this._changeMediator, this._packetArchive, this._mapHostLocator);
+        gameServer.Context.ServerTimeZone = Program.ServerTimeZone;
         foreach (var endpoint in gameServerDefinition.Endpoints)
         {
             gameServer.AddListener(new DefaultTcpGameServerListener(endpoint, gameServer.CreateServerInfo(), gameServer.Context, this._connectServerContainer.GetObserver(endpoint.Client!), this._ipResolver, this._loggerFactory));

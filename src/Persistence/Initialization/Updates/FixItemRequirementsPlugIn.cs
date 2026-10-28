@@ -12,13 +12,23 @@ using MUnique.OpenMU.GameLogic.Attributes;
 using MUnique.OpenMU.PlugIns;
 
 /// <summary>
-/// Updates some item requirements for elf bows which were intialized wrongly.
+/// Updates some item requirements for elf bows that were initialized wrongly.
 /// </summary>
 [PlugIn]
-[Display(Name = PlugInName, Description = PlugInDescription)]
+[Display(Name = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixItemRequirementsPlugIn_Name), Description = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixItemRequirementsPlugIn_Description), ResourceType = typeof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources))]
 [Guid("9E8DB2CB-1972-40D3-9129-6964ABFEB4DC")]
 public class FixItemRequirementsPlugIn : UpdatePlugInBase
 {
+    /// <summary>
+    /// The plugin name.
+    /// </summary>
+    internal const string PlugInName = "Fix Item Requirements (Elf Bows)";
+
+    /// <summary>
+    /// The plugin description.
+    /// </summary>
+    internal const string PlugInDescription = "Updates some item requirements for elf bows which were initialized wrongly.";
+
     private static readonly List<(int Group, int Number, int StrengthRequirement, int AgilityRequirement, int EnergyRequirement, int VitalityRequirement)> RequirementCorrections =
     [
         (4, 0, 20, 80, 0, 0), // Short Bow
@@ -68,19 +78,6 @@ public class FixItemRequirementsPlugIn : UpdatePlugInBase
         */
     ];
 
-    /// <summary>
-    /// The plug in name.
-    /// </summary>
-    internal const string PlugInName = "Fix Item Requirements (Elf Bows)";
-
-    /// <summary>
-    /// The plug in description.
-    /// </summary>
-    internal const string PlugInDescription = "Updates some item requirements for elf bows which were intialized wrongly.";
-
-    /// <inheritdoc />
-    public override UpdateVersion Version => UpdateVersion.FixItemRequirements;
-
     /// <inheritdoc />
     public override string DataInitializationKey => VersionSeasonSix.DataInitialization.Id;
 
@@ -94,14 +91,25 @@ public class FixItemRequirementsPlugIn : UpdatePlugInBase
     public override bool IsMandatory => true;
 
     /// <inheritdoc />
+    public override int Version => 2;
+
+    /// <inheritdoc />
     public override DateTime CreatedAt => new(2024, 11, 03, 18, 0, 0, DateTimeKind.Utc);
+
+    /// <inheritdoc />
+    public override DateTime UpdatedAt => new(2026, 09, 30, 12, 0, 0, DateTimeKind.Utc);
 
     /// <inheritdoc />
     protected override async ValueTask ApplyAsync(IContext context, GameConfiguration gameConfiguration)
     {
         foreach (var reqUpdate in RequirementCorrections)
         {
-            var item = gameConfiguration.Items.First(x => x.Number == reqUpdate.Number && x.Group == reqUpdate.Group);
+            var item = gameConfiguration.Items.FirstOrDefault(x => x.Number == reqUpdate.Number && x.Group == reqUpdate.Group);
+            if (item is null)
+            {
+                continue;
+            }
+
             UpdateRequirement(Stats.TotalStrengthRequirementValue, reqUpdate.StrengthRequirement);
             UpdateRequirement(Stats.TotalAgilityRequirementValue, reqUpdate.AgilityRequirement);
             UpdateRequirement(Stats.TotalEnergyRequirementValue, reqUpdate.EnergyRequirement);

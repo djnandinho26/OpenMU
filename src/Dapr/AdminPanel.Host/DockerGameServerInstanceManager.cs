@@ -1,9 +1,10 @@
-﻿// <copyright file="ServerRestarter.cs" company="MUnique">
+﻿// <copyright file="DockerGameServerInstanceManager.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace MUnique.OpenMU.AdminPanel.Host;
 
+using MUnique.OpenMU.Dapr.Common;
 using MUnique.OpenMU.Interfaces;
 
 /// <summary>
@@ -25,11 +26,11 @@ public class DockerGameServerInstanceManager : IGameServerInstanceManager
     /// <inheritdoc />
     public async ValueTask RestartAllAsync(bool onDatabaseInit)
     {
-        var gameServers = this._serverProvider.Servers.Where(server => server.Type == ServerType.GameServer).ToList();
+        var gameServers = this._serverProvider.Servers.OfType<GameServerClient>().ToList();
         foreach (var gameServer in gameServers)
         {
-            await gameServer.ShutdownAsync().ConfigureAwait(false);
-            // It's started again automatically by the docker host.
+            // The process ends, and it's started again by the restart policy of its container.
+            await gameServer.RestartAsync().ConfigureAwait(false);
         }
     }
 
@@ -37,7 +38,6 @@ public class DockerGameServerInstanceManager : IGameServerInstanceManager
     public async ValueTask InitializeGameServerAsync(byte serverId)
     {
         // TODO: Implement this... by starting a new docker container
-
     }
 
     /// <inheritdoc />
@@ -49,6 +49,7 @@ public class DockerGameServerInstanceManager : IGameServerInstanceManager
         if (gameServer is not null)
         {
             await gameServer.ShutdownAsync().ConfigureAwait(false);
+
             // TODO: Remove the docker container
         }
     }

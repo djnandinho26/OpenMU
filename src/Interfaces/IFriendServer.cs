@@ -65,8 +65,16 @@ public interface IFriendServer
     /// <param name="serverId">The server identifier.</param>
     /// <param name="characterId">Id of the character.</param>
     /// <param name="characterName">Name of the character.</param>
-    /// <param name="isVisible">If set to <c>true</c>, the character is visible as online. Otherwise, it appears as offline for other players, but is still online</param>
+    /// <param name="isVisible">If set to <c>true</c>, the character is visible as online. Otherwise, it appears as offline for other players, but is still online.</param>
     ValueTask SetPlayerVisibilityStateAsync(byte serverId, Guid characterId, string characterName, bool isVisible);
+
+    /// <summary>
+    /// Determines whether two players are friends (accepted friend relationship).
+    /// </summary>
+    /// <param name="characterName">The character name of the first player.</param>
+    /// <param name="friendName">The character name of the second player.</param>
+    /// <returns>True if the two players are friends; otherwise false.</returns>
+    ValueTask<bool> IsFriendAsync(string characterName, string friendName);
 
     /// <summary>
     /// Sends a friend request to the friend, and adds a new friend view item to the players friend list.
@@ -98,4 +106,14 @@ public interface IFriendServer
     /// <param name="roomNumber">The room number.</param>
     /// <returns>The success of the invitation.</returns>
     ValueTask<bool> InviteFriendToChatRoomAsync(string selectedCharacterName, string friendName, ushort roomNumber);
+
+    /// <summary>
+    /// Gets the identifier of the game server on which the character is online.
+    /// </summary>
+    /// <param name="characterName">The name of the character.</param>
+    /// <returns>
+    /// The identifier of the game server; or <see langword="null"/>, if the character is offline
+    /// or invisible (which looks like offline to other players).
+    /// </returns>
+    ValueTask<byte?> GetOnlineServerIdAsync(string characterName);
 }

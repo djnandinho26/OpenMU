@@ -1,4 +1,4 @@
-﻿// <copyright file="FixDamageCalcsPlugInSeason6.cs" company="MUnique">
+// <copyright file="FixDamageCalcsPlugInSeason6.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -19,7 +19,7 @@ using MUnique.OpenMU.PlugIns;
 /// This update fixes character stats, skills, magic effects, items, and options related to damage. It also adds the Berserker magic effect.
 /// </summary>
 [PlugIn]
-[Display(Name = PlugInName, Description = PlugInDescription)]
+[Display(Name = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixDamageCalcsPlugInBase_Name), Description = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixDamageCalcsPlugInBase_Description), ResourceType = typeof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources))]
 [Guid("077BA63D-F201-41BE-8A65-CFB859482A1B")]
 public class FixDamageCalcsPlugInSeason6 : FixDamageCalcsPlugInBase
 {
@@ -33,9 +33,6 @@ public class FixDamageCalcsPlugInSeason6 : FixDamageCalcsPlugInBase
 
     /// <inheritdoc />
     public override string DataInitializationKey => VersionSeasonSix.DataInitialization.Id;
-
-    /// <inheritdoc />
-    public override UpdateVersion Version => UpdateVersion.FixDamageCalcsSeason6;
 
     /// <inheritdoc />
     protected override async ValueTask ApplyAsync(IContext context, GameConfiguration gameConfiguration)
@@ -145,7 +142,8 @@ public class FixDamageCalcsPlugInSeason6 : FixDamageCalcsPlugInBase
             var powerUps = infiniteArrowEffect.PowerUpDefinitions.ToList();
             foreach (var powerUp in powerUps)
             {
-                if (powerUp.TargetAttribute == Stats.SkillExtraManaCost || powerUp.TargetAttribute == Stats.BaseDamageBonus) // SkillExtraManaCost is the old ManaLossAfterHit
+                // SkillExtraManaCost is the old ManaLossAfterHit.
+                if (powerUp.TargetAttribute == Stats.SkillExtraManaCost || powerUp.TargetAttribute == Stats.BaseDamageBonus)
                 {
                     infiniteArrowEffect.PowerUpDefinitions.Remove(powerUp);
                 }
@@ -172,7 +170,7 @@ public class FixDamageCalcsPlugInSeason6 : FixDamageCalcsPlugInBase
         }
 
         var armorDamageDecrease = Stats.ArmorDamageDecrease.GetPersistent(gameConfiguration);
-        var harmonyDefOptions = gameConfiguration.ItemOptions.FirstOrDefault(o => o.Name == "Harmony Defense Options");
+        var harmonyDefOptions = gameConfiguration.ItemOptions.FirstOrDefault(o => o.Name.ValueInNeutralLanguage == "Harmony Defense Options");
         if (harmonyDefOptions is not null
             && harmonyDefOptions.PossibleOptions.FirstOrDefault(o => o.Number == 7) is { } dmgDecOpt)
         {

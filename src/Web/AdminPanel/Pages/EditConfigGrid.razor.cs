@@ -8,8 +8,6 @@ using System.Collections;
 using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
-using Blazored.Modal.Services;
-using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.QuickGrid;
 using Microsoft.Extensions.Logging;
@@ -18,6 +16,8 @@ using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.Persistence;
 using MUnique.OpenMU.Web.AdminPanel.Properties;
 using MUnique.OpenMU.Web.Shared;
+using MUnique.OpenMU.Web.Shared.Components.Modal;
+using MUnique.OpenMU.Web.Shared.Components.Toast;
 using MUnique.OpenMU.Web.Shared.Services;
 
 /// <summary>
@@ -81,6 +81,12 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
     public ILogger<EditConfigGrid> Logger { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the loading overlay service.
+    /// </summary>
+    [Inject]
+    public LoadingOverlayService LoadingService { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the type.
     /// </summary>
     private Type? Type { get; set; }
@@ -101,13 +107,6 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
     }
 
     private string? NameFilter { get; set; }
-
-    /// <inheritdoc />
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        this.CreationPanelService.ItemCreated += this.OnItemCreatedAsync;
-    }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
@@ -133,6 +132,13 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
     }
 
     /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.CreationPanelService.ItemCreated += this.OnItemCreatedAsync;
+    }
+
+    /// <inheritdoc />
     protected override async Task OnParametersSetAsync()
     {
         this.NameFilter = string.Empty;
@@ -145,6 +151,7 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
 
     private async Task LoadDataAsync(CancellationToken cancellationToken)
     {
+        using var loading = this.LoadingService.ShowLoadingIndicator();
         cancellationToken.ThrowIfCancellationRequested();
         if (this.Type is null)
         {
@@ -186,7 +193,7 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
     {
         try
         {
-            var dialogResult = await this.ModalService.ShowQuestionAsync("Are you sure?", $"You're about to delete '{viewModel.Name}. Are you sure?").ConfigureAwait(true);
+            var dialogResult = await this.ModalService.ShowQuestionAsync(Resources.ConfirmDelete, string.Format(Resources.ConfirmDeleteEntry, viewModel.Name)).ConfigureAwait(true);
             if (!dialogResult)
             {
                 return;
@@ -198,21 +205,21 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
             var toDelete = await deleteContext.GetByIdAsync(viewModel.Id, this.Type!, cancellationToken).ConfigureAwait(false);
             if (toDelete is null)
             {
-                 this.ToastService.ShowError(string.Format(Resources.CouldNotFindToDelete, viewModel.Name));
-                 return;
+                this.ToastService.ShowError(string.Format(Resources.CouldNotFindToDelete, viewModel.Name));
+                return;
             }
 
             await deleteContext.DeleteAsync(toDelete).ConfigureAwait(false);
             await deleteContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await this.DataSource.ForceDiscardChangesAsync().ConfigureAwait(false);
-            this.ToastService.ShowSuccess($"Deleted '{viewModel.Name}' successfully.");
+            this.ToastService.ShowSuccess(string.Format(Resources.DeletedSuccessfully, viewModel.Name));
             this._viewModels = null;
             this._loadTask = Task.Run(() => this.LoadDataAsync(cancellationToken), cancellationToken);
         }
         catch (Exception ex)
         {
-             this.Logger.LogError(ex, "Couldn't delete {viewModelName}, probably because it's referenced by another object.", viewModel.Name);
-             this.ToastService.ShowError(Resources.DeleteFailedReferenced);
+            this.Logger.LogError(ex, "Couldn't delete {viewModelName}, probably because it's referenced by another object.", viewModel.Name);
+            this.ToastService.ShowError(Resources.DeleteFailedReferenced);
         }
     }
 
@@ -227,7 +234,7 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
 
             var session = new CreationSession
             {
-                Title = $"Create {this.Type!.GetTypeCaption()}",
+                Title = string.Format(Resources.CreateEntry, this.Type!.GetTypeCaption()),
                 Item = newObject,
                 ItemType = this.Type!,
                 Context = creationContext,
@@ -296,7 +303,7 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
                 var duplicatedName = viewModel.Name;
                 var session = new CreationSession
                 {
-                    Title = $"Duplicate '{duplicatedName}'",
+                    Title = string.Format(Resources.DuplicateEntry, duplicatedName),
                     Item = newObject,
                     ItemType = this.Type!,
                     Context = context,
@@ -371,7 +378,7 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
 
         if (cloneMethod is null || !this.Type.IsAssignableFrom(cloneMethod.ReturnType))
         {
-            this.ToastService.ShowError($"Type '{this.Type.Name}' must have a Clone method that takes '{nameof(GameConfiguration)}' and returns '{this.Type.Name}'.");
+            this.ToastService.ShowError(string.Format(Resources.InvalidCloneMethod, this.Type.Name, nameof(GameConfiguration)));
             return null;
         }
 
@@ -413,8 +420,8 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
         var clearMethod = targetValue!.GetType().GetMethod("Clear");
         clearMethod?.Invoke(targetValue, null);
 
-        var itemType = prop.PropertyType.IsGenericType 
-            ? prop.PropertyType.GetGenericArguments().FirstOrDefault() 
+        var itemType = prop.PropertyType.IsGenericType
+            ? prop.PropertyType.GetGenericArguments().FirstOrDefault()
             : null;
 
         foreach (var item in sourceCollection)
@@ -481,6 +488,7 @@ public partial class EditConfigGrid : ComponentBase, IAsyncDisposable
         /// <summary>
         /// Gets or sets the name of the object.
         /// </summary>
+        [System.ComponentModel.DataAnnotations.Display(Name = nameof(Resources.ConfigurationEntryName), ResourceType = typeof(Resources))]
         public string Name { get; set; }
     }
 }

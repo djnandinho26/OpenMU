@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -218,6 +218,12 @@
   </data>
   <data name="HitHandlerPlugIn075_Description" xml:space="preserve">
     <value>Handler for hit packets.</value>
+  </data>
+    <data name="MagicEffectCancelHandlerPlugIn_Name" xml:space="preserve">
+    <value>Magic Effect Cancel Handler</value>
+  </data>
+    <data name="MagicEffectCancelHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handler for magic effect cancel packets.</value>
   </data>
   <data name="TalkNpcHandlerPlugIn_Name" xml:space="preserve">
     <value>Talk Npc Handler</value>
@@ -488,6 +494,24 @@
   </data>
   <data name="JewelMixHandlerPlugIn_Description" xml:space="preserve">
     <value>Handler for jewel mix packets.</value>
+  </data>
+  <data name="KanturuEnterRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Kanturu Enter Request Handler</value>
+  </data>
+  <data name="KanturuEnterRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles 0xD1/0x01 (KanturuEnterRequest) and teleports the player into the event.</value>
+  </data>
+  <data name="KanturuGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Kanturu Group Handler</value>
+  </data>
+  <data name="KanturuGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Routes 0xD1 Kanturu client packets to sub-handlers.</value>
+  </data>
+  <data name="KanturuInfoRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Kanturu Info Request Handler</value>
+  </data>
+  <data name="KanturuInfoRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Responds to 0xD1/0x00 (KanturuInfoRequest) with fresh event state info.</value>
   </data>
   <data name="PickupItemHandlerPlugIn_Name" xml:space="preserve">
     <value>Pickup Item Handler</value>
@@ -1305,11 +1329,35 @@
   <data name="ChangeTerrainAttributesViewPlugIn_Description" xml:space="preserve">
     <value>The default implementation of the IChangeTerrainAttributesViewPlugin which is forwarding everything to the game client with specific data packets.</value>
   </data>
+  <data name="ChaosCastleScoreTableViewPlugin_Name" xml:space="preserve">
+    <value>Chaos Castle Score Table View</value>
+  </data>
+  <data name="ChaosCastleScoreTableViewPlugin_Description" xml:space="preserve">
+    <value>The default implementation of the IChaosCastleScoreTableViewPlugin which is forwarding everything to the game client with specific data packets.</value>
+  </data>
   <data name="ChaosCastleStateViewPlugIn_Name" xml:space="preserve">
     <value>Chaos Castle State View</value>
   </data>
   <data name="ChaosCastleStateViewPlugIn_Description" xml:space="preserve">
     <value>The default implementation of the IChaosCastleStateViewPlugin which is forwarding everything to the game client with specific data packets.</value>
+  </data>
+  <data name="DoppelgangerEnterRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Doppelganger Enter Request Handler</value>
+  </data>
+  <data name="DoppelgangerEnterRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handler for the request to enter the doppelganger event through the NPC Lugard.</value>
+  </data>
+  <data name="DoppelgangerEventViewPlugIn_Name" xml:space="preserve">
+    <value>Doppelganger Event View</value>
+  </data>
+  <data name="DoppelgangerEventViewPlugIn_Description" xml:space="preserve">
+    <value>Sends the doppelganger event packets (0xBF 0x0F - 0x14) to the client.</value>
+  </data>
+  <data name="KanturuEventViewPlugIn_Name" xml:space="preserve">
+    <value>Kanturu Event View</value>
+  </data>
+  <data name="KanturuEventViewPlugIn_Description" xml:space="preserve">
+    <value>Sends Kanturu event state/result/HUD packets (0xD1 group) to the client.</value>
   </data>
   <data name="MiniGameScoreTableViewPlugin_Name" xml:space="preserve">
     <value>MiniGameScoreTableViewPlugin</value>
@@ -1941,6 +1989,174 @@
   <data name="CharacterGroupHandlerPlugIn_Description" xml:space="preserve">
     <value>Packet handler for character packets (0xF3 identifier).</value>
   </data>
+  <data name="CastleSiegeGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Packet Group Handler</value>
+  </data>
+  <data name="CastleSiegeGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Routes Castle Siege packet subcodes.</value>
+  </data>
+  <data name="CastleSiegeHuntZoneGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Hunting-Zone Packet Group</value>
+  </data>
+  <data name="CastleSiegeHuntZoneGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles grouped Castle Siege hunting-zone packets.</value>
+  </data>
+  <data name="CastleSiegeMachineGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Warfare-Machine Packet Group</value>
+  </data>
+  <data name="CastleSiegeMachineGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Routes Castle Siege warfare-machine packet subcodes.</value>
+  </data>
+  <data name="CastleSiegeMachineUseHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Warfare-Machine Fire Handler</value>
+  </data>
+  <data name="CastleSiegeMachineUseHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege warfare-machine fire requests.</value>
+  </data>
+  <data name="CastleSiegeMachineInterfacePlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Warfare-Machine Interface View</value>
+  </data>
+  <data name="CastleSiegeMachineInterfacePlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege warfare-machine interface packets to the game client.</value>
+  </data>
+  <data name="CastleSiegeMachineRegionNotifyPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Warfare-Machine Region View</value>
+  </data>
+  <data name="CastleSiegeMachineRegionNotifyPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege warfare-machine impact-region notifications to the game client.</value>
+  </data>
+  <data name="CastleSiegeMachineUseResultPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Warfare-Machine Use Result View</value>
+  </data>
+  <data name="CastleSiegeMachineUseResultPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege warfare-machine fire results to the game client.</value>
+  </data>
+  <data name="CastleSiegeDefenseBuyHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Defense Purchase Handler</value>
+  </data>
+  <data name="CastleSiegeDefenseBuyHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege defense-structure purchase requests.</value>
+  </data>
+  <data name="CastleSiegeDefenseRepairHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Defense Repair Handler</value>
+  </data>
+  <data name="CastleSiegeDefenseRepairHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege defense-structure repair requests.</value>
+  </data>
+  <data name="CastleSiegeDefenseUpgradeHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Defense Upgrade Handler</value>
+  </data>
+  <data name="CastleSiegeDefenseUpgradeHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege defense-structure upgrade requests.</value>
+  </data>
+  <data name="CastleSiegeGateListHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Gate List Handler</value>
+  </data>
+  <data name="CastleSiegeGateListHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests for the Castle Siege gate list.</value>
+  </data>
+  <data name="CastleSiegeGateOperateHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Gate Operation Handler</value>
+  </data>
+  <data name="CastleSiegeGateOperateHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege gate open and close requests.</value>
+  </data>
+  <data name="CastleSiegeNpcGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege NPC Packet Group Handler</value>
+  </data>
+  <data name="CastleSiegeNpcGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Routes Castle Siege NPC-list packet subcodes.</value>
+  </data>
+  <data name="CastleSiegeStatueListHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Guardian Statue List Handler</value>
+  </data>
+  <data name="CastleSiegeStatueListHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests for the Castle Siege Guardian Statue list.</value>
+  </data>
+  <data name="CastleSiegeNpcListPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege NPC List View</value>
+  </data>
+  <data name="CastleSiegeNpcListPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege defense-structure lists to the game client.</value>
+  </data>
+  <data name="CastleSiegeNpcOperationResultPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege NPC Operation Result View</value>
+  </data>
+  <data name="CastleSiegeNpcOperationResultPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege defense-structure operation results to the game client.</value>
+  </data>
+  <data name="CastleSiegeRegistrationHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Registration Handler</value>
+  </data>
+  <data name="CastleSiegeRegistrationHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege guild registration requests.</value>
+  </data>
+  <data name="CastleSiegeUnregisterHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Unregister Handler</value>
+  </data>
+  <data name="CastleSiegeUnregisterHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege guild unregistration requests.</value>
+  </data>
+  <data name="CastleSiegeRegistrationStateHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Registration State Handler</value>
+  </data>
+  <data name="CastleSiegeRegistrationStateHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege registration-state requests.</value>
+  </data>
+  <data name="CastleSiegeMarkRegistrationHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Mark Registration Handler</value>
+  </data>
+  <data name="CastleSiegeMarkRegistrationHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles Castle Siege Sign of Lord registration requests.</value>
+  </data>
+  <data name="CastleSiegeMarkRegistrationResultPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Mark Registration View</value>
+  </data>
+  <data name="CastleSiegeMarkRegistrationResultPlugIn_Description" xml:space="preserve">
+    <value>Sends Sign of Lord registration results to the game client.</value>
+  </data>
+  <data name="CastleSiegeRegistrationResultPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Registration Result View</value>
+  </data>
+  <data name="CastleSiegeRegistrationResultPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege registration results to the game client.</value>
+  </data>
+  <data name="CastleSiegeRegistrationStatePlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Registration State View</value>
+  </data>
+  <data name="CastleSiegeRegistrationStatePlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege registration state to the game client.</value>
+  </data>
+  <data name="CastleSiegeGuildListHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Guild List Handler</value>
+  </data>
+  <data name="CastleSiegeGuildListHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests for the selected Castle Siege guild list.</value>
+  </data>
+  <data name="CastleSiegeRegisteredGuildListHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Registered Guild List Handler</value>
+  </data>
+  <data name="CastleSiegeRegisteredGuildListHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests for the current Castle Siege guild registrations.</value>
+  </data>
+  <data name="CastleSiegeGuildListPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Guild List View</value>
+  </data>
+  <data name="CastleSiegeGuildListPlugIn_Description" xml:space="preserve">
+    <value>Sends the selected Castle Siege guild list to the game client.</value>
+  </data>
+  <data name="CastleSiegeRegisteredGuildListPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Registered Guild List View</value>
+  </data>
+  <data name="CastleSiegeRegisteredGuildListPlugIn_Description" xml:space="preserve">
+    <value>Sends the current Castle Siege guild registrations to the game client.</value>
+  </data>
+  <data name="CastleSiegeJoinSidePlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Join Side View</value>
+  </data>
+  <data name="CastleSiegeJoinSidePlugIn_Description" xml:space="preserve">
+    <value>Sends a player's assigned Castle Siege side to the game client.</value>
+  </data>
   <data name="CharacterKeyConfigurationPacketHandlerPlugIn_Name" xml:space="preserve">
     <value>Character - Key Configuration</value>
   </data>
@@ -2162,5 +2378,367 @@
   </data>
   <data name="MuHelperSettingsInitializationPlugIn_Description" xml:space="preserve">
     <value>Initializes the MU Helper settings when the player enters the world.</value>
+  </data>
+  <data name="ChatCommandListViewPlugIn_Name" xml:space="preserve">
+    <value>Chat command list view</value>
+  </data>
+  <data name="ChatCommandListViewPlugIn_Description" xml:space="preserve">
+    <value>Sends the chat commands which are available to the player, so that the client can offer them in a user interface.</value>
+  </data>
+  <data name="ChatCommandGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Chat command packet group handler</value>
+  </data>
+  <data name="ChatCommandGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the packets about chat commands (0xF5).</value>
+  </data>
+  <data name="ChatCommandListRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Chat command list request handler</value>
+  </data>
+  <data name="ChatCommandListRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request for the list of chat commands which are available to the player.</value>
+  </data>
+  <data name="CastleSiegeCrownStatePlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Crown State View</value>
+  </data>
+  <data name="CastleSiegeCrownStatePlugIn_Description" xml:space="preserve">
+    <value>Sends the current Castle Siege Crown lock state to the game client.</value>
+  </data>
+  <data name="CastleSiegeCrownAccessStatePlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Crown Access State View</value>
+  </data>
+  <data name="CastleSiegeCrownAccessStatePlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege Crown capture progress to the game client.</value>
+  </data>
+  <data name="CastleSiegeSwitchInfoPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Switch Information View</value>
+  </data>
+  <data name="CastleSiegeSwitchInfoPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege Crown switch occupancy information to the game client.</value>
+  </data>
+  <data name="CastleSiegeOwnershipChangePlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Ownership Change View</value>
+  </data>
+  <data name="CastleSiegeOwnershipChangePlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege ownership changes to the game client.</value>
+  </data>
+  <data name="CastleSiegeTaxInfoHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege tax information request handler</value>
+  </data>
+  <data name="CastleSiegeTaxInfoHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests for the current Castle Siege tax and treasury information.</value>
+  </data>
+  <data name="CastleSiegeTaxChangeHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege tax change request handler</value>
+  </data>
+  <data name="CastleSiegeTaxChangeHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests to change a Castle Siege tax rate.</value>
+  </data>
+  <data name="CastleSiegeTributeWithdrawHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege tribute withdrawal request handler</value>
+  </data>
+  <data name="CastleSiegeTributeWithdrawHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests to withdraw money from the Castle Siege treasury.</value>
+  </data>
+  <data name="CastleSiegeHuntZoneToggleHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege hunting-zone access request handler</value>
+  </data>
+  <data name="CastleSiegeHuntZoneToggleHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests to change public access to the Castle Siege hunting zone.</value>
+  </data>
+  <data name="CastleSiegeHuntZoneEnterHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege hunting-zone entry request handler</value>
+  </data>
+  <data name="CastleSiegeHuntZoneEnterHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles requests to enter the Castle Siege hunting zone.</value>
+  </data>
+  <data name="CastleSiegeTaxInfoPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege tax information view</value>
+  </data>
+  <data name="CastleSiegeTaxInfoPlugIn_Description" xml:space="preserve">
+    <value>Sends the current Castle Siege tax and treasury information to the game client.</value>
+  </data>
+  <data name="CastleSiegeTaxChangeResultPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege tax change result view</value>
+  </data>
+  <data name="CastleSiegeTaxChangeResultPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege tax changes and their results to the game client.</value>
+  </data>
+  <data name="CastleSiegeTributeWithdrawResultPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege tribute withdrawal result view</value>
+  </data>
+  <data name="CastleSiegeTributeWithdrawResultPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege treasury withdrawal results to the game client.</value>
+  </data>
+  <data name="CastleSiegeHuntZoneGuardInfoPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege hunting-zone guardsman view</value>
+  </data>
+  <data name="CastleSiegeHuntZoneGuardInfoPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege hunting-zone access information to the game client.</value>
+  </data>
+  <data name="CastleSiegeHuntZoneResultPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege hunting-zone result view</value>
+  </data>
+  <data name="CastleSiegeHuntZoneResultPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege hunting-zone request results to the game client.</value>
+  </data>
+  <data name="CastleSiegeCommandHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Guild Command Handler</value>
+  </data>
+  <data name="CastleSiegeCommandHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles directional guild commands issued by Castle Siege alliance masters.</value>
+  </data>
+  <data name="CastleSiegeCommandPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Guild Command View</value>
+  </data>
+  <data name="CastleSiegeCommandPlugIn_Description" xml:space="preserve">
+    <value>Forwards an alliance master's directional guild command to same-side players.</value>
+  </data>
+  <data name="CastleSiegeMiniMapPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Mini-Map View</value>
+  </data>
+  <data name="CastleSiegeMiniMapPlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege player and NPC mini-map positions to alliance masters.</value>
+  </data>
+  <data name="CastleSiegeLifeStoneStatePlugIn_Name" xml:space="preserve">
+    <value>Castle Siege Life Stone state view</value>
+  </data>
+  <data name="CastleSiegeLifeStoneStatePlugIn_Description" xml:space="preserve">
+    <value>Sends Castle Siege Life Stone creation progress to the game client.</value>
+  </data>
+  <data name="EnterMarketPlace_Name" xml:space="preserve"><value>Enter Market Place Handler</value></data>
+  <data name="EnterMarketPlace_Description" xml:space="preserve"><value>Handler which warps a player between Lorencia and the Loren Market when using the 'Warp' button of Market Union Member Julia.</value></data>
+  <data name="GuildRoleAssignHandlerPlugIn_Name" xml:space="preserve">
+    <value>Guild Role Assign Handler</value>
+  </data>
+  <data name="GuildRoleAssignHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handler for guild role assign packets.</value>
+  </data>
+  <data name="RaklionEventViewPlugIn_Name" xml:space="preserve">
+    <value>Raklion Event View</value>
+  </data>
+  <data name="RaklionEventViewPlugIn_Description" xml:space="preserve">
+    <value>Sends the state of the raklion event and the skills of Selupan to the client.</value>
+  </data>
+  <data name="RaklionStateInfoRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Raklion State Info Request Handler</value>
+  </data>
+  <data name="RaklionStateInfoRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of the client for the state of the raklion event.</value>
+  </data>
+  <data name="CrywolfEventViewPlugIn_Name" xml:space="preserve">
+    <value>Crywolf Event View</value>
+  </data>
+  <data name="CrywolfEventViewPlugIn_Description" xml:space="preserve">
+    <value>Sends the state of the crywolf event, its altars and its result to the client.</value>
+  </data>
+  <data name="CrywolfGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Crywolf Group Handler</value>
+  </data>
+  <data name="CrywolfGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the packets of the crywolf event.</value>
+  </data>
+  <data name="CrywolfInfoRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Crywolf Info Request Handler</value>
+  </data>
+  <data name="CrywolfInfoRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of the client for the state of the crywolf event.</value>
+  </data>
+  <data name="CrywolfContractRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Crywolf Contract Request Handler</value>
+  </data>
+  <data name="CrywolfContractRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of an elf to contract an altar of the crywolf event.</value>
+  </data>
+  <data name="CrywolfChaosRateBenefitRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Crywolf Chaos Rate Benefit Request Handler</value>
+  </data>
+  <data name="CrywolfChaosRateBenefitRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of the client for the additional success rate of the chaos machine.</value>
+  </data>
+  <data name="ImperialGuardianGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Imperial Guardian Group Handler</value>
+  </data>
+  <data name="ImperialGuardianGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the packets of the imperial guardian event (0xF7).</value>
+  </data>
+  <data name="ImperialGuardianEnterRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Imperial Guardian Enter Request Handler</value>
+  </data>
+  <data name="ImperialGuardianEnterRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request to enter the imperial guardian event, which is sent by the window of Jerint.</value>
+  </data>
+  <data name="ImperialGuardianViewPlugIn_Name" xml:space="preserve">
+    <value>Imperial Guardian View</value>
+  </data>
+  <data name="ImperialGuardianViewPlugIn_Description" xml:space="preserve">
+    <value>Sends the enter result, the timer and the result of the imperial guardian event to the client.</value>
+  </data>
+  <data name="GensGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Gens group handler</value>
+  </data>
+  <data name="GensGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the packets of the gens system (0xF8).</value>
+  </data>
+  <data name="GensJoinRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Gens join request handler</value>
+  </data>
+  <data name="GensJoinRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of a player to join a gens.</value>
+  </data>
+  <data name="GensLeaveRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Gens leave request handler</value>
+  </data>
+  <data name="GensLeaveRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of a player to leave the gens.</value>
+  </data>
+  <data name="GensRankingRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Gens ranking request handler</value>
+  </data>
+  <data name="GensRankingRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of the gens ranking, which the client sends when it opens the gens info window.</value>
+  </data>
+  <data name="GensViewPlugIn_Name" xml:space="preserve">
+    <value>Gens view</value>
+  </data>
+  <data name="GensViewPlugIn_Description" xml:space="preserve">
+    <value>Shows the results of the gens requests and the gens info of the own player.</value>
+  </data>
+  <data name="AssignPlayersToGensPlugIn_Name" xml:space="preserve">
+    <value>Assign players to gens</value>
+  </data>
+  <data name="AssignPlayersToGensPlugIn_Description" xml:space="preserve">
+    <value>Shows the gens mark and rank of the players in the view.</value>
+  </data>
+  <data name="GensRewardRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Gens reward request handler</value>
+  </data>
+  <data name="GensRewardRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of a player for the gens ranking reward.</value>
+  </data>
+  <data name="PingHandlerPlugIn_Name" xml:space="preserve">
+    <value>Ping Handler</value>
+  </data>
+  <data name="PingHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the ping which the client sends periodically, which reports that it's alive.</value>
+  </data>
+  <data name="CashShopGroupHandlerPlugIn_Name" xml:space="preserve">
+    <value>Cash shop group handler</value>
+  </data>
+  <data name="CashShopGroupHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler for cash shop packets (0xD2 identifier).</value>
+  </data>
+  <data name="CashShopOpenStateHandlerPlugIn_Name" xml:space="preserve">
+    <value>Cash shop open state handler</value>
+  </data>
+  <data name="CashShopOpenStateHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler for opening and closing the cash shop (0xD2, 0x02 identifier).</value>
+  </data>
+  <data name="CashShopPointInfoRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Cash shop point info request handler</value>
+  </data>
+  <data name="CashShopPointInfoRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler for cash shop point information requests (0xD2, 0x01 identifier).</value>
+  </data>
+  <data name="CashShopStorageListRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Cash shop storage list request handler</value>
+  </data>
+  <data name="CashShopStorageListRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler for cash shop storage list requests (0xD2, 0x05 identifier).</value>
+  </data>
+  <data name="CashShopViewPlugIn_Name" xml:space="preserve">
+    <value>Cash shop view</value>
+  </data>
+  <data name="CashShopViewPlugIn_Description" xml:space="preserve">
+    <value>The default implementation of the ICashShopViewPlugIn which is forwarding everything to the game client with specific data packets.</value>
+  </data>
+  <data name="CashShopItemBuyRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Cash shop buy request handler</value>
+  </data>
+  <data name="CashShopItemBuyRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler for cash shop buy requests (0xD2, 0x03 identifier).</value>
+  </data>
+  <data name="CashShopStorageItemConsumeRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Cash shop storage item use request handler</value>
+  </data>
+  <data name="CashShopStorageItemConsumeRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler for requests to use an item of the cash shop storage (0xD2, 0x0B identifier).</value>
+  </data>
+  <data name="CashShopItemGiftRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Cash shop gift request handler</value>
+  </data>
+  <data name="CashShopItemGiftRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler for cash shop gift requests (0xD2, 0x04 identifier).</value>
+  </data>
+  <data name="PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Name" xml:space="preserve">
+    <value>Player Shop - Set Price (with currency)</value>
+  </data>
+  <data name="PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler which sets prices in a currency for an item in the player shop (3F 09).</value>
+  </data>
+  <data name="ShowShopCurrenciesExtendedPlugIn_Name" xml:space="preserve">
+    <value>Show Shop Currencies Extended</value>
+  </data>
+  <data name="ShowShopCurrenciesExtendedPlugIn_Description" xml:space="preserve">
+    <value>The extended implementation of the IShowShopCurrenciesPlugIn which is forwarding everything to the game client with specific data packets.</value>
+  </data>
+  <data name="DiscordIntegrationInfoRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Discord integration info request handler</value>
+  </data>
+  <data name="DiscordIntegrationInfoRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of the Discord integration info (F5 02).</value>
+  </data>
+  <data name="DiscordLinkCodeRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Discord link code request handler</value>
+  </data>
+  <data name="DiscordLinkCodeRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request of a code to link the account to a Discord user (F5 04).</value>
+  </data>
+  <data name="DiscordUnlinkRequestHandlerPlugIn_Name" xml:space="preserve">
+    <value>Discord unlink request handler</value>
+  </data>
+  <data name="DiscordUnlinkRequestHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request to remove the link of the account to a Discord user (F5 06).</value>
+  </data>
+  <data name="DiscordIntegrationViewPlugIn_Name" xml:space="preserve">
+    <value>Discord integration view</value>
+  </data>
+  <data name="DiscordIntegrationViewPlugIn_Description" xml:space="preserve">
+    <value>Sends the Discord integration info, the link code and the messages written in Discord to the game client.</value>
+  </data>
+  <data name="CastleSiegeOwnerLogoHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege owner logo request handler</value>
+  </data>
+  <data name="CastleSiegeOwnerLogoHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the request for the guild logo of the castle owner, which the client sends when it enters the Castle Siege map.</value>
+  </data>
+  <data name="CastleSiegeOwnerLogoPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege owner logo view</value>
+  </data>
+  <data name="CastleSiegeOwnerLogoPlugIn_Description" xml:space="preserve">
+    <value>Sends the guild logo of the castle owner to the game client.</value>
+  </data>
+  <data name="CastleSiegeWeaponExplosionHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege weapon explosion handler</value>
+  </data>
+  <data name="CastleSiegeWeaponExplosionHandlerPlugIn_Description" xml:space="preserve">
+    <value>Accepts the weapon explosion request of the client. The impact damage of warfare machines is applied by the server when the projectile lands, so the request has no effect.</value>
+  </data>
+  <data name="CastleSiegeStatusHandlerPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege status request handler</value>
+  </data>
+  <data name="CastleSiegeStatusHandlerPlugIn_Description" xml:space="preserve">
+    <value>Handles the Castle Siege status request which the client sends when the guardsman window opens.</value>
+  </data>
+  <data name="CastleSiegeStatusPlugIn_Name" xml:space="preserve">
+    <value>Castle Siege status view</value>
+  </data>
+  <data name="CastleSiegeStatusPlugIn_Description" xml:space="preserve">
+    <value>Sends the Castle Siege state, schedule and castle owner to the game client.</value>
+  </data>
+  <data name="ShowItemCraftingPreviewExtendedPlugIn_Name" xml:space="preserve">
+    <value>Show Item Crafting Preview Extended</value>
+  </data>
+  <data name="ShowItemCraftingPreviewExtendedPlugIn_Description" xml:space="preserve">
+    <value>The extended implementation of the IShowItemCraftingPreviewPlugIn which is forwarding everything to the game client with specific data packets.</value>
   </data>
 </root>

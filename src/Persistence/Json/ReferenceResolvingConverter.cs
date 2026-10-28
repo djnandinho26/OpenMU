@@ -4,7 +4,6 @@
 
 namespace MUnique.OpenMU.Persistence.Json;
 
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
@@ -12,21 +11,25 @@ using System.Text.Json.Serialization;
 
 /// <summary>
 /// A json converter which is able to resolve (circular) references.
+/// It determines the properties to read by reflection.
 /// </summary>
+/// <remarks>
+/// It's used for types which don't have a generated converter, see <see cref="ReferenceResolvingConverterRegistry"/>.
+/// </remarks>
 /// <typeparam name="T">The <see cref="Type"/> to convert.</typeparam>
-public class ReferenceResolvingConverter<T> : JsonConverter<T>
+public class ReferenceResolvingConverter<T> : ReferenceResolvingConverterBase<T>
     where T : class, IIdentifiable, new()
 {
-    private static readonly Dictionary<string, (Type PropertyType, Action<T, object>? Setter, Action<T, object>? Adder)> PropertyHandlers;
+    private static readonly (Type PropertyType, Action<T, object>? Setter, Action<T, object>? Adder)[] PropertyHandlers;
 
-    private readonly Type[] _ignoredTypes;
+    private static readonly ReferenceResolvingProperty[] PropertyDescriptions;
 
     static ReferenceResolvingConverter()
     {
         var properties = typeof(T).GetProperties()
             .Where(p => p.GetCustomAttribute<JsonIgnoreAttribute>() is null)
             .ToList();
-        PropertyHandlers = properties
+        var handlers = properties
             .Select(x => new
             {
                 Property = x,
@@ -47,11 +50,14 @@ public class ReferenceResolvingConverter<T> : JsonConverter<T>
                 else if (x.CollectionInterface != null && x.Property.Name.StartsWith("Raw"))
                 {
                     propertyType = x.CollectionInterface.GetGenericArguments()[0];
+
+                    var collectionExpr = Expression.Convert(Expression.Property(tParam, x.Property), x.CollectionInterface);
+                    var itemExpr = Expression.Convert(objParam, propertyType);
+                    var containsCall = Expression.Call(collectionExpr, x.CollectionInterface.GetMethod("Contains")!, itemExpr);
+                    var addCall = Expression.Call(collectionExpr, x.CollectionInterface.GetMethod("Add")!, itemExpr);
+
                     adder = Expression.Lambda<Action<T, object>>(
-                            Expression.Call(
-                                Expression.Property(tParam, x.Property),
-                                x.CollectionInterface.GetMethod("Add")!,
-                                Expression.Convert(objParam, propertyType)),
+                            Expression.IfThen(Expression.Not(containsCall), addCall),
                             tParam,
                             objParam)
                         .Compile();
@@ -66,11 +72,15 @@ public class ReferenceResolvingConverter<T> : JsonConverter<T>
 
                     propertyType = propertyType.GetProperties().First(p => p.PropertyType.BaseType == baseType).PropertyType;
                     jsonPropertyName = basePropertyName;
+
+                    var baseCollectionInterface = DetermineCollectionInterface(baseCollectionProperty)!;
+                    var collectionExpr = Expression.Convert(Expression.Property(tParam, baseCollectionProperty), baseCollectionInterface);
+                    var itemExpr = Expression.Convert(objParam, propertyType);
+                    var containsCall = Expression.Call(collectionExpr, baseCollectionInterface.GetMethod("Contains")!, itemExpr);
+                    var addCall = Expression.Call(collectionExpr, baseCollectionInterface.GetMethod("Add")!, itemExpr);
+
                     adder = Expression.Lambda<Action<T, object>>(
-                            Expression.Call(
-                                Expression.Property(tParam, baseCollectionProperty),
-                                baseCollectionProperty.PropertyType.GetMethod("Add")!,
-                                Expression.Convert(objParam, propertyType)),
+                            Expression.IfThen(Expression.Not(containsCall), addCall),
                             tParam,
                             objParam)
                         .Compile();
@@ -86,6 +96,29 @@ public class ReferenceResolvingConverter<T> : JsonConverter<T>
                             objParam)
                         .Compile();
                 }
+                else if (x.CollectionInterface != null
+                         && properties.All(p => p.Name != "Raw" + x.Property.Name && p.Name != "Joined" + x.Property.Name))
+                {
+                    // A collection without a public setter and without a "Raw" or "Joined" counterpart
+                    // which would hold its data (e.g. ItemSlotType.ItemSlots).
+                    // We can't assign a new collection, so we add the items to the existing one.
+                    propertyType = x.CollectionInterface.GetGenericArguments()[0];
+
+                    var collectionExpr = Expression.Convert(Expression.Property(tParam, x.Property), x.CollectionInterface);
+                    var itemExpr = Expression.Convert(objParam, propertyType);
+                    var addCall = Expression.Call(collectionExpr, x.CollectionInterface.GetMethod("Add")!, itemExpr);
+
+                    adder = Expression.Lambda<Action<T, object>>(addCall, tParam, objParam).Compile();
+                }
+                else if (x.Property.GetSetMethod(nonPublic: true) is not null
+                         && properties.All(p => p.Name != "Joined" + x.Property.Name))
+                {
+                    // A property with a non-public setter (e.g. ConstValueAttribute.Value).
+                    // A compiled expression isn't allowed to call it, so we set it by reflection.
+                    propertyType = x.Property.PropertyType;
+                    var property = x.Property;
+                    setter = (target, value) => property.SetValue(target, value);
+                }
                 else
                 {
                     // not supported property, ignore...
@@ -98,7 +131,9 @@ public class ReferenceResolvingConverter<T> : JsonConverter<T>
                     PropertyType: propertyType);
             })
             .Where(x => x.PropertyType is not null)
-            .ToDictionary(x => x.Name, x => (x.PropertyType!, x.Setter, x.Adder), StringComparer.InvariantCultureIgnoreCase);
+            .ToArray();
+        PropertyHandlers = handlers.Select(x => (x.PropertyType!, x.Setter, x.Adder)).ToArray();
+        PropertyDescriptions = handlers.Select(x => new ReferenceResolvingProperty(x.Name, x.PropertyType!, x.Setter is null)).ToArray();
     }
 
     /// <summary>
@@ -106,143 +141,28 @@ public class ReferenceResolvingConverter<T> : JsonConverter<T>
     /// </summary>
     /// <param name="ignoredTypes">The ignored types.</param>
     public ReferenceResolvingConverter(Type[] ignoredTypes)
+        : base(PropertyDescriptions, ignoredTypes)
     {
-        this._ignoredTypes = ignoredTypes;
     }
 
-    /// <inheritdoc/>
-    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    /// <inheritdoc />
+    protected override void ReadPropertyValue(int index, ref Utf8JsonReader reader, T target, JsonSerializerOptions options)
     {
-        throw new NotImplementedException($"Don't use {nameof(ReferenceResolvingConverterFactory)} for writing.");
-    }
-
-    /// <inheritdoc/>
-    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        T? item = null;
-        while (reader.Read())
+        var handler = PropertyHandlers[index];
+        if (JsonSerializer.Deserialize(ref reader, handler.PropertyType, options) is { } value)
         {
-            if (reader.TokenType == JsonTokenType.EndObject)
-            {
-                break;
-            }
-
-            if (reader.TokenType == JsonTokenType.PropertyName)
-            {
-                var propertyName = reader.GetString();
-                if (propertyName == null)
-                {
-                    reader.Skip();
-                }
-                else if (propertyName is "$ref" or "$id"
-                         && JsonSerializer.Deserialize<string>(ref reader, options) is { } referenceId)
-                {
-                    item ??= ResolveObjectReference(options, referenceId);
-                }
-                else if (PropertyHandlers.TryGetValue(propertyName, out var handler)
-                         && !this._ignoredTypes.Contains(handler.PropertyType) && !this._ignoredTypes.Contains(handler.PropertyType!.BaseType))
-                {
-                    ReadProperty(ref reader, options, item, handler);
-                }
-                else
-                {
-                    reader.Skip();
-                }
-            }
-        }
-
-        return item!;
-    }
-
-    private static void ReadProperty(ref Utf8JsonReader reader, JsonSerializerOptions options, T? item, (Type PropertyType, Action<T, object>? Setter, Action<T, object>? Adder) handler)
-    {
-        _ = item ?? throw new InvalidOperationException("Item must be set here already. Is $id missing?");
-
-        if (!reader.Read())
-        {
-            throw new JsonException($"Bad JSON");
-        }
-
-        if (handler.Setter != null)
-        {
-            if (JsonSerializer.Deserialize(ref reader, handler.PropertyType, options) is { } value)
-            {
-                handler.Setter(item, value);
-            }
-        }
-        else
-        {
-            if (reader.TokenType == JsonTokenType.StartArray)
-            {
-                while (true)
-                {
-                    if (!reader.Read())
-                    {
-                        throw new JsonException($"Bad JSON");
-                    }
-
-                    if (reader.TokenType == JsonTokenType.EndArray)
-                    {
-                        break;
-                    }
-
-                    if (JsonSerializer.Deserialize(ref reader, handler.PropertyType, options) is { } collectionItem)
-                    {
-                        handler.Adder!(item, collectionItem);
-                    }
-                }
-            }
-            else
-            {
-                reader.Skip();
-            }
+            handler.Setter!(target, value);
         }
     }
 
-    /// <summary>
-    /// Resolves the object reference by the reference handler of the serializer.
-    /// </summary>
-    /// <param name="serializer">The serializer.</param>
-    /// <param name="id">The identifier of the object.</param>
-    /// <returns>The resolved object.</returns>
-    /// <remarks>
-    /// The idea here is, to handle $ref and $id the same;
-    /// If it's a $ref, there are two cases:
-    ///   - the object was read before: it's all logical, we use the previously read object.
-    ///   - the object wasn't read before (e.g. circular reference):
-    ///       We already create the object as a placeholder, so that when $id comes along, it can be filled.
-    /// If it's an $id, there are also two cases:
-    ///   - the object was created before by a $ref: all fine, we take and fill it
-    ///   - the object wasn't created before: we create a new one.
-    /// This implies, that any object should have $id as first property.
-    /// </remarks>
-    private static T? ResolveObjectReference(JsonSerializerOptions serializer, string id)
+    /// <inheritdoc />
+    protected override void ReadCollectionItem(int index, ref Utf8JsonReader reader, T target, JsonSerializerOptions options)
     {
-        if (string.IsNullOrEmpty(id))
+        var handler = PropertyHandlers[index];
+        if (JsonSerializer.Deserialize(ref reader, handler.PropertyType, options) is { } collectionItem)
         {
-            throw new ArgumentException("id must be provided; it's null or empty.", nameof(id));
+            handler.Adder!(target, collectionItem);
         }
-
-        T? resolvedObject;
-        if (serializer.ReferenceHandler is IIdReferenceHandler { Current: { } resolver })
-        {
-            resolvedObject = (T?)resolver.ResolveReference(id);
-        }
-        else
-        {
-            throw new UnreachableException("This should never happen!");
-        }
-
-        if (resolvedObject is null)
-        {
-            resolvedObject = new()
-            {
-                Id = new Guid(id),
-            };
-            resolver.AddReference(id, resolvedObject);
-        }
-
-        return resolvedObject;
     }
 
     private static Type? DetermineCollectionInterface(PropertyInfo x)

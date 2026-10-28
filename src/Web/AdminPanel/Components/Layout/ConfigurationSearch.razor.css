@@ -11,7 +11,7 @@
     left: 0;
     width: 100%;
     max-height: min(68vh, 28rem);
-    z-index: 2200;
+    z-index: 1060;
     overflow-y: auto;
     margin: 0;
     padding: 0.25rem 0;
@@ -48,7 +48,7 @@
     color: var(--omu-text);
 }
 
-@media (max-width: 640.98px) {
+@media (max-width: 767.98px) {
     .configuration-search {
         width: 100%;
         min-width: 0;

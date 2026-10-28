@@ -7,29 +7,21 @@ namespace MUnique.OpenMU.Web.AdminPanel;
 using System.Collections.Immutable;
 
 /// <summary>
-/// Class which holds the script exports of this project.
+/// Class that holds the script exports of this project.
 /// </summary>
 /// <remarks>
+/// The exports of the map already contain the shared exports, which the admin panel needs in any case.
 /// TODO: Instead of a static class, create an interface, so we can inject an instance into the layout.
 ///       For example, we could further add some common Components which render the Scripts, Stylesheets, etc.
 /// </remarks>
 public static class Exports
 {
     /// <summary>
-    /// Gets the url prefix to the scripts of this project.
-    /// </summary>
-    private static string Prefix { get; } = $"_content/{typeof(Exports).Namespace}";
-
-    private static IEnumerable<string> AdminPanelScripts => [];
-
-    private static IEnumerable<string> AdminPanelStylesheets => [];
-
-    /// <summary>
     /// Gets the scripts.
     /// </summary>
     public static ImmutableList<string> Scripts { get; } = AdminPanelEnvironment.IsHostingEmbedded
         ? Web.Map.Exports.Scripts.Concat(AdminPanelScripts).ToImmutableList()
-        : AdminPanelScripts.ToImmutableList();
+        : Web.Shared.Exports.Scripts.Concat(AdminPanelScripts).ToImmutableList();
 
     /// <summary>
     /// Gets the script mappings.
@@ -43,5 +35,9 @@ public static class Exports
     /// </summary>
     public static ImmutableList<string> Stylesheets { get; } = AdminPanelEnvironment.IsHostingEmbedded
         ? Web.Map.Exports.Stylesheets.Concat(AdminPanelStylesheets).ToImmutableList()
-        : AdminPanelStylesheets.ToImmutableList();
+        : Web.Shared.Exports.Stylesheets.Concat(AdminPanelStylesheets).ToImmutableList();
+
+    private static IEnumerable<string> AdminPanelScripts => [];
+
+    private static IEnumerable<string> AdminPanelStylesheets => [];
 }

@@ -79,6 +79,11 @@ internal class ChatClient : IChatClient
     /// <inheritdoc/>
     public DateTime LastActivity { get; private set; }
 
+    /// <summary>
+    /// Gets the connection of this client, so that its traffic can be captured.
+    /// </summary>
+    internal IConnection? Connection => this._connection;
+
     /// <inheritdoc/>
     public async ValueTask SendMessageAsync(byte senderId, string message)
     {
@@ -239,7 +244,7 @@ internal class ChatClient : IChatClient
                 break;
 
             case var value:
-                this._logger.LogError("Received unknown packet of type {PacketType}: {PacketSpan}",value,  packet.Span.AsString());
+                this._logger.LogError("Received unknown packet of type {PacketType}: {PacketSpan}", value, packet.Span.AsString());
                 await this.LogOffAsync().ConfigureAwait(false);
                 break;
         }

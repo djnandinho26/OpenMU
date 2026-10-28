@@ -439,6 +439,24 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Shows the gens mark and rank of the players in the view..
+        /// </summary>
+        public static string AssignPlayersToGensPlugIn_Description {
+            get {
+                return ResourceManager.GetString("AssignPlayersToGensPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assign players to gens.
+        /// </summary>
+        public static string AssignPlayersToGensPlugIn_Name {
+            get {
+                return ResourceManager.GetString("AssignPlayersToGensPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The default implementation of the IAssignPlayersToGuildPlugIn which is forwarding everything to the game client with specific data packets..
         /// </summary>
         public static string AssignPlayersToGuildPlugIn_Description {
@@ -619,6 +637,1050 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Packet handler for cash shop packets (0xD2 identifier)..
+        /// </summary>
+        public static string CashShopGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop group handler.
+        /// </summary>
+        public static string CashShopGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packet handler for cash shop buy requests (0xD2, 0x03 identifier)..
+        /// </summary>
+        public static string CashShopItemBuyRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopItemBuyRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop buy request handler.
+        /// </summary>
+        public static string CashShopItemBuyRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopItemBuyRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packet handler for cash shop gift requests (0xD2, 0x04 identifier)..
+        /// </summary>
+        public static string CashShopItemGiftRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopItemGiftRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop gift request handler.
+        /// </summary>
+        public static string CashShopItemGiftRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopItemGiftRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packet handler for opening and closing the cash shop (0xD2, 0x02 identifier)..
+        /// </summary>
+        public static string CashShopOpenStateHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopOpenStateHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop open state handler.
+        /// </summary>
+        public static string CashShopOpenStateHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopOpenStateHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packet handler for cash shop point information requests (0xD2, 0x01 identifier)..
+        /// </summary>
+        public static string CashShopPointInfoRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopPointInfoRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop point info request handler.
+        /// </summary>
+        public static string CashShopPointInfoRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopPointInfoRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packet handler for requests to use an item of the cash shop storage (0xD2, 0x0B identifier)..
+        /// </summary>
+        public static string CashShopStorageItemConsumeRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopStorageItemConsumeRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop storage item use request handler.
+        /// </summary>
+        public static string CashShopStorageItemConsumeRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopStorageItemConsumeRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packet handler for cash shop storage list requests (0xD2, 0x05 identifier)..
+        /// </summary>
+        public static string CashShopStorageListRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopStorageListRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop storage list request handler.
+        /// </summary>
+        public static string CashShopStorageListRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopStorageListRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The default implementation of the ICashShopViewPlugIn which is forwarding everything to the game client with specific data packets..
+        /// </summary>
+        public static string CashShopViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CashShopViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cash shop view.
+        /// </summary>
+        public static string CashShopViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CashShopViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles directional guild commands issued by Castle Siege alliance masters..
+        /// </summary>
+        public static string CastleSiegeCommandHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeCommandHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Guild Command Handler.
+        /// </summary>
+        public static string CastleSiegeCommandHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeCommandHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Forwards an alliance master's directional guild command to same-side players..
+        /// </summary>
+        public static string CastleSiegeCommandPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeCommandPlugIn_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Guild Command View.
+        /// </summary>
+        public static string CastleSiegeCommandPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeCommandPlugIn_Name", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege Crown capture progress to the game client..
+        /// </summary>
+        public static string CastleSiegeCrownAccessStatePlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeCrownAccessStatePlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Crown Access State View.
+        /// </summary>
+        public static string CastleSiegeCrownAccessStatePlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeCrownAccessStatePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the current Castle Siege Crown lock state to the game client..
+        /// </summary>
+        public static string CastleSiegeCrownStatePlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeCrownStatePlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Crown State View.
+        /// </summary>
+        public static string CastleSiegeCrownStatePlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeCrownStatePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege defense-structure purchase requests..
+        /// </summary>
+        public static string CastleSiegeDefenseBuyHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeDefenseBuyHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Defense Purchase Handler.
+        /// </summary>
+        public static string CastleSiegeDefenseBuyHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeDefenseBuyHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege defense-structure repair requests..
+        /// </summary>
+        public static string CastleSiegeDefenseRepairHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeDefenseRepairHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Defense Repair Handler.
+        /// </summary>
+        public static string CastleSiegeDefenseRepairHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeDefenseRepairHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege defense-structure upgrade requests..
+        /// </summary>
+        public static string CastleSiegeDefenseUpgradeHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeDefenseUpgradeHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Defense Upgrade Handler.
+        /// </summary>
+        public static string CastleSiegeDefenseUpgradeHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeDefenseUpgradeHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests for the Castle Siege gate list..
+        /// </summary>
+        public static string CastleSiegeGateListHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeGateListHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Gate List Handler.
+        /// </summary>
+        public static string CastleSiegeGateListHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeGateListHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege gate open and close requests..
+        /// </summary>
+        public static string CastleSiegeGateOperateHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeGateOperateHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Gate Operation Handler.
+        /// </summary>
+        public static string CastleSiegeGateOperateHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeGateOperateHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Routes Castle Siege packet subcodes..
+        /// </summary>
+        public static string CastleSiegeGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Packet Group Handler.
+        /// </summary>
+        public static string CastleSiegeGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests for the selected Castle Siege guild list..
+        /// </summary>
+        public static string CastleSiegeGuildListHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeGuildListHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Guild List Handler.
+        /// </summary>
+        public static string CastleSiegeGuildListHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeGuildListHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the selected Castle Siege guild list to the game client..
+        /// </summary>
+        public static string CastleSiegeGuildListPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeGuildListPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Guild List View.
+        /// </summary>
+        public static string CastleSiegeGuildListPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeGuildListPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests to enter the Castle Siege hunting zone..
+        /// </summary>
+        public static string CastleSiegeHuntZoneEnterHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneEnterHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege hunting-zone entry request handler.
+        /// </summary>
+        public static string CastleSiegeHuntZoneEnterHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneEnterHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles grouped Castle Siege hunting-zone packets..
+        /// </summary>
+        public static string CastleSiegeHuntZoneGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Hunting-Zone Packet Group.
+        /// </summary>
+        public static string CastleSiegeHuntZoneGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege hunting-zone access information to the game client..
+        /// </summary>
+        public static string CastleSiegeHuntZoneGuardInfoPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneGuardInfoPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege hunting-zone guardsman view.
+        /// </summary>
+        public static string CastleSiegeHuntZoneGuardInfoPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneGuardInfoPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege hunting-zone request results to the game client..
+        /// </summary>
+        public static string CastleSiegeHuntZoneResultPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneResultPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege hunting-zone result view.
+        /// </summary>
+        public static string CastleSiegeHuntZoneResultPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneResultPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests to change public access to the Castle Siege hunting zone..
+        /// </summary>
+        public static string CastleSiegeHuntZoneToggleHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneToggleHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege hunting-zone access request handler.
+        /// </summary>
+        public static string CastleSiegeHuntZoneToggleHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeHuntZoneToggleHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends a player&apos;s assigned Castle Siege side to the game client..
+        /// </summary>
+        public static string CastleSiegeJoinSidePlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeJoinSidePlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Join Side View.
+        /// </summary>
+        public static string CastleSiegeJoinSidePlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeJoinSidePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Routes Castle Siege warfare-machine packet subcodes..
+        /// </summary>
+        public static string CastleSiegeMachineGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Warfare-Machine Packet Group.
+        /// </summary>
+        public static string CastleSiegeMachineGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege warfare-machine interface packets to the game client..
+        /// </summary>
+        public static string CastleSiegeMachineInterfacePlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineInterfacePlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Warfare-Machine Interface View.
+        /// </summary>
+        public static string CastleSiegeMachineInterfacePlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineInterfacePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege warfare-machine impact-region notifications to the game client..
+        /// </summary>
+        public static string CastleSiegeMachineRegionNotifyPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineRegionNotifyPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Warfare-Machine Region View.
+        /// </summary>
+        public static string CastleSiegeMachineRegionNotifyPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineRegionNotifyPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege warfare-machine fire requests..
+        /// </summary>
+        public static string CastleSiegeMachineUseHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineUseHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Warfare-Machine Fire Handler.
+        /// </summary>
+        public static string CastleSiegeMachineUseHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineUseHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege warfare-machine fire results to the game client..
+        /// </summary>
+        public static string CastleSiegeMachineUseResultPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineUseResultPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Warfare-Machine Use Result View.
+        /// </summary>
+        public static string CastleSiegeMachineUseResultPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMachineUseResultPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege Sign of Lord registration requests..
+        /// </summary>
+        public static string CastleSiegeMarkRegistrationHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMarkRegistrationHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Mark Registration Handler.
+        /// </summary>
+        public static string CastleSiegeMarkRegistrationHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMarkRegistrationHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Sign of Lord registration results to the game client..
+        /// </summary>
+        public static string CastleSiegeMarkRegistrationResultPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMarkRegistrationResultPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Mark Registration View.
+        /// </summary>
+        public static string CastleSiegeMarkRegistrationResultPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMarkRegistrationResultPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege player and NPC mini-map positions to alliance masters..
+        /// </summary>
+        public static string CastleSiegeMiniMapPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeMiniMapPlugIn_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Mini-Map View.
+        /// </summary>
+        public static string CastleSiegeMiniMapPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeMiniMapPlugIn_Name", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Routes Castle Siege NPC-list packet subcodes..
+        /// </summary>
+        public static string CastleSiegeNpcGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeNpcGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege NPC Packet Group Handler.
+        /// </summary>
+        public static string CastleSiegeNpcGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeNpcGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege defense-structure lists to the game client..
+        /// </summary>
+        public static string CastleSiegeNpcListPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeNpcListPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege NPC List View.
+        /// </summary>
+        public static string CastleSiegeNpcListPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeNpcListPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege defense-structure operation results to the game client..
+        /// </summary>
+        public static string CastleSiegeNpcOperationResultPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeNpcOperationResultPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege NPC Operation Result View.
+        /// </summary>
+        public static string CastleSiegeNpcOperationResultPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeNpcOperationResultPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request for the guild logo of the castle owner, which the client sends when it enters the Castle Siege map..
+        /// </summary>
+        public static string CastleSiegeOwnerLogoHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeOwnerLogoHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege owner logo request handler.
+        /// </summary>
+        public static string CastleSiegeOwnerLogoHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeOwnerLogoHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the guild logo of the castle owner to the game client..
+        /// </summary>
+        public static string CastleSiegeOwnerLogoPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeOwnerLogoPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege owner logo view.
+        /// </summary>
+        public static string CastleSiegeOwnerLogoPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeOwnerLogoPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege ownership changes to the game client..
+        /// </summary>
+        public static string CastleSiegeOwnershipChangePlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeOwnershipChangePlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Ownership Change View.
+        /// </summary>
+        public static string CastleSiegeOwnershipChangePlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeOwnershipChangePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests for the current Castle Siege guild registrations..
+        /// </summary>
+        public static string CastleSiegeRegisteredGuildListHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegisteredGuildListHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Registered Guild List Handler.
+        /// </summary>
+        public static string CastleSiegeRegisteredGuildListHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegisteredGuildListHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the current Castle Siege guild registrations to the game client..
+        /// </summary>
+        public static string CastleSiegeRegisteredGuildListPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegisteredGuildListPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Registered Guild List View.
+        /// </summary>
+        public static string CastleSiegeRegisteredGuildListPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegisteredGuildListPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege guild registration requests..
+        /// </summary>
+        public static string CastleSiegeRegistrationHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Registration Handler.
+        /// </summary>
+        public static string CastleSiegeRegistrationHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege registration results to the game client..
+        /// </summary>
+        public static string CastleSiegeRegistrationResultPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationResultPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Registration Result View.
+        /// </summary>
+        public static string CastleSiegeRegistrationResultPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationResultPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege registration-state requests..
+        /// </summary>
+        public static string CastleSiegeRegistrationStateHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationStateHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Registration State Handler.
+        /// </summary>
+        public static string CastleSiegeRegistrationStateHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationStateHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege registration state to the game client..
+        /// </summary>
+        public static string CastleSiegeRegistrationStatePlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationStatePlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Registration State View.
+        /// </summary>
+        public static string CastleSiegeRegistrationStatePlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeRegistrationStatePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests for the Castle Siege Guardian Statue list..
+        /// </summary>
+        public static string CastleSiegeStatueListHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeStatueListHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Guardian Statue List Handler.
+        /// </summary>
+        public static string CastleSiegeStatueListHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeStatueListHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the Castle Siege status request which the client sends when the guardsman window opens..
+        /// </summary>
+        public static string CastleSiegeStatusHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeStatusHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege status request handler.
+        /// </summary>
+        public static string CastleSiegeStatusHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeStatusHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the Castle Siege state, schedule and castle owner to the game client..
+        /// </summary>
+        public static string CastleSiegeStatusPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeStatusPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege status view.
+        /// </summary>
+        public static string CastleSiegeStatusPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeStatusPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege Crown switch occupancy information to the game client..
+        /// </summary>
+        public static string CastleSiegeSwitchInfoPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeSwitchInfoPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Switch Information View.
+        /// </summary>
+        public static string CastleSiegeSwitchInfoPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeSwitchInfoPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests to change a Castle Siege tax rate..
+        /// </summary>
+        public static string CastleSiegeTaxChangeHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxChangeHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege tax change request handler.
+        /// </summary>
+        public static string CastleSiegeTaxChangeHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxChangeHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege tax changes and their results to the game client..
+        /// </summary>
+        public static string CastleSiegeTaxChangeResultPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxChangeResultPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege tax change result view.
+        /// </summary>
+        public static string CastleSiegeTaxChangeResultPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxChangeResultPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests for the current Castle Siege tax and treasury information..
+        /// </summary>
+        public static string CastleSiegeTaxInfoHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxInfoHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege tax information request handler.
+        /// </summary>
+        public static string CastleSiegeTaxInfoHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxInfoHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the current Castle Siege tax and treasury information to the game client..
+        /// </summary>
+        public static string CastleSiegeTaxInfoPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxInfoPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege tax information view.
+        /// </summary>
+        public static string CastleSiegeTaxInfoPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeTaxInfoPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles requests to withdraw money from the Castle Siege treasury..
+        /// </summary>
+        public static string CastleSiegeTributeWithdrawHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeTributeWithdrawHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege tribute withdrawal request handler.
+        /// </summary>
+        public static string CastleSiegeTributeWithdrawHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeTributeWithdrawHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege treasury withdrawal results to the game client..
+        /// </summary>
+        public static string CastleSiegeTributeWithdrawResultPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeTributeWithdrawResultPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege tribute withdrawal result view.
+        /// </summary>
+        public static string CastleSiegeTributeWithdrawResultPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeTributeWithdrawResultPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles Castle Siege guild unregistration requests..
+        /// </summary>
+        public static string CastleSiegeUnregisterHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeUnregisterHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Unregister Handler.
+        /// </summary>
+        public static string CastleSiegeUnregisterHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeUnregisterHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Accepts the weapon explosion request of the client. The impact damage of warfare machines is applied by the server when the projectile lands, so the request has no effect..
+        /// </summary>
+        public static string CastleSiegeWeaponExplosionHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeWeaponExplosionHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege weapon explosion handler.
+        /// </summary>
+        public static string CastleSiegeWeaponExplosionHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeWeaponExplosionHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Handler for online state change packets..
         /// </summary>
         public static string ChangeOnlineStateHandlerPlugIn_Description {
@@ -687,6 +1749,24 @@ namespace MUnique.OpenMU.GameServer.Properties {
         public static string ChaosCastleEnterHandlerPlugIn_Name {
             get {
                 return ResourceManager.GetString("ChaosCastleEnterHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The default implementation of the IChaosCastleScoreTableViewPlugin which is forwarding everything to the game client with specific data packets..
+        /// </summary>
+        public static string ChaosCastleScoreTableViewPlugin_Description {
+            get {
+                return ResourceManager.GetString("ChaosCastleScoreTableViewPlugin_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chaos Castle Score Table View.
+        /// </summary>
+        public static string ChaosCastleScoreTableViewPlugin_Name {
+            get {
+                return ResourceManager.GetString("ChaosCastleScoreTableViewPlugin_Name", resourceCulture);
             }
         }
         
@@ -997,6 +2077,60 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Handles the packets about chat commands (0xF5)..
+        /// </summary>
+        public static string ChatCommandGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ChatCommandGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chat command packet group handler.
+        /// </summary>
+        public static string ChatCommandGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ChatCommandGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request for the list of chat commands which are available to the player..
+        /// </summary>
+        public static string ChatCommandListRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ChatCommandListRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chat command list request handler.
+        /// </summary>
+        public static string ChatCommandListRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ChatCommandListRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the chat commands which are available to the player, so that the client can offer them in a user interface..
+        /// </summary>
+        public static string ChatCommandListViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ChatCommandListViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chat command list view.
+        /// </summary>
+        public static string ChatCommandListViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ChatCommandListViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Packet handler for chat messages..
         /// </summary>
         public static string ChatMessageHandlerPlugIn_Description {
@@ -1195,6 +2329,96 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Handles the request of the client for the additional success rate of the chaos machine..
+        /// </summary>
+        public static string CrywolfChaosRateBenefitRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CrywolfChaosRateBenefitRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Crywolf Chaos Rate Benefit Request Handler.
+        /// </summary>
+        public static string CrywolfChaosRateBenefitRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CrywolfChaosRateBenefitRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of an elf to contract an altar of the crywolf event..
+        /// </summary>
+        public static string CrywolfContractRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CrywolfContractRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Crywolf Contract Request Handler.
+        /// </summary>
+        public static string CrywolfContractRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CrywolfContractRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the state of the crywolf event, its altars and its result to the client..
+        /// </summary>
+        public static string CrywolfEventViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CrywolfEventViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Crywolf Event View.
+        /// </summary>
+        public static string CrywolfEventViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CrywolfEventViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the packets of the crywolf event..
+        /// </summary>
+        public static string CrywolfGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CrywolfGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Crywolf Group Handler.
+        /// </summary>
+        public static string CrywolfGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CrywolfGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of the client for the state of the crywolf event..
+        /// </summary>
+        public static string CrywolfInfoRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("CrywolfInfoRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Crywolf Info Request Handler.
+        /// </summary>
+        public static string CrywolfInfoRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("CrywolfInfoRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The default implementation of the ICurrentlyActiveQuestsPlugIn which is forwarding everything to the game client with specific data packets..
         /// </summary>
         public static string CurrentlyActiveQuestsPlugIn_Description {
@@ -1281,6 +2505,78 @@ namespace MUnique.OpenMU.GameServer.Properties {
         public static string DevilSquareEnterHandlerPlugIn_Name {
             get {
                 return ResourceManager.GetString("DevilSquareEnterHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of the Discord integration info (F5 02)..
+        /// </summary>
+        public static string DiscordIntegrationInfoRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("DiscordIntegrationInfoRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discord integration info request handler.
+        /// </summary>
+        public static string DiscordIntegrationInfoRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("DiscordIntegrationInfoRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the Discord integration info, the link code and the messages written in Discord to the game client..
+        /// </summary>
+        public static string DiscordIntegrationViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("DiscordIntegrationViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discord integration view.
+        /// </summary>
+        public static string DiscordIntegrationViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("DiscordIntegrationViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of a code to link the account to a Discord user (F5 04)..
+        /// </summary>
+        public static string DiscordLinkCodeRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("DiscordLinkCodeRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discord link code request handler.
+        /// </summary>
+        public static string DiscordLinkCodeRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("DiscordLinkCodeRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request to remove the link of the account to a Discord user (F5 06)..
+        /// </summary>
+        public static string DiscordUnlinkRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("DiscordUnlinkRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discord unlink request handler.
+        /// </summary>
+        public static string DiscordUnlinkRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("DiscordUnlinkRequestHandlerPlugIn_Name", resourceCulture);
             }
         }
         
@@ -1699,6 +2995,114 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Handles the packets of the gens system (0xF8)..
+        /// </summary>
+        public static string GensGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("GensGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gens group handler.
+        /// </summary>
+        public static string GensGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("GensGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of a player to join a gens..
+        /// </summary>
+        public static string GensJoinRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("GensJoinRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gens join request handler.
+        /// </summary>
+        public static string GensJoinRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("GensJoinRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of a player to leave the gens..
+        /// </summary>
+        public static string GensLeaveRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("GensLeaveRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gens leave request handler.
+        /// </summary>
+        public static string GensLeaveRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("GensLeaveRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of the gens ranking, which the client sends when it opens the gens info window..
+        /// </summary>
+        public static string GensRankingRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("GensRankingRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gens ranking request handler.
+        /// </summary>
+        public static string GensRankingRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("GensRankingRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of a player for the gens ranking reward..
+        /// </summary>
+        public static string GensRewardRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("GensRewardRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gens reward request handler.
+        /// </summary>
+        public static string GensRewardRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("GensRewardRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shows the results of the gens requests and the gens info of the own player..
+        /// </summary>
+        public static string GensViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("GensViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gens view.
+        /// </summary>
+        public static string GensViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("GensViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Handler for guild create packets..
         /// </summary>
         public static string GuildCreateHandlerPlugIn_Description {
@@ -1915,6 +3319,24 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Handler for guild role assign packets..
+        /// </summary>
+        public static string GuildRoleAssignHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("GuildRoleAssignHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Guild Role Assign Handler.
+        /// </summary>
+        public static string GuildRoleAssignHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("GuildRoleAssignHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Handler for guild war response packets..
         /// </summary>
         public static string GuildWarResponseHandlerPlugIn_Description {
@@ -1983,6 +3405,60 @@ namespace MUnique.OpenMU.GameServer.Properties {
         public static string HitHandlerPlugIn075_Name {
             get {
                 return ResourceManager.GetString("HitHandlerPlugIn075_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request to enter the imperial guardian event, which is sent by the window of Jerint..
+        /// </summary>
+        public static string ImperialGuardianEnterRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ImperialGuardianEnterRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Imperial Guardian Enter Request Handler.
+        /// </summary>
+        public static string ImperialGuardianEnterRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ImperialGuardianEnterRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the packets of the imperial guardian event (0xF7)..
+        /// </summary>
+        public static string ImperialGuardianGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ImperialGuardianGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Imperial Guardian Group Handler.
+        /// </summary>
+        public static string ImperialGuardianGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ImperialGuardianGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the enter result, the timer and the result of the imperial guardian event to the client..
+        /// </summary>
+        public static string ImperialGuardianViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ImperialGuardianViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Imperial Guardian View.
+        /// </summary>
+        public static string ImperialGuardianViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ImperialGuardianViewPlugIn_Name", resourceCulture);
             }
         }
         
@@ -2365,6 +3841,114 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Handles 0xD1/0x01 (KanturuEnterRequest) and teleports the player into the event..
+        /// </summary>
+        public static string KanturuEnterRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("KanturuEnterRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kanturu Enter Request Handler.
+        /// </summary>
+        public static string KanturuEnterRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("KanturuEnterRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handler for the request to enter the doppelganger event through the NPC Lugard..
+        /// </summary>
+        public static string DoppelgangerEnterRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("DoppelgangerEnterRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Doppelganger Enter Request Handler.
+        /// </summary>
+        public static string DoppelgangerEnterRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("DoppelgangerEnterRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the doppelganger event packets (0xBF 0x0F - 0x14) to the client..
+        /// </summary>
+        public static string DoppelgangerEventViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("DoppelgangerEventViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Doppelganger Event View.
+        /// </summary>
+        public static string DoppelgangerEventViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("DoppelgangerEventViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Kanturu event state/result/HUD packets (0xD1 group) to the client..
+        /// </summary>
+        public static string KanturuEventViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("KanturuEventViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kanturu Event View.
+        /// </summary>
+        public static string KanturuEventViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("KanturuEventViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Routes 0xD1 Kanturu client packets to sub-handlers..
+        /// </summary>
+        public static string KanturuGroupHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("KanturuGroupHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kanturu Group Handler.
+        /// </summary>
+        public static string KanturuGroupHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("KanturuGroupHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Responds to 0xD1/0x00 (KanturuInfoRequest) with fresh event state info..
+        /// </summary>
+        public static string KanturuInfoRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("KanturuInfoRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kanturu Info Request Handler.
+        /// </summary>
+        public static string KanturuInfoRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("KanturuInfoRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The default implementation of the ILegacyQuestRewardPlugIn which is forwarding everything to the game client with specific data packets..
         /// </summary>
         public static string LegacyQuestRewardPlugIn_Description {
@@ -2577,6 +4161,24 @@ namespace MUnique.OpenMU.GameServer.Properties {
         public static string LogoutPlugIn_Name {
             get {
                 return ResourceManager.GetString("LogoutPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handler for magic effect cancel packets..
+        /// </summary>
+        public static string MagicEffectCancelHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("MagicEffectCancelHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Magic Effect Cancel Handler.
+        /// </summary>
+        public static string MagicEffectCancelHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("MagicEffectCancelHandlerPlugIn_Name", resourceCulture);
             }
         }
         
@@ -3481,6 +5083,24 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Packet handler which sets prices in a currency for an item in the player shop (3F 09)..
+        /// </summary>
+        public static string PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Player Shop - Set Price (with currency).
+        /// </summary>
+        public static string PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Packet handler which sets prices for an item in the player shop (3F 01)..
         /// </summary>
         public static string PlayerShopSetItemPricePacketHandlerPlugIn_Description {
@@ -3855,6 +5475,42 @@ namespace MUnique.OpenMU.GameServer.Properties {
         public static string RageSkillAttackRequestHandlerPlugIn_Name {
             get {
                 return ResourceManager.GetString("RageSkillAttackRequestHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sends the state of the raklion event and the skills of Selupan to the client..
+        /// </summary>
+        public static string RaklionEventViewPlugIn_Description {
+            get {
+                return ResourceManager.GetString("RaklionEventViewPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Raklion Event View.
+        /// </summary>
+        public static string RaklionEventViewPlugIn_Name {
+            get {
+                return ResourceManager.GetString("RaklionEventViewPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Handles the request of the client for the state of the raklion event..
+        /// </summary>
+        public static string RaklionStateInfoRequestHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("RaklionStateInfoRequestHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Raklion State Info Request Handler.
+        /// </summary>
+        public static string RaklionStateInfoRequestHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("RaklionStateInfoRequestHandlerPlugIn_Name", resourceCulture);
             }
         }
         
@@ -5047,6 +6703,42 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The extended implementation of the IShowItemCraftingPreviewPlugIn which is forwarding everything to the game client with specific data packets..
+        /// </summary>
+        public static string ShowItemCraftingPreviewExtendedPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ShowItemCraftingPreviewExtendedPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show Item Crafting Preview Extended.
+        /// </summary>
+        public static string ShowItemCraftingPreviewExtendedPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ShowItemCraftingPreviewExtendedPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The extended implementation of the IShowShopCurrenciesPlugIn which is forwarding everything to the game client with specific data packets..
+        /// </summary>
+        public static string ShowShopCurrenciesExtendedPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ShowShopCurrenciesExtendedPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show Shop Currencies Extended.
+        /// </summary>
+        public static string ShowShopCurrenciesExtendedPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ShowShopCurrenciesExtendedPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The extended implementation of the IShowShopItemListPlugIn which is forwarding everything to the game client with specific data packets..
         /// </summary>
         public static string ShowShopItemListExtendedPlugIn_Description {
@@ -6197,5 +7889,34 @@ namespace MUnique.OpenMU.GameServer.Properties {
                 return ResourceManager.GetString("WhisperedChatMessageHandlerPlugIn_Name", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sends Castle Siege Life Stone creation progress to the game client.
+        /// </summary>
+        public static string CastleSiegeLifeStoneStatePlugIn_Description {
+            get {
+                return ResourceManager.GetString("CastleSiegeLifeStoneStatePlugIn_Description", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Castle Siege Life Stone state view.
+        /// </summary>
+        public static string CastleSiegeLifeStoneStatePlugIn_Name {
+            get {
+                return ResourceManager.GetString("CastleSiegeLifeStoneStatePlugIn_Name", resourceCulture);
+            }
+        }
+        /// <summary>Gets the localized EnterMarketPlace_Name text.</summary>
+        public static string EnterMarketPlace_Name => ResourceManager.GetString("EnterMarketPlace_Name", resourceCulture)!;
+
+        /// <summary>Gets the localized EnterMarketPlace_Description text.</summary>
+        public static string EnterMarketPlace_Description => ResourceManager.GetString("EnterMarketPlace_Description", resourceCulture)!;
+
+        /// <summary>Gets the localized PingHandlerPlugIn_Name text.</summary>
+        public static string PingHandlerPlugIn_Name => ResourceManager.GetString("PingHandlerPlugIn_Name", resourceCulture)!;
+
+        /// <summary>Gets the localized PingHandlerPlugIn_Description text.</summary>
+        public static string PingHandlerPlugIn_Description => ResourceManager.GetString("PingHandlerPlugIn_Description", resourceCulture)!;
     }
 }

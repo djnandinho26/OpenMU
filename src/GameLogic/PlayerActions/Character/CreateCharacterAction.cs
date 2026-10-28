@@ -4,8 +4,6 @@
 
 namespace MUnique.OpenMU.GameLogic.PlayerActions.Character;
 
-using System.Text.RegularExpressions;
-using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.GameLogic.PlugIns;
 using MUnique.OpenMU.GameLogic.Views.Character;
 
@@ -53,43 +51,31 @@ public class CreateCharacterAction
         }
 
         player.Logger.LogDebug("Enter CreateCharacter: {0} {1} {2}", account.LoginName, name, characterClass);
-        var isValidName = string.IsNullOrWhiteSpace(player.GameContext.Configuration.CharacterNameRegex) || Regex.IsMatch(name, player.GameContext.Configuration.CharacterNameRegex);
+        var isValidName = player.GameContext.Configuration.IsValidCharacterName(name);
         player.Logger.LogDebug("CreateCharacter: Character Name matches = {0}", isValidName);
         if (!isValidName)
         {
             return null;
         }
 
-        var freeSlot = this.GetFreeSlot(player);
+        var freeSlot = account.GetFreeCharacterSlot(player.GameContext.Configuration);
         if (freeSlot is null)
         {
             return null;
         }
 
-        if (!characterClass.CanGetCreated || characterClass.HomeMap is null)
+        // The character starts on the home map, so it must be available in the game.
+        if (!characterClass.CanGetCreated || !characterClass.IsActive || characterClass.HomeMap is not { IsActive: true })
         {
             return null;
         }
 
         var character = player.PersistenceContext.CreateNew<DataModel.Entities.Character>();
-        character.CharacterClass = characterClass;
         character.Name = name;
         character.CharacterSlot = freeSlot.Value;
-        character.CreateDate = DateTime.UtcNow;
-        character.KeyConfiguration = new byte[30];
-        var attributes = character.CharacterClass.StatAttributes.Select(a => player.PersistenceContext.CreateNew<StatAttribute>(a.Attribute, a.BaseValue)).ToList();
-        attributes.ForEach(character.Attributes.Add);
-        character.CurrentMap = characterClass.HomeMap;
-        var randomSpawnGate = character.CurrentMap!.ExitGates.Where(g => g.IsSpawnGate).SelectRandom();
-        if (randomSpawnGate is not null)
-        {
-            character.PositionX = (byte)Rand.NextInt(randomSpawnGate.X1, randomSpawnGate.X2);
-            character.PositionY = (byte)Rand.NextInt(randomSpawnGate.Y1, randomSpawnGate.Y2);
-        }
-
-        character.Inventory = player.PersistenceContext.CreateNew<ItemStorage>();
+        player.PersistenceContext.InitializeNewCharacter(character, characterClass);
         account.Characters.Add(character);
-        player.GameContext.PlugInManager.GetPlugInPoint<ICharacterCreatedPlugIn>()?.CharacterCreated(player, character);
+        player.GameContext.PlugInManager.GetPlugInPoint<ICharacterCreatedPlugIn>()?.CharacterCreated(account, character, player.PersistenceContext, player.GameContext.Configuration, player.Logger);
         try
         {
             await player.SaveProgressAsync().ConfigureAwait(false);
@@ -110,17 +96,5 @@ public class CreateCharacterAction
 
         player.Logger.LogDebug("Creating Character Complete.");
         return character;
-    }
-
-    private byte? GetFreeSlot(Player player)
-    {
-        var usedSlots = player.Account!.Characters.Select(c => (int)c.CharacterSlot);
-        var freeSlots = Enumerable.Range(0, player.GameContext.Configuration.MaximumCharactersPerAccount).Except(usedSlots).ToList();
-        if (freeSlots.Any())
-        {
-            return (byte)freeSlots.First();
-        }
-
-        return null;
     }
 }

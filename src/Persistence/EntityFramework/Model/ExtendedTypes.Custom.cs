@@ -8,7 +8,6 @@
 
 using System.Collections.Specialized;
 using System.ComponentModel;
-using Mapster;
 using MUnique.OpenMU.Persistence.Json;
 
 namespace MUnique.OpenMU.Persistence.EntityFramework.Model;
@@ -51,8 +50,19 @@ internal partial class PowerUpDefinitionValue
 /// <summary>
 /// The Entity Framework Core implementation of <see cref="ConstValueAttribute"/>.
 /// </summary>
-internal partial class ConstValueAttribute
+internal partial class ConstValueAttribute : MUnique.OpenMU.DataModel.IAssignable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConstValueAttribute"/> class
+    /// using the default <see cref="AggregateType.AddRaw"/> aggregation mode.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <param name="definition">The attribute definition.</param>
+    public ConstValueAttribute(float value, AttributeDefinition definition)
+        : base(value, definition)
+    {
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstValueAttribute"/> class.
     /// </summary>
@@ -97,6 +107,28 @@ internal partial class ConstValueAttribute
     {
         get => base.Value;
         set => base.Value = value;
+    }
+
+    /// <inheritdoc />
+    public new AggregateType AggregateType
+    {
+        get => base.AggregateType;
+        set => base.AggregateType = value;
+    }
+
+    /// <inheritdoc />
+    public void AssignValuesOf(object other, MUnique.OpenMU.DataModel.Configuration.GameConfiguration gameConfiguration)
+    {
+        if (other is not MUnique.OpenMU.AttributeSystem.ConstValueAttribute value)
+        {
+            throw new ArgumentException("Expected a constant attribute.", nameof(other));
+        }
+
+        var definition = gameConfiguration.Attributes.SingleOrDefault(a => a.Id == value.Definition.Id)
+            ?? throw new ArgumentException("The attribute definition must belong to the target configuration.", nameof(gameConfiguration));
+        this.Definition = definition;
+        this.Value = value.Value;
+        this.AggregateType = value.AggregateType;
     }
 }
 
@@ -200,9 +232,7 @@ internal partial class Account : IConvertibleTo<BasicModel.Account>
 {
     public BasicModel.Account Convert()
     {
-        MapsterConfigurator.EnsureConfigured();
-
-        return this.Adapt<BasicModel.Account>();
+        return BasicModelConverter.Convert<BasicModel.Account>(this);
     }
 }
 
@@ -210,9 +240,7 @@ internal partial class GameConfiguration : IConvertibleTo<BasicModel.GameConfigu
 {
     public BasicModel.GameConfiguration Convert()
     {
-        MapsterConfigurator.EnsureConfigured();
-
-        return this.Adapt<BasicModel.GameConfiguration>();
+        return BasicModelConverter.Convert<BasicModel.GameConfiguration>(this);
     }
 }
 
@@ -220,8 +248,7 @@ internal partial class ConnectServerDefinition : IConvertibleTo<BasicModel.Conne
 {
     public BasicModel.ConnectServerDefinition Convert()
     {
-        MapsterConfigurator.EnsureConfigured();
-        return this.Adapt<BasicModel.ConnectServerDefinition>();
+        return BasicModelConverter.Convert<BasicModel.ConnectServerDefinition>(this);
     }
 }
 
@@ -229,8 +256,7 @@ internal partial class GameClientDefinition : IConvertibleTo<BasicModel.GameClie
 {
     public BasicModel.GameClientDefinition Convert()
     {
-        MapsterConfigurator.EnsureConfigured();
-        return this.Adapt<BasicModel.GameClientDefinition>();
+        return BasicModelConverter.Convert<BasicModel.GameClientDefinition>(this);
     }
 }
 
@@ -255,4 +281,76 @@ internal partial class LetterHeader
     /// Gets or sets the receiver identifier.
     /// </summary>
     public Guid ReceiverId { get; set; }
+}
+
+internal partial class ChatServerDefinition : IConvertibleTo<BasicModel.ChatServerDefinition>
+{
+    public BasicModel.ChatServerDefinition Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.ChatServerDefinition>(this);
+    }
+}
+
+internal partial class GameServerDefinition : IConvertibleTo<BasicModel.GameServerDefinition>
+{
+    public BasicModel.GameServerDefinition Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.GameServerDefinition>(this);
+    }
+}
+
+internal partial class SystemConfiguration : IConvertibleTo<BasicModel.SystemConfiguration>
+{
+    public BasicModel.SystemConfiguration Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.SystemConfiguration>(this);
+    }
+}
+
+internal partial class ConfigurationUpdate : IConvertibleTo<BasicModel.ConfigurationUpdate>
+{
+    public BasicModel.ConfigurationUpdate Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.ConfigurationUpdate>(this);
+    }
+}
+
+internal partial class ConfigurationUpdateState : IConvertibleTo<BasicModel.ConfigurationUpdateState>
+{
+    public BasicModel.ConfigurationUpdateState Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.ConfigurationUpdateState>(this);
+    }
+}
+
+internal partial class CastleSiegeData : IConvertibleTo<BasicModel.CastleSiegeData>
+{
+    public BasicModel.CastleSiegeData Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.CastleSiegeData>(this);
+    }
+}
+
+internal partial class CrywolfData : IConvertibleTo<BasicModel.CrywolfData>
+{
+    public BasicModel.CrywolfData Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.CrywolfData>(this);
+    }
+}
+
+internal partial class GensMember : IConvertibleTo<BasicModel.GensMember>
+{
+    public BasicModel.GensMember Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.GensMember>(this);
+    }
+}
+
+internal partial class GensAbuse : IConvertibleTo<BasicModel.GensAbuse>
+{
+    public BasicModel.GensAbuse Convert()
+    {
+        return BasicModelConverter.Convert<BasicModel.GensAbuse>(this);
+    }
 }

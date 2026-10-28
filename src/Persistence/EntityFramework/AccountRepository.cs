@@ -4,13 +4,13 @@
 
 namespace MUnique.OpenMU.Persistence.EntityFramework;
 
+using System.Linq;
+using System.Threading;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MUnique.OpenMU.Persistence.EntityFramework.Json;
 using MUnique.OpenMU.Persistence.EntityFramework.Model;
-using System.Linq;
-using System.Threading;
 
 /// <summary>
 /// Repository for accounts.
@@ -47,7 +47,7 @@ internal class AccountRepository : CachingGenericRepository<Account>
                     context.Detach(account);
                 }
 
-                var objectLoader = new AccountJsonObjectLoader();
+                var objectLoader = new AccountJsonObjectLoader((this.RepositoryProvider as CacheAwareRepositoryProvider)?.ConfigurationReferences);
                 account = await objectLoader.LoadObjectAsync<Account>(id, context.Context, cancellationToken).ConfigureAwait(false);
                 if (account != null && !(context.Context.Entry(account) is { } entry && entry.State != EntityState.Detached))
                 {
@@ -76,14 +76,15 @@ internal class AccountRepository : CachingGenericRepository<Account>
         cancellationToken.ThrowIfCancellationRequested();
 
         using var context = this.GetContext();
-        var accountInfo = await context.Context.Set<Account>()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.RawCharacters.Any(c => c.Name == characterName), cancellationToken)
+        var accountId = await context.Context.Set<Account>()
+            .Where(a => a.RawCharacters.Any(c => c.Name == characterName))
+            .Select(a => (Guid?)a.Id)
+            .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        if (accountInfo != null)
+        if (accountId is { } id)
         {
-            return await this.GetByIdAsync(accountInfo.Id, cancellationToken).ConfigureAwait(false);
+            return await this.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
         }
 
         return null;

@@ -17,7 +17,7 @@ using MUnique.OpenMU.PlugIns;
 /// This update adds missing area skill settings for summoner curse (book) and lightning shock skills.
 /// </summary>
 [PlugIn]
-[Display(Name = PlugInName, Description = PlugInDescription)]
+[Display(Name = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixSummonerCurseSkillsPlugIn_Name), Description = nameof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources.FixSummonerCurseSkillsPlugIn_Description), ResourceType = typeof(MUnique.OpenMU.Persistence.Initialization.Properties.PlugInResources))]
 [Guid("A3B4C8DB-2F39-4C81-A2D9-5E4FA5B9E004")]
 public class FixSummonerCurseSkillsPlugIn : UpdatePlugInBase
 {
@@ -30,9 +30,6 @@ public class FixSummonerCurseSkillsPlugIn : UpdatePlugInBase
     /// The plug in description.
     /// </summary>
     internal const string PlugInDescription = "This update adds missing area skill settings for summoner curse (book) and lightning shock skills.";
-
-    /// <inheritdoc />
-    public override UpdateVersion Version => UpdateVersion.FixSummonerCurseSkills;
 
     /// <inheritdoc />
     public override string DataInitializationKey => VersionSeasonSix.DataInitialization.Id;
@@ -57,10 +54,10 @@ public class FixSummonerCurseSkillsPlugIn : UpdatePlugInBase
         var bleedingDamageMultiplier = Stats.BleedingDamageMultiplier.GetPersistent(gameConfiguration);
         this.AddStatIfNotExists(context, gameConfiguration, Stats.IsBleeding);
         var isBleeding = Stats.IsBleeding.GetPersistent(gameConfiguration);
-        this.AddStatIfNotExists(context, gameConfiguration, Stats.StunChance);
-        var stunChance = Stats.StunChance.GetPersistent(gameConfiguration);
-        this.AddStatIfNotExists(context, gameConfiguration, Stats.PollutionMoveTargetChance);
-        var pollutionMoveTargetChance = Stats.PollutionMoveTargetChance.GetPersistent(gameConfiguration);
+        this.AddStatIfNotExists(context, gameConfiguration, Stats.MasteryStunChance);
+        var stunChance = Stats.MasteryStunChance.GetPersistent(gameConfiguration);
+        this.AddStatIfNotExists(context, gameConfiguration, Stats.MasteryMoveTargetChance);
+        var masteryMoveTargetChance = Stats.MasteryMoveTargetChance.GetPersistent(gameConfiguration);
 
         // Add new base attribute to summoner classes
         var summonerClassNumbers = new[] { (int)CharacterClassNumber.Summoner, (int)CharacterClassNumber.BloodySummoner, (int)CharacterClassNumber.DimensionMaster };
@@ -122,7 +119,7 @@ public class FixSummonerCurseSkillsPlugIn : UpdatePlugInBase
 
         if (gameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.LightningTomeMastery)?.MasterDefinition is { } lightningTomeMastery)
         {
-            lightningTomeMastery.TargetAttribute = pollutionMoveTargetChance;
+            lightningTomeMastery.TargetAttribute = masteryMoveTargetChance;
             lightningTomeMastery.Aggregation = AggregateType.AddRaw;
             lightningTomeMastery.ValueFormula = $"{lightningTomeMastery.ValueFormula} / 100";
         }

@@ -112,7 +112,7 @@ public static class InventoryConstants
     /// <summary>
     /// Index of the first personal store slot.
     /// 12 = number of wearable item slots
-    /// 64 = number of inventory slots
+    /// 64 = number of inventory slots.
     /// </summary>
     public static readonly byte FirstExtensionItemSlotIndex = (byte)(
         EquippableSlotsCount + // 12
@@ -174,17 +174,5 @@ public static class InventoryConstants
                    (RowsOfOneExtension * RowSize * Math.Max(Math.Min(numberOfExtensions, MaximumNumberOfExtensions), 0));
 
         return (byte)size;
-    }
-
-    /// <summary>
-    /// Determines whether the item slot is of an defending item.
-    /// </summary>
-    /// <param name="itemSlot">The item slot.</param>
-    /// <returns><see langword="true"/>, if the slot is of an defending item.</returns>
-    public static bool IsDefenseItemSlot(byte itemSlot)
-    {
-        return (itemSlot >= HelmSlot && itemSlot <= WingsSlot)
-               || itemSlot == Ring1Slot
-               || itemSlot == Ring2Slot;
     }
 }

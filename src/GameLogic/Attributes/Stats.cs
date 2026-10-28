@@ -1,4 +1,4 @@
-// <copyright file="Stats.cs" company="MUnique">
+﻿// <copyright file="Stats.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -148,6 +148,16 @@ public class Stats
     public static AttributeDefinition Resets { get; } = new(new Guid("89A891A7-F9F9-4AB5-AF36-12056E53A5F7"), "Resets", "Reset quantity of current character");
 
     /// <summary>
+    /// Gets the registered renas / items attribute definition.
+    /// </summary>
+    public static AttributeDefinition RegisteredRenas { get; } = new(new Guid("45B1C2A3-3E4F-5A6B-7C8D-9E0F1A2B3C4D"), "Registered Renas", "Progress towards next item registration reward");
+
+    /// <summary>
+    /// Gets the total registered renas / items attribute definition.
+    /// </summary>
+    public static AttributeDefinition TotalRegisteredRenas { get; } = new(new Guid("56C2D3B4-4F5A-6B7C-8D9E-0F1A2B3C4D5E"), "Total Registered Renas", "Total registered items (all-time counter)");
+
+    /// <summary>
     /// Gets the zen amount rate attribute definition.
     /// </summary>
     public static AttributeDefinition MoneyAmountRate { get; } = new(new Guid("D84D1A5C-3A56-4CB9-8DD4-158AFD4D1EDB"), "Money Drop Amount Rate", "Defines a multiplier for the amount of a money drop.");
@@ -253,6 +263,14 @@ public class Stats
     /// <summary>
     /// Gets the min and max physical base DMG attribute definition.
     /// </summary>
+    /// <remarks>
+    /// <see cref="AggregateType.AddRaw"/> values include:
+    ///     Weapon item option; excellent lvl/20 option (weapons)
+    /// <see cref="AggregateType.Multiplicate"/> values include:
+    ///     Double wield halving (averaging).
+    /// <see cref="AggregateType.AddFinal"/> values include:
+    ///     Excellent lvl/20 option (pendant); wings damage option; harmony damage (min and max) option; gold fenrir damage bonus; <see cref="BaseDamageBonus"/>.
+    /// </remarks>
     public static AttributeDefinition PhysicalBaseDmg { get; } = new(new Guid("DD1E13E4-BFFD-45B5-9B91-9080710324B2"), "Physical Base Damage (min and max)", string.Empty);
 
     /// <summary>
@@ -431,13 +449,33 @@ public class Stats
     /// <summary>
     /// Gets the physical base (min and max) damage increase attribute definition>.
     /// </summary>
-    /// <remarks>Includes excellent 2% physical increase option, ammunition damage increase, and the double wield multiplier (55%).</remarks>
+    /// <remarks>
+    /// <see cref="AggregateType.AddRaw"/> values include:
+    ///     Excellent 2% increase option (double wield weapons); ammunition damage increase.
+    /// <see cref="AggregateType.Multiplicate"/> values include:
+    ///     Double wield halving (averaging); double wield bonus multiplier (55%); excellent 2% increase option (pendant and other weapons).
+    /// </remarks>
     public static AttributeDefinition PhysicalBaseDmgIncrease { get; } = new(new Guid("104B4DAA-C507-4CBB-AF38-D53DDBB4817E"), "Physical Base Damage Increase", string.Empty);
 
     /// <summary>
     /// Gets the walk speed attribute definition.
     /// </summary>
     public static AttributeDefinition WalkSpeed { get; } = new(new Guid("9CDDC598-E5F3-4372-9294-505455E4A40B"), "Walk Speed", string.Empty);
+
+    /// <summary>
+    /// Gets the movement speed attribute definition.
+    /// </summary>
+    public static AttributeDefinition MovementSpeed { get; } = new(new Guid("E29301BE-626B-4B42-9F68-0DFAC18B3856"), "Movement Speed", "The movement speed of a character on regular terrain.");
+
+    /// <summary>
+    /// Gets the underwater movement speed attribute definition.
+    /// </summary>
+    public static AttributeDefinition MovementSpeedUnderwater { get; } = new(new Guid("12128DC7-0740-48A5-A653-E546191CD7E0"), "Underwater Movement Speed", "The movement speed of a character on underwater terrain.");
+
+    /// <summary>
+    /// Gets the movement speed factor attribute definition.
+    /// </summary>
+    public static AttributeDefinition MovementSpeedFactor { get; } = new(new Guid("003E1F2E-661D-4258-BEF0-33111D5F4AD2"), "Movement Speed Factor", "The factor which is applied to the final movement speed of a character.");
 
     /// <summary>
     /// Gets the attack damage increase attribute definition.
@@ -497,6 +535,33 @@ public class Stats
     public static AttributeDefinition CrossBowMasteryBonusDamage { get; } = new(new Guid("B3AF7F51-6D6B-42FB-B8FF-689D03890F3E"), "Cross Bow Mastery PvP Bonus Damage (MST)", string.Empty);
 
     /// <summary>
+    /// Gets the extra projectiles attribute definition.
+    /// </summary>
+    /// <remarks>
+    /// A generic pool which is increased by equipping certain (cross)bows. It applies to
+    /// every multi-projectile skill which opts in through its <see cref="SkillExtraProjectiles"/>.
+    /// </remarks>
+    public static AttributeDefinition ExtraProjectiles { get; } = new(new Guid("B9E4F3C2-A1D5-4B8E-7F2C-6D3A9E1F5C8B"), "Extra Projectiles", "The number of extra projectiles which is added to every multi-projectile skill which uses them.");
+
+    /// <summary>
+    /// Gets the triple shot mastery's extra projectiles attribute definition.
+    /// </summary>
+    /// <remarks>
+    /// A skill-exclusive source which is fed by the passive power-up of the triple shot mastery.
+    /// Only the triple shot skill uses it, so it doesn't leak into other multi-projectile skills.
+    /// </remarks>
+    public static AttributeDefinition TripleShotExtraProjectiles { get; } = new(new Guid("7F3B9C21-4A6E-4D8B-9F1C-2E5A7D9B3C64"), "Triple Shot Extra Projectiles", "The number of extra projectiles granted by the triple shot mastery.");
+
+    /// <summary>
+    /// Gets the extra projectiles attribute definition of a skill.
+    /// </summary>
+    /// <remarks>
+    /// The number of extra projectiles which a multi-projectile skill actually shoots.
+    /// It is composed per skill from the pools it uses, see <see cref="Skill.AttributeRelationships"/>.
+    /// </remarks>
+    public static AttributeDefinition SkillExtraProjectiles { get; } = new(new Guid("C4D8E2A6-1B5F-4E9C-8A3D-6F2B7C4E1A95"), "Skill Extra Projectiles", "The number of extra projectiles which a multi-projectile skill actually shoots.");
+
+    /// <summary>
     /// Gets elf's melee attack mode attribute definition.
     /// </summary>
     public static AttributeDefinition MeleeAttackMode { get; } = new(new Guid("2121E586-B511-4D27-9E1A-67BFCACD7F41"), "Melee Attack Mode", "The elf's melee attack mode switch.");
@@ -525,6 +590,11 @@ public class Stats
     /// Gets elf's archery maximum damage attribute definition.
     /// </summary>
     public static AttributeDefinition ArcheryMaxDmg { get; } = new(new Guid("EC807B7C-4004-4D13-BED2-326E13F8EFEB"), "Archery Maximum Damage", "The elf's maximum archery damage, which is added to projectile weapon attacks.");
+
+    /// <summary>
+    /// Gets the elf's greater defense buff bonus defense attribute definition.
+    /// </summary>
+    public static AttributeDefinition GreaterDefenseBonus { get; } = new(new Guid("5A7C3E9B-D1F4-4B82-8A6D-2F3E1C9B7A4D"), "Greater Defense Bonus", string.Empty);
 
     /// <summary>
     /// Gets the elf's greater damage buff bonus damage attribute definition.
@@ -661,6 +731,16 @@ public class Stats
     public static AttributeDefinition PollutionBonusDmg { get; } = new(new Guid("9B7AF584-DB59-4770-BCE9-1B5131BBDE38"), "Pollution Bonus Damage (MST)", "The pollution skill (book of lagle) bonus damage, which rises with lightning tome strengthener and is added at a late stage.");
 
     /// <summary>
+    /// Gets the sleep strengthener MST bonus chance.
+    /// </summary>
+    public static AttributeDefinition SleepStrBonusChance { get; } = new(new Guid("3F9E2A7B-41C8-4D2E-9B0F-6A1C8D5E7B3F"), "Sleep Strengthener Bonus Chance (MST)", string.Empty);
+
+    /// <summary>
+    /// Gets the drain life strengthener MST bonus healing.
+    /// </summary>
+    public static AttributeDefinition DrainLifeStrBonusHealing { get; } = new(new Guid("5B1AA436-2CF9-4A45-AACA-5B1AA4362CF9"), "Drain Life Strengthener Bonus Healing (MST)", string.Empty);
+
+    /// <summary>
     /// Gets the is a scepter equipped.
     /// </summary>
     public static AttributeDefinition IsScepterEquipped { get; } = new(new Guid("8650DE3B-BE11-458E-B352-4046CE264402"), "Is Scepter Equipped", string.Empty);
@@ -696,12 +776,23 @@ public class Stats
     public static AttributeDefinition GloveWeaponBonusDamage { get; } = new(new Guid("F9CB1174-0184-4F21-B71D-AFC7359BC594"), "Glove Weapon Bonus Damage (MST)", string.Empty);
 
     /// <summary>
+    /// Gets the rage fighter's increase block (defense rate) buff bonus.
+    /// </summary>
+    /// <remarks>It only adds to PvM defense rate (<see cref="DefenseRatePvm"/>).</remarks>
+    public static AttributeDefinition IncreaseBlockBonus { get; } = new(new Guid("8F2D1A7C-4E6B-4A9D-B1F3-5C7E8A2D9F0B"), "Increase Block Bonus", string.Empty);
+
+    /// <summary>
+    /// Gets the glove weapon mastery double damage MST chance attribute definition.
+    /// </summary>
+    public static AttributeDefinition GloveWeaponMasteryDoubleDamageChance { get; } = new(new Guid("B7C2E1A9-5F4D-4B3A-8C6E-2D1F9A7B4C5E"), "Glove Weapon Mastery Double Damage Chance (MST)", string.Empty);
+
+    /// <summary>
     /// Gets the summoned monster health increase, percentage.
     /// </summary>
     public static AttributeDefinition SummonedMonsterHealthIncrease { get; } = new(new Guid("7B0625C8-DA1A-4A5D-BCA5-26AACDA0BDC6"), "Summoned Monster Health Increase %", string.Empty);
 
     /// <summary>
-    /// Gets the summoned monster defense increase, absolute.
+    /// Gets the summoned monster defense increase, percentage.
     /// </summary>
     public static AttributeDefinition SummonedMonsterDefenseIncrease { get; } = new(new Guid("0D55CFCA-751F-4E66-B327-635576A9A0B3"), "Summoned Monster Defense Increase", string.Empty);
 
@@ -747,7 +838,8 @@ public class Stats
     /// <see cref="AggregateType.Multiplicate"/> values include:
     ///     <see cref="DefenseIncreaseWithEquippedShield"/>.
     /// <see cref="AggregateType.AddFinal"/> values include:
-    ///     Greater defense buff; MST bonus defense with shield (shield strengthener); MST dark horse strengthener; Jack O'Lantern Cry bonus (halved); Berserker defense reduction.
+    ///     MST bonus defense with shield (shield strengthener); MST dark horse strengthener; Jack O'Lantern Cry bonus (halved); Berserker defense reduction;
+    ///     Defense Success Rate Increase Mastery (increase block) defense bonus.
     /// </remarks>
     public static AttributeDefinition DefenseFinal { get; } = new(new Guid("0888AD48-0CC8-47CA-B6A3-99F3771AA5FC"), "Final Defense", string.Empty);
 
@@ -883,7 +975,7 @@ public class Stats
     /// <summary>
     /// Gets the berserker proficiency buff damage multiplier MST attribute definition.
     /// </summary>
-    /// <remarks>Increases with MST berserker proficiency. Applies on <see cref="DamageType.Curse"/> and <see cref="DamageType.Wizardry"/> skills.</remarks>
+    /// <remarks>Increases with MST berserker proficiency. Applies on <see cref="DamageType.Curse"/> (once) and <see cref="DamageType.Wizardry"/> (twice) skills.</remarks>
     public static AttributeDefinition BerserkerProficiencyMultiplier { get; } = new(new Guid("55124C97-6EF3-4C46-AEC9-D01C11BE18A4"), "Berserker Proficiency Multiplier (MST)", "The berserker proficiency damage multiplier which is added to the wizardry multiplier but also by itself is multiplied by the wizardry/curse final damage and added to it.");
 
     /// <summary>
@@ -1102,7 +1194,31 @@ public class Stats
     /// Gets the shield recovery everywhere attribute definition.
     /// By default, shield recovery is limited to the safezone only. With this attribute (value >= 1), recovery works everywhere on a map.
     /// </summary>
-    public static AttributeDefinition ShieldRecoveryEverywhere { get; } = new(new Guid("3D0A78FF-CCD4-442E-8B4E-64E5082ABD78"), "Is Shield Recovery Active Everwhere", "By default, shield recovery is limited to the safezone only. With this attribute (value >= 1), recovery works everywhere on a map.");
+    public static AttributeDefinition ShieldRecoveryEverywhere { get; } = new(new Guid("3D0A78FF-CCD4-442E-8B4E-64E5082ABD78"), "Shield Recovery Active Everywhere", "By default, shield recovery is limited to the safezone only. With this attribute (value >= 1), recovery works everywhere on a map.");
+
+    /// <summary>
+    /// Gets the is shield recovery active attribute definition.
+    /// </summary>
+    public static AttributeDefinition IsShieldRecoveryActive { get; } = new(new Guid("8F2C4D7E-B1A9-4E3F-9C5D-2A1B7E8F3C4D"), "Is Shield Recovery Active", string.Empty);
+
+    /// <summary>
+    /// Gets the shield recovery hiatus (in seconds) attribute definition.
+    /// </summary>
+    /// <remarks>
+    /// Must be equal or greater than <see cref="ShieldRegeneration"/>.HiatusThreshold for shield to regenerate. See <see cref="PlugIns.ShieldRecoveryHiatusPlugIn"/>.
+    /// </remarks>
+    public static AttributeDefinition ShieldRecoveryHiatus { get; } = new(new Guid("5A7E2B9C-3D1F-4A8E-B6C2-1E7D4A9F2B3C"), "Shield Recovery Hiatus", "The seconds since when shield recovery was last interrupted, either by leaving a safezone, the shield being damaged or maxing out.");
+
+    /// <summary>
+    /// Gets the shield recovery ramp factor attribute definition.
+    /// </summary>
+    /// <remarks>
+    /// The factor by which shield recovery increases. Rises linearly with <see cref="ShieldRecoveryHiatus"/>. Original range is [2,3].
+    /// </remarks>
+    public static AttributeDefinition ShieldRecoveryRampFactor { get; } = new(new Guid("C3E8F1A7-4B9D-4C5E-8A2F-3D6E1C9B5A7F"), "Shield Recovery Ramp Factor", "The factor by which shield recovery increases. Rises linearly with the uninterrupted shield recovery duration.")
+    {
+        MaximumValue = 3,
+    };
 
     /// <summary>
     /// Gets the ability usage reduction attribute definition. Value ranges from 0 (no reduction) to 1 (full reduction).
@@ -1140,14 +1256,51 @@ public class Stats
     public static AttributeDefinition DoubleDamageChance { get; } = new(new Guid("2B8A03E6-1CC2-48A0-8633-3F36E17050F4"), "Double Damage Chance", string.Empty);
 
     /// <summary>
-    /// Gets the stun chance attribute definition.
+    /// Gets the MST stun chance attribute definition.
     /// </summary>
-    public static AttributeDefinition StunChance { get; } = new(new Guid("610D3259-1158-424A-8738-9EB7A71DE600"), "Stun Chance", string.Empty);
+    /// <remarks>Bucket attribute for the master skills: wind tome (book of neil) mastery, fire burst mastery, earthshake mastery and mace mastery.</remarks>
+    public static AttributeDefinition MasteryStunChance { get; } = new(new Guid("610D3259-1158-424A-8738-9EB7A71DE600"), "Mastery Stun Chance (MST)", "A generic master tree stun chance attribute, which serves as a bucket for \"mastery\" skills.");
 
     /// <summary>
-    /// Gets the pollution skill MST target move chance, which rises with lightning tome mastery.
+    /// Gets the MST mace mastery stun chance attribute definition.
     /// </summary>
-    public static AttributeDefinition PollutionMoveTargetChance { get; } = new(new Guid("6F9619FF-8B86-D011-B42D-00C04FC964FF"), "Pollution Move Target Chance (MST)", "The pollution skill (book of lagle) move chance, which rises with lightning tome mastery.");
+    public static AttributeDefinition MaceMasteryStunChance { get; } = new(new Guid("6E3A9F2D-5B7C-4D8E-A1F3-2C9E5B7D4F6A"), "Mace Mastery Stun Chance (MST)", string.Empty);
+
+    /// <summary>
+    /// Gets the MST target move chance attribute definition.
+    /// </summary>
+    /// <remarks>Bucket attribute for the master skills: lightning tome (book of lagle) mastery and twisting slash mastery.</remarks>
+    public static AttributeDefinition MasteryMoveTargetChance { get; } = new(new Guid("6F9619FF-8B86-D011-B42D-00C04FC964FF"), "Mastery Move Target Chance (MST)", "A generic master tree move target chance attribute, which serves as a bucket for \"mastery\" skills.");
+
+    /// <summary>
+    /// Gets the rageful blow mastery decrease durability MST chance attribute definition.
+    /// </summary>
+    public static AttributeDefinition RagefulBlowMasteryDurabilityDecChance { get; } = new(new Guid("2F8A5D3B-9C7E-4F1A-B6D2-8E3C5A7F9B1D"), "Rageful Blow Mastery Durability Decrease Chance (MST)", string.Empty);
+
+    /// <summary>
+    /// Gets the durability reduction factor attribute definition.
+    /// </summary>
+    /// <remarks>
+    /// Factor by which the maximum durability of armor items is multiplied when attacked by Rageful Blow and  <see cref="RagefulBlowMasteryDurabilityDecChance"/> is successful.
+    /// Decreases with the level of the master skills DurabilityReduction1 or DurabilityReduction1FistMaster.
+    /// Value ranges from 10% (default) to 6%.
+    /// </remarks>
+    public static AttributeDefinition DurabilityReductionFactor { get; } = new(new Guid("3C9E7F2A-B1D4-8E6F-5A0C-1D8F3B5E7A2D"), "Durability Reduction Factor", string.Empty);
+
+    /// <summary>
+    /// Gets the spear mastery double damage MST chance attribute definition.
+    /// </summary>
+    public static AttributeDefinition SpearMasteryDoubleDamageChance { get; } = new(new Guid("5D9E2A7B-3C4F-8E1A-B5D6-2E7F9C4A1B8D"), "Spear Mastery Double Damage Chance (MST)", string.Empty);
+
+    /// <summary>
+    /// Gets the swell life skill health increase attribute definition.
+    /// </summary>
+    public static AttributeDefinition SwellLifeHealthIncrease { get; } = new(new Guid("9C4E7B2A-F1D6-4A3E-B8C5-1D7F2E9A3B4C"), "Swell Life Health Increase", string.Empty);
+
+    /// <summary>
+    /// Gets the swell life skill mana increase attribute definition.
+    /// </summary>
+    public static AttributeDefinition SwellLifeManaIncrease { get; } = new(new Guid("8B4F1C6D-9A2E-4F7B-A3D5-1E9C7F2A4B6D"), "Swell Life Mana Increase", string.Empty);
 
     /// <summary>
     /// Gets the mana after monster kill attribute definition.
@@ -1200,14 +1353,31 @@ public class Stats
     public static AttributeDefinition ShieldRateIncrease { get; } = new(new Guid("C2FFBA46-4DC3-4861-84F5-313DED038997"), "SD Rate Increase", "Increases the shield’s damage absorb rate in PVP according to set value.");
 
     /// <summary>
-    /// Gets the item duration increase attribute definition.
+    /// Gets the weapon and armor duration increase MST attribute definition.
     /// </summary>
-    public static AttributeDefinition ItemDurationIncrease { get; } = new(new Guid("03EBE702-90FF-473C-8CBB-E83669FE3C68"), "Item Duration Increase", string.Empty);
+    /// <remarks>Includes weapons, shields and armor items. Excludes jewelry, wings and pets.</remarks>
+    public static AttributeDefinition WeaponAndArmorDurationIncrease { get; } = new(new Guid("03EBE702-90FF-473C-8CBB-E83669FE3C68"), "Weapon And Armor Duration Increase (MST)", string.Empty);
 
     /// <summary>
-    /// Gets the pet duration increase attribute definition.
+    /// Gets the jewelry and wings duration increase MST attribute definition.
     /// </summary>
-    public static AttributeDefinition PetDurationIncrease { get; } = new(new Guid("B4455150-D3A9-4A5F-914B-F41F9387FE9A"), "Pet Duration Increase", string.Empty);
+    public static AttributeDefinition JewelryAndWingsDurationIncrease { get; } = new(new Guid("E539FDD2-72C5-484A-B0F4-40565ABAEDD9"), "Jewelry And Wings Duration Increase (MST)", string.Empty);
+
+    /// <summary>
+    /// Gets the pet duration increase MST attribute definition.
+    /// </summary>
+    /// <remarks>Applies to imp, guardian angel, uniria, dinorant and fenrir. Cash shop items excluded.</remarks>
+    public static AttributeDefinition PetDurationIncrease { get; } = new(new Guid("E9CCA156-E0DE-4113-A249-B7CD4C0F610D"), "Pet Duration Increase (MST)", string.Empty);
+
+    /// <summary>
+    /// Gets the trainable pet (dark horse, dark raven) duration increase MST attribute definition.
+    /// </summary>
+    public static AttributeDefinition TrainablePetDurationIncrease { get; } = new(new Guid("B4455150-D3A9-4A5F-914B-F41F9387FE9A"), "Trainable Pet Duration Increase (MST)", string.Empty);
+
+    /// <summary>
+    /// Gets the weapon duration increase (ice socket) attribute definition.
+    /// </summary>
+    public static AttributeDefinition WeaponDurationIncrease { get; } = new(new Guid("C37DBD05-25A9-4C61-94EA-5A27781D0CD4"), "Weapon Duration Increase", string.Empty);
 
     /// <summary>
     /// Gets the horse level attribute definition.
@@ -1329,7 +1499,17 @@ public class Stats
     /// <summary>
     /// Gets the <see cref="IsInSafezone"/> attribute which defines if the character is located in a safezone of a game map.
     /// </summary>
-    public static AttributeDefinition IsInSafezone { get; } = new(new Guid("82044DF9-F528-4AD6-9AAA-6FEAA4C786E7"), "Flag, if the character is located in a safezone of a game map", "Characters at the safezone recover additional health and shield.");
+    public static AttributeDefinition IsInSafezone { get; } = new(new Guid("82044DF9-F528-4AD6-9AAA-6FEAA4C786E7"), "Flag, if the character is located in a safezone of a game map", "Characters at the safezone recover shield and additional ability.");
+
+    /// <summary>
+    /// Gets the <see cref="IsResting"/> attribute which defines if the character is in a resting state: sitting, leaning or hanging.
+    /// </summary>
+    public static AttributeDefinition IsResting { get; } = new(new Guid("7A4E2D9F-B1C3-48F5-9D2E-1A6F8C3E5B7D"), "Flag, if the character is resting (sitting, leaning or hanging)", "Characters resting recover additional health and mana.");
+
+    /// <summary>
+    /// Gets the <see cref="IsUnderwater"/> attribute which defines if the character is located on an underwater game map.
+    /// </summary>
+    public static AttributeDefinition IsUnderwater { get; } = new(new Guid("72A684C1-102B-4FDE-B637-2665ADD5F4AE"), "Flag, if the character is located on an underwater game map", "Characters on underwater maps use underwater movement speed attributes.");
 
     /// <summary>
     /// Gets the attribute definition, which defines if a player has MU Helper activated.
@@ -1352,6 +1532,15 @@ public class Stats
     /// Gets the <see cref="NearbyPartyMemberCount"/> attribute which defines how many party members are nearby.
     /// </summary>
     public static AttributeDefinition NearbyPartyMemberCount { get; } = new(new Guid("585CB9C8-FA23-4995-ABA9-3327321A6F44"), "Nearby party member count", "Defines how many party members are currently nearby.");
+
+    /// <summary>
+    /// Gets the <see cref="CraftingBonusPercentage"/> attribute which defines the percentage points which are added to the success rate of item craftings, e.g. of the chaos machine.
+    /// </summary>
+    /// <remarks>
+    /// It can be defined globally (<see cref="GameConfiguration.GlobalBaseAttributeValues"/>), per map, per account or per character,
+    /// e.g. for an event or a premium subscription. A negative value decreases the success rate.
+    /// </remarks>
+    public static AttributeDefinition CraftingBonusPercentage { get; } = new(new Guid("A1B714D3-AF71-446A-8C8B-227FAB856D58"), "Crafting bonus percentage", "Defines the percentage points which are added to the success rate of item craftings, e.g. of the chaos machine. A negative value decreases it.");
 
     /// <summary>
     /// Gets the <see cref="SkillLevel"/> attribute which defines the level of a skill.
@@ -1429,9 +1618,39 @@ public class Stats
     public static AttributeDefinition SkillFinalMultiplier { get; } = new(new Guid("AC72CAE4-973C-46BB-BE3B-F6260E8DDFA8"), "Skill Final Damage Multiplier (skill attribute)", string.Empty);
 
     /// <summary>
+    /// Gets the skill's final multiplier attribute definition against non-player targets (PvM).
+    /// </summary>
+    /// <remarks>
+    /// When it's set, it replaces <see cref="SkillFinalMultiplier"/> outside of PvP.
+    /// E.g. Dragon Slasher deals three times its damage to monsters.
+    /// </remarks>
+    public static AttributeDefinition SkillFinalMultiplierPvm { get; } = new(new Guid("A7C24DFA-7F97-42A6-90C4-1F634C77AD71"), "Skill Final Damage Multiplier (PvM) (skill attribute)", string.Empty);
+
+    /// <summary>
+    /// Gets the value of a master skill at its current level, as calculated by <see cref="MasterSkillDefinition.ValueFormula"/>.
+    /// </summary>
+    /// <remarks>
+    /// It's an input for the <see cref="MasterSkillDefinition.PassivePowerUps"/>, next to the <see cref="SkillLevel"/>.
+    /// </remarks>
+    public static AttributeDefinition MasterSkillValue { get; } = new(new Guid("24E5ED6D-EB97-41C1-B013-60B8D9EB8B9C"), "Master Skill Value (skill attribute)", string.Empty);
+
+    /// <summary>
     /// Gets the skill's final damage bonus attribute definition.
     /// </summary>
     public static AttributeDefinition SkillFinalDamageBonus { get; } = new(new Guid("155D8045-5CD1-4238-BEFC-FCF8C46F94E3"), "Skill Final Damage Bonus (skill attribute)", string.Empty);
+
+    /// <summary>
+    /// Gets the Dragon Slasher skill's shield damage chance.
+    /// </summary>
+    public static AttributeDefinition DragonSlasherShieldDamageChance { get; } = new(new Guid("F2A8D5C7-1E9B-43F6-A2D8-7C4E1B9A6F3D"), "Dragon Slasher Shield Damage Chance (skill attribute)", string.Empty);
+
+    /// <summary>
+    /// Gets the Dragon Slasher skill's shield damage rate.
+    /// </summary>
+    public static AttributeDefinition DragonSlasherShieldDamageRate { get; } = new(new Guid("A4E2F8C1-9D6B-47A3-B5E2-1F8C6D3A9B4E"), "Dragon Slasher Shield Damage Rate (skill attribute)", string.Empty)
+    {
+        MaximumValue = 1,
+    };
 
     /// <summary>
     /// Gets the dictionary which relates the jewelry element resistance attribute to the correspondent DMG bonus attribute.
@@ -1475,13 +1694,43 @@ public class Stats
         }
     }
 
-    private static Regeneration ManaRegeneration { get; } = new(ManaRecoveryMultiplier, MaximumMana, CurrentMana, ManaRecoveryAbsolute);
+    /// <summary>
+    /// Gets the mana regeneration.
+    /// </summary>
+    public static Regeneration ManaRegeneration { get; } = new(ManaRecoveryMultiplier, MaximumMana, CurrentMana, ManaRecoveryAbsolute)
+    {
+        IntervalResting = TimeSpan.FromSeconds(5),
+    };
 
-    private static Regeneration HealthRegeneration { get; } = new(HealthRecoveryMultiplier, MaximumHealth, CurrentHealth, HealthRecoveryAbsolute);
+    /// <summary>
+    /// Gets the health regeneration.
+    /// </summary>
+    public static Regeneration HealthRegeneration { get; } = new(HealthRecoveryMultiplier, MaximumHealth, CurrentHealth, HealthRecoveryAbsolute)
+    {
+        Interval = TimeSpan.FromSeconds(7),
+        IntervalResting = TimeSpan.FromSeconds(5),
+    };
 
-    private static Regeneration AbilityRegeneration { get; } = new(AbilityRecoveryMultiplier, MaximumAbility, CurrentAbility, AbilityRecoveryAbsolute);
+    /// <summary>
+    /// Gets the ability regeneration.
+    /// </summary>
+    public static Regeneration AbilityRegeneration { get; } = new(AbilityRecoveryMultiplier, MaximumAbility, CurrentAbility, AbilityRecoveryAbsolute);
 
-    private static Regeneration ShieldRegeneration { get; } = new(ShieldRecoveryMultiplier, MaximumShield, CurrentShield, ShieldRecoveryAbsolute);
+    /// <summary>
+    /// Gets the shield regeneration.
+    /// </summary>
+    /// <remarks>
+    /// Shield recovery is only possible at safe zone, except the character has a specific attribute which has the effect that it's recovered everywhere.
+    /// This attribute is usually provided by level 380 armor with a Guardian Option.
+    /// Also, shield has a penalty (hiatus) period before the recovery starts, after which it increases linearly (see <see cref="ShieldRecoveryRampFactor"/>).
+    /// </remarks>
+    public static Regeneration ShieldRegeneration { get; } = new(ShieldRecoveryMultiplier, MaximumShield, CurrentShield, ShieldRecoveryAbsolute)
+    {
+        Interval = TimeSpan.FromSeconds(1),
+        IntervalResting = TimeSpan.FromSeconds(1),
+        EnablerAttribute = IsShieldRecoveryActive,
+        HiatusAttribute = ShieldRecoveryHiatus,
+    };
 
     private static Regeneration ManaRegenerationAfterMonsterKill { get; } = new(ManaAfterMonsterKillMultiplier, MaximumMana, CurrentMana, ManaAfterMonsterKillAbsolute);
 
@@ -1500,8 +1749,8 @@ public class Stats
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Regeneration" /> class.
-        /// At regeneration the value of <paramref name="regenerationMultiplier" /> * <paramref name="maximumAttribute" /> is getting added to
-        /// <paramref name="currentAttribute" />, until the value of <paramref name="maximumAttribute" /> is reached.
+        /// At regeneration the value of (<paramref name="maximumAttribute" /> * <paramref name="regenerationMultiplier" />) + <paramref name="absoluteAttribute"/>
+        /// is getting added to <paramref name="currentAttribute" />, until the value of <paramref name="maximumAttribute" /> is reached.
         /// </summary>
         /// <param name="regenerationMultiplier">The regeneration multiplier.</param>
         /// <param name="maximumAttribute">The maximum attribute.</param>
@@ -1534,5 +1783,36 @@ public class Stats
         /// Gets the current attribute.
         /// </summary>
         public AttributeDefinition CurrentAttribute { get; }
+
+        /// <summary>
+        /// Gets the interval at which the attribute would complete a full regeneration cycle.
+        /// </summary>
+        /// <remarks>
+        /// Originally, the game had different regeneration cycles depending on attributes and the player's state (<see cref="IsResting"/>).
+        /// To avoid having different timers each with a regeneration interval, we run just one set to <see cref="GameConfiguration.RecoveryInterval"/>.
+        /// Then, we apply a compensation factor which is the ratio between elapsed time and <see cref="Interval"/>.
+        /// This way we can mimic original regeneration over time while still keeping it configurable.
+        /// </remarks>
+        public TimeSpan Interval { get; init; } = TimeSpan.FromSeconds(3);
+
+        /// <summary>
+        /// Gets the interval at which the attribute would complete a full regeneration cycle when the player is resting (<see cref="IsResting"/>).
+        /// </summary>
+        public TimeSpan IntervalResting { get; init; } = TimeSpan.FromSeconds(3);
+
+        /// <summary>
+        /// Gets the attribute which gates the regeneration, if it exists.
+        /// </summary>
+        public AttributeDefinition? EnablerAttribute { get; init; }
+
+        /// <summary>
+        /// Gets the attribute which keeps the regeneration hiatus duration, if it exists.
+        /// </summary>
+        public AttributeDefinition? HiatusAttribute { get; init; }
+
+        /// <summary>
+        /// Gets the hiatus threshold (in seconds) against which <see cref="HiatusAttribute"/> is checked to allow the regeneration.
+        /// </summary>
+        public int HiatusThreshold { get; init; } = 10;
     }
 }

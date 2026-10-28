@@ -31,6 +31,7 @@ public class AutoFields : ComponentBase
     static AutoFields()
     {
         Builders.Add(new PasswordHashFieldBuilder());
+        Builders.Add(new TimeZoneIdFieldBuilder());
         Builders.Add(new TextFieldBuilder());
         Builders.Add(new LocalizedStringFieldBuilder());
         Builders.Add(new NumberFieldBuilder<long>());
@@ -51,8 +52,10 @@ public class AutoFields : ComponentBase
         Builders.Add(new ItemStorageFieldBuilder());
         Builders.Add(new LookupFieldBuilder());
         Builders.Add(new EmbeddedFormFieldBuilder());
+        Builders.Add(new SkillListFieldBuilder());
         Builders.Add(new ObjectCollectionFieldBuilder());
         Builders.Add(new IntCollectionFieldBuilder());
+        Builders.Add(new GameServerSelectionFieldBuilder());
         Builders.Add(new ByteArrayFieldBuilder());
         Builders.Add(new ValueListFieldBuilder());
         Builders.Add(new InvasionSpawnTableFieldBuilder());

@@ -1,4 +1,4 @@
-﻿// <copyright file="RemotePlayer.cs" company="MUnique">
+// <copyright file="RemotePlayer.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -14,11 +14,13 @@ using MUnique.OpenMU.Network.PlugIns;
 using MUnique.OpenMU.PlugIns;
 
 /// <summary>
-/// A player which is playing through a remote connection.
+/// A player that is playing through a remote connection.
 /// </summary>
-public class RemotePlayer : Player, IClientVersionProvider
+public class RemotePlayer : Player, IClientVersionProvider, IHasIpAddress
 {
     private readonly byte[] _packetBuffer = new byte[0xFF];
+
+    private readonly string? _ipAddress;
 
     private ClientVersion _clientVersion;
 
@@ -33,6 +35,9 @@ public class RemotePlayer : Player, IClientVersionProvider
     {
         this.Connection = connection;
         this._clientVersion = clientVersion;
+        this._ipAddress = connection.EndPoint is System.Net.IPEndPoint ipEndPoint
+            ? (ipEndPoint.Address.IsIPv4MappedToIPv6 ? ipEndPoint.Address.MapToIPv4() : ipEndPoint.Address).ToString()
+            : null;
         this.MainPacketHandler = new MainPacketHandlerPlugInContainer(this, gameContext.PlugInManager, gameContext.LoggerFactory);
         this.MainPacketHandler.Initialize();
         this.Connection!.PacketReceived += this.PacketReceivedAsync;
@@ -41,6 +46,9 @@ public class RemotePlayer : Player, IClientVersionProvider
 
     /// <inheritdoc />
     public event EventHandler? ClientVersionChanged;
+
+    /// <inheritdoc />
+    public string? IpAddress => this._ipAddress;
 
     /// <summary>
     /// Gets the game server context.
@@ -108,6 +116,50 @@ public class RemotePlayer : Player, IClientVersionProvider
         }
     }
 
+    /// <inheritdoc/>
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        // The teardown above only reaches the connection when the base teardown succeeded - a throw
+        // out of it (which DisconnectAsync catches and continues from) would otherwise leave the
+        // player disposed while its socket stays open with the packet handler still subscribed,
+        // feeding client packets into the disposed player until the client gives up. And once the
+        // player state advanced to Finished, the connection's own Disconnected -> DisconnectAsync
+        // callback can no longer run the teardown either - so the disposal is the last place which
+        // can still close it.
+        if (this.Connection is { } connection)
+        {
+            this.Connection = null;
+            connection.PacketReceived -= this.PacketReceivedAsync;
+            connection.Disconnected -= this.DisconnectAsync;
+            try
+            {
+                if (connection.Connected)
+                {
+                    await connection.DisconnectAsync().ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, "Error while disconnecting the connection of player {Player} during disposal.", this);
+            }
+            finally
+            {
+                connection.Dispose();
+            }
+        }
+
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        finally
+        {
+            // The packet handlers are subscribed to the server-wide plugin manager; without this, every
+            // connection ever accepted stays reachable from it, even one which never logged in.
+            this.MainPacketHandler.Dispose();
+        }
+    }
+
     /// <summary>
     /// Is getting called when a packet got received from the connection of the player.
     /// </summary>
@@ -143,7 +195,7 @@ public class RemotePlayer : Player, IClientVersionProvider
                     this.Logger.LogDebug("[C->S] {0}", buffer.ToArray().AsString());
                 }
 
-                await this.MainPacketHandler.HandlePacketAsync(this, buffer).ConfigureAwait(false);
+                await this.RunPersistenceExclusiveAsync(() => this.MainPacketHandler.HandlePacketAsync(this, buffer)).ConfigureAwait(false);
             }
             finally
             {

@@ -18,15 +18,33 @@ using MUnique.OpenMU.Interfaces;
 /// </summary>
 public sealed class HealingHandler
 {
-    private static readonly ItemConsumeAction ConsumeAction = new();
-
-    private static readonly ItemIdentifier[] HealthPotionPriority =
+    /// <summary>
+    /// The health potions the offline player drinks, best first. Also the shopping list a bot restocks
+    /// from (see <c>BotShoppingHandler</c>): buying what it does not drink, or not buying what it does,
+    /// is how a bot ends up starving next to a full merchant.
+    /// </summary>
+    internal static readonly ItemIdentifier[] HealthPotionPriority =
     [
         ItemConstants.LargeHealingPotion,
         ItemConstants.MediumHealingPotion,
         ItemConstants.SmallHealingPotion,
         ItemConstants.Apple,
     ];
+
+    /// <summary>
+    /// The mana potions the offline player drinks, best first. <see cref="HealthPotionPriority"/>.
+    /// </summary>
+    internal static readonly ItemIdentifier[] ManaPotionPriority =
+    [
+        ItemConstants.LargeManaPotion,
+        ItemConstants.MediumManaPotion,
+        ItemConstants.SmallManaPotion,
+    ];
+
+    /// <summary>Drink a mana potion once mana falls below this share, so casters can keep casting.</summary>
+    private const int ManaThresholdPercent = 30;
+
+    private static readonly ItemConsumeAction ConsumeAction = new();
 
     private readonly OfflinePlayer _player;
     private readonly IMuHelperSettings? _config;
@@ -45,7 +63,6 @@ public sealed class HealingHandler
     /// <summary>
     /// Performs health recovery actions for the player and their party.
     /// </summary>
-    /// <returns>A value task representing the asynchronous operation.</returns>
     public async ValueTask PerformHealthRecoveryAsync()
     {
         if (this._config is null || this._player.Attributes is null)
@@ -76,7 +93,25 @@ public sealed class HealingHandler
         if (this._config!.UseHealPotion && this.IsHealthBelowThreshold(this._player, this._config.PotionThresholdPercent))
         {
             await this.UseHealthPotionAsync().ConfigureAwait(false);
+            return;
         }
+
+        if (this._config.UseManaPotion && this.IsManaBelowThreshold())
+        {
+            await this.UsePotionAsync(ManaPotionPriority).ConfigureAwait(false);
+        }
+    }
+
+    private bool IsManaBelowThreshold()
+    {
+        if (this._player.Attributes is not { } attributes)
+        {
+            return false;
+        }
+
+        double mana = attributes[Stats.CurrentMana];
+        double maxMana = attributes[Stats.MaximumMana];
+        return maxMana > 0 && (mana * 100.0 / maxMana) <= ManaThresholdPercent;
     }
 
     private async ValueTask PerformPartyHealingAsync()
@@ -127,14 +162,16 @@ public sealed class HealingHandler
         return maxHp > 0 && (hp * 100.0 / maxHp) <= thresholdPercent;
     }
 
-    private async ValueTask UseHealthPotionAsync()
+    private ValueTask UseHealthPotionAsync() => this.UsePotionAsync(HealthPotionPriority);
+
+    private async ValueTask UsePotionAsync(ItemIdentifier[] priority)
     {
         if (this._player.Inventory is null)
         {
             return;
         }
 
-        foreach (var identifier in HealthPotionPriority)
+        foreach (var identifier in priority)
         {
             var potion = this._player.Inventory.Items
                 .FirstOrDefault(i => i.Definition?.Group == identifier.Group

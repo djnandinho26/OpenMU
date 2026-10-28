@@ -15,7 +15,7 @@ public partial class DuelConfiguration
     /// <summary>
     /// Gets or sets the maximum score at which the duel will end with a winner.
     /// </summary>
-    public int MaximumScore {get; set; }
+    public int MaximumScore { get; set; }
 
     /// <summary>
     /// Gets or sets the entrance fee for a duel.
@@ -47,6 +47,6 @@ public partial class DuelConfiguration
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"Duel Configuration {this.DuelAreas.Count} Arenas, Exit: {this.Exit}";
+        return string.Format(MUnique.OpenMU.DataModel.Properties.Resources.DuelConfigSummary, this.DuelAreas.Count, this.Exit);
     }
 }

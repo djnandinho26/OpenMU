@@ -165,6 +165,21 @@ public enum NpcWindow
     /// The dialog for the legacy quest system.
     /// </summary>
     LegacyQuest,
+
+    /// <summary>
+    /// The castle siege gate NPC interaction window.
+    /// </summary>
+    CastleSiegeGateNpc,
+
+    /// <summary>
+    /// The castle siege lever NPC interaction window.
+    /// </summary>
+    CastleSiegeLeverNpc,
+
+    /// <summary>
+    /// The castle siege guardsman window, which shows the castle siege status and the guild registration.
+    /// </summary>
+    CastleSiegeGuardsman,
 }
 
 /// <summary>
@@ -193,7 +208,7 @@ public enum NpcObjectKind
     Trap,
 
     /// <summary>
-    /// The npc is a gate
+    /// The npc is a gate.
     /// </summary>
     Gate,
 
@@ -222,6 +237,7 @@ public partial class MonsterDefinition
     /// <summary>
     /// Gets or sets the unique number of this monster.
     /// </summary>
+    [Display(AutoGenerateField = true)]
     public short Number { get; set; }
 
     /// <summary>
@@ -229,6 +245,25 @@ public partial class MonsterDefinition
     /// Not relevant for the server, however helpful for debugging/logging.
     /// </summary>
     public LocalizedString Designation { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this monster is active in the game.
+    /// </summary>
+    /// <remarks>
+    /// Inactive monsters stay in the configuration, but are not available in the game.
+    /// This allows to restrict the game to the features of a certain game version, e.g. a season,
+    /// without having to delete them.
+    /// </remarks>
+    public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the version of the original game which introduced this monster.
+    /// </summary>
+    /// <remarks>
+    /// It's informational and allows to activate or deactivate the content of certain game versions
+    /// in batches (see <see cref="IsActive"/>).
+    /// </remarks>
+    public GameVersion IntroducedIn { get; set; }
 
     /// <summary>
     /// Gets or sets the range in which a monster will move randomly?
@@ -327,6 +362,12 @@ public partial class MonsterDefinition
     /// </summary>
     [MemberOfAggregate]
     public virtual ICollection<QuestDefinition> Quests { get; protected set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the buffs which can be granted by this npc.
+    /// </summary>
+    [MemberOfAggregate]
+    public virtual ICollection<Buff> Buffs { get; protected set; } = null!;
 
     /// <summary>
     /// Attribute default accessor.

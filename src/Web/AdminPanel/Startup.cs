@@ -1,12 +1,10 @@
-// <copyright file="Startup.cs" company="MUnique">
+﻿// <copyright file="Startup.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
 namespace MUnique.OpenMU.Web.AdminPanel;
 
 using System.IO;
-using Blazored.Modal;
-using Blazored.Toast;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,9 +12,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using MUnique.OpenMU.DataModel.Entities;
+using MUnique.OpenMU.Web.AdminPanel.Auth;
 using MUnique.OpenMU.Web.AdminPanel.Components;
+using MUnique.OpenMU.Web.AdminPanel.Operations;
 using MUnique.OpenMU.Web.AdminPanel.Services;
 using MUnique.OpenMU.Web.Shared;
+using MUnique.OpenMU.Web.Shared.Components.Modal;
 using MUnique.OpenMU.Web.Shared.Models;
 using MUnique.OpenMU.Web.Shared.Services;
 
@@ -57,24 +58,36 @@ public class Startup
 
         services.AddSignalR().AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new TimeSpanConverter()));
 
-        services.AddControllers()
+        services.AddControllers(options => options.Filters.Add<MUnique.OpenMU.Web.AdminPanel.API.AdminOperationExceptionFilter>())
             .ConfigureApplicationPartManager(setup =>
                 setup.FeatureProviders.Add(new GenericControllerFeatureProvider()));
 
-        services.AddBlazoredModal();
-        services.AddBlazoredToast();
+        services.AddToasts();
+        services.AddScoped<ModalService>();
+        services.AddScoped<IModalService>(sp => sp.GetRequiredService<ModalService>());
 
         services.AddSingleton<ILookupController, PersistentObjectsLookupController>();
         services.AddSingleton<ConfigurationSearchIndexCache>();
+        services.AddScoped<IAdminReadModel, AdminReadModel>();
+        services.AddAdminReadOperations();
 
         services.AddScoped<AccountService>();
         services.AddScoped<IDataService<Account>>(serviceProvider => serviceProvider.GetService<AccountService>()!);
+        services.AddScoped<IGuildMemberEnricher, CharacterGuildMemberEnricher>();
+        services.AddScoped<GuildService>();
+        services.AddScoped<IGuildService>(serviceProvider => serviceProvider.GetRequiredService<GuildService>());
+        services.AddScoped<IDataService<GuildListItem>>(serviceProvider => serviceProvider.GetRequiredService<GuildService>());
 
         services.AddScoped<PlugInController>();
         services.AddScoped<IDataService<PlugInConfigurationViewItem>>(serviceProvider => serviceProvider.GetService<PlugInController>()!);
+        services.AddScoped<ChatCommandController>();
+        services.AddScoped<IDataService<ChatCommandViewItem>>(serviceProvider => serviceProvider.GetService<ChatCommandController>()!);
         services.AddScoped<CreationPanelService>();
 
         services.AddScoped<IChangeNotificationService, ChangeNotificationService>();
+        services.AddScoped<AdminUserManagementService>();
+        services.AddScoped<CastleSiegeManagementService>();
+        services.AddAdminPanelAuth(this.Configuration);
     }
 
     /// <summary>
@@ -98,6 +111,12 @@ public class Startup
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+
+        app.UseRouting();
+        app.UseAdminPanelAuth();
+
+        // The log files may contain sensitive information, so they are only served to authorized users.
+        app.UseAuthorizedPath("/logs");
         app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "logs")),
@@ -110,7 +129,8 @@ public class Startup
         {
             endpoints.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
-            endpoints.MapControllers();
+            endpoints.MapControllers().RequireAuthorization();
+            endpoints.MapAdminPanelAuthEndpoints();
         });
     }
 }

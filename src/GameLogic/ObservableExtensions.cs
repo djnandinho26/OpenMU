@@ -71,7 +71,7 @@ public static class ObservableExtensions
     public static async ValueTask<TObserving?> GetObservingWithIdAsync<TObserving>(this IObservable observable, ushort objectId)
         where TObserving : IWorldObserver, IIdentifiable
     {
-        using var readerLock = await observable.ObserverLock.ReaderLockAsync();
+        using var readerLock = await observable.ObserverLock.ReaderLockAsync().ConfigureAwait(false);
         return observable.Observers.OfType<TObserving>().FirstOrDefault(p => p.Id == objectId);
     }
 
@@ -82,13 +82,12 @@ public static class ObservableExtensions
     /// <param name="observable">The observable.</param>
     /// <param name="action">The action.</param>
     /// <param name="includeThis">if set to <c>true</c> the <paramref name="action" /> should be done for <paramref name="observable" /> too.</param>
-    /// <returns></returns>
     public static async ValueTask ForEachObservingAsync<T>(this IObservable observable, Func<T, ValueTask> action, bool includeThis)
         where T : class, IWorldObserver
     {
         try
         {
-            using var readerLock = await observable.ObserverLock.ReaderLockAsync();
+            using var readerLock = await observable.ObserverLock.ReaderLockAsync().ConfigureAwait(false);
             foreach (var obs in observable.Observers.OfType<T>())
             {
                 if (!includeThis && obs.Equals(observable))

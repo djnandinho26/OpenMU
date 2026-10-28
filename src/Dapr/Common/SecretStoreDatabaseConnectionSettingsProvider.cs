@@ -14,6 +14,9 @@ using MUnique.OpenMU.Persistence.EntityFramework;
 /// <summary>
 /// Implementation of <see cref="IDatabaseConnectionSettingProvider"/> which retrieves the settings from the
 /// configured Dapr secret storage.
+/// The retrieved connection strings can be influenced by the environment variables <c>DB_HOST</c>, <c>DB_ADMIN_USER</c> and <c>DB_ADMIN_PW</c>,
+/// just like the <see cref="ConfigFileDatabaseConnectionStringProvider"/>. When the variables are not set,
+/// the stored values (default password <c>admin</c>) are used unchanged.
 /// </summary>
 public class SecretStoreDatabaseConnectionSettingsProvider : IDatabaseConnectionSettingProvider
 {
@@ -55,17 +58,24 @@ public class SecretStoreDatabaseConnectionSettingsProvider : IDatabaseConnection
                     {
                         Console.WriteLine("trying to get secrets ...");
                         var secrets = await this._daprClient.GetBulkSecretAsync(SecretStoreName, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                        // The local file secret store returns one secret for each connection string,
+                        // e.g. "connectionStrings:<context type>". The Kubernetes secret store returns one
+                        // secret "connectionstrings", with one key for each context type.
                         foreach (var secret in secrets.Where(kvp => string.Equals(kvp.Key.Split(':')[0], "connectionStrings", StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            var contextTypeName = secret.Value.Keys.First().Split(':').Last();
-                            var setting = new ConnectionSetting
+                            foreach (var (key, connectionString) in secret.Value)
                             {
-                                ContextTypeName = contextTypeName,
-                                ConnectionString = secret.Value.Values.First()!,
-                                DatabaseEngine = DatabaseEngine.Npgsql,
-                            };
+                                var contextTypeName = key.Split(':').Last();
+                                var setting = new ConnectionSetting
+                                {
+                                    ContextTypeName = contextTypeName,
+                                    ConnectionString = DatabaseConnectionStringHelper.ApplyEnvironmentVariables(connectionString),
+                                    DatabaseEngine = DatabaseEngine.Npgsql,
+                                };
 
-                            this._connectionSettings.Add(contextTypeName, setting);
+                                this._connectionSettings[contextTypeName] = setting;
+                            }
                         }
 
                         Console.WriteLine("secrets retrieved :)");

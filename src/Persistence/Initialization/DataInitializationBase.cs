@@ -9,11 +9,17 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic;
+using MUnique.OpenMU.GameLogic.MiniGames.Doppelganger;
+using MUnique.OpenMU.GameLogic.MiniGames.Kanturu;
 using MUnique.OpenMU.GameLogic.PlayerActions.ItemConsumeActions;
+using MUnique.OpenMU.GameLogic.PlayerShopCurrencies;
+using MUnique.OpenMU.GameLogic.PlugIns;
+using MUnique.OpenMU.GameLogic.PlugIns.PeriodicTasks;
 using MUnique.OpenMU.GameLogic.Resets;
 using MUnique.OpenMU.GameServer.MessageHandler;
 using MUnique.OpenMU.Network;
 using MUnique.OpenMU.Network.PlugIns;
+using MUnique.OpenMU.Persistence.Initialization.Items;
 using MUnique.OpenMU.Persistence.Initialization.Updates;
 using MUnique.OpenMU.PlugIns;
 
@@ -103,6 +109,10 @@ public abstract class DataInitializationBase : IDataInitializationPlugIn
         this.CreateGameClientDefinition();
         await this.CreateChatServerDefinitionAsync().ConfigureAwait(false);
         this.GameConfigurationInitializer.Initialize();
+        IntroducedGameVersions.Apply(this.GameConfiguration);
+
+        // After all items exist, for every version.
+        ItemStatProfiles.Apply(this.Context, this.GameConfiguration);
 
         var gameServerConfiguration = this.CreateGameServerConfiguration(this.GameConfiguration.Maps);
         await this.CreateGameServerDefinitionsAsync(gameServerConfiguration, numberOfGameServers).ConfigureAwait(false);
@@ -122,7 +132,7 @@ public abstract class DataInitializationBase : IDataInitializationPlugIn
         }
 
         var dataSource = new GameConfigurationDataSource(this._loggerFactory.CreateLogger<GameConfigurationDataSource>(), this._persistenceContextProvider);
-        await dataSource.GetOwnerAsync(this.GameConfiguration.GetId());
+        await dataSource.GetOwnerAsync(this.GameConfiguration.GetId()).ConfigureAwait(false);
         var referenceHandler = new ByDataSourceReferenceHandler(dataSource);
         var serviceContainer = new ServiceContainer();
         serviceContainer.AddService(typeof(IPersistenceContextProvider), this._persistenceContextProvider);
@@ -160,6 +170,35 @@ public abstract class DataInitializationBase : IDataInitializationPlugIn
                 plugInConfiguration.SetConfiguration(config, referenceHandler);
             }
 
+            if (plugInType == typeof(PlayerShopCurrenciesFeaturePlugIn))
+            {
+                // The default configuration of the plug-in can't reference the items, because it's created without a game configuration.
+                plugInConfiguration.SetConfiguration(this.CreatePlayerShopCurrenciesConfiguration(), referenceHandler);
+            }
+
+            if (plugInType.IsAssignableTo(typeof(NpcTalkPlugInBase)))
+            {
+                // The default configuration of the plug-in can't reference the NPC, because it's created without a game configuration.
+                var npcTalkPlugIn = (NpcTalkPlugInBase)Activator.CreateInstance(plugInType)!;
+                plugInConfiguration.SetConfiguration(npcTalkPlugIn.CreateDefaultConfig(this.GameConfiguration), referenceHandler);
+            }
+
+            if (plugInType == typeof(DoppelgangerFeaturePlugIn))
+            {
+                // The default configuration of the plug-in can't reference the monsters of the
+                // event, because it's created without a game configuration.
+                plugInConfiguration.SetConfiguration(DoppelgangerEventDefinition.CreateDefault(this.GameConfiguration), referenceHandler);
+            }
+
+            if (plugInType == typeof(KanturuStartPlugIn))
+            {
+                // The default configuration of the plug-in can't reference the monsters of the
+                // event, because it's created without a game configuration.
+                var config = KanturuStartConfiguration.Default;
+                config.EventDefinition = KanturuEventDefinition.CreateDefault(this.GameConfiguration);
+                plugInConfiguration.SetConfiguration(config, referenceHandler);
+            }
+
             // We don't move the player anymore by his request. This was usually requested after a player performed a skill.
             // However, it adds way for cheaters to move through the map.
             // The plugin is therefore deactivated by default.
@@ -175,7 +214,7 @@ public abstract class DataInitializationBase : IDataInitializationPlugIn
             }
         });
 
-        this.AddAllUpdateEntries(plugInManager);
+        await this.AddAllUpdateEntriesAsync(plugInManager).ConfigureAwait(false);
 
         await this.Context.SaveChangesAsync().ConfigureAwait(false);
     }
@@ -184,6 +223,29 @@ public abstract class DataInitializationBase : IDataInitializationPlugIn
     /// Creates the game client definition.
     /// </summary>
     protected abstract void CreateGameClientDefinition();
+
+    private PlayerShopCurrenciesConfiguration CreatePlayerShopCurrenciesConfiguration()
+    {
+        var configuration = new PlayerShopCurrenciesConfiguration();
+        ItemIdentifier[] jewels =
+        [
+            ItemConstants.JewelOfBless,
+            ItemConstants.JewelOfSoul,
+            ItemConstants.JewelOfChaos,
+            ItemConstants.JewelOfCreation,
+            ItemConstants.JewelOfLife,
+        ];
+
+        foreach (var jewel in jewels)
+        {
+            if (this.GameConfiguration.Items.FirstOrDefault(item => item.Group == jewel.Group && item.Number == jewel.Number) is { } definition)
+            {
+                configuration.PriceItems.Add(definition);
+            }
+        }
+
+        return configuration;
+    }
 
     private void CreateDefaultPlugInConfiguration(Type plugInType, PlugInConfiguration plugInConfiguration, ReferenceHandler referenceHandler)
     {
@@ -199,51 +261,49 @@ public abstract class DataInitializationBase : IDataInitializationPlugIn
         }
     }
 
-    private void AddAllUpdateEntries(PlugInManager plugInManager)
+    /// <summary>
+    /// Installs the updates of this version on the new database (<see cref="NewDatabaseUpdates"/>).
+    /// </summary>
+    private async ValueTask AddAllUpdateEntriesAsync(PlugInManager plugInManager)
     {
-        var updates = plugInManager.GetStrategyProvider<int, IConfigurationUpdatePlugIn>()
+        var updates = plugInManager.GetStrategyProvider<Guid, IConfigurationUpdatePlugIn>()
                           ?.AvailableStrategies.Where(up => up.DataInitializationKey == this.Key)
-                          .OrderBy(up => up.Version)
                           .ToList();
         if (updates is not { Count: > 0 })
         {
             return;
         }
 
-        foreach (var update in updates)
-        {
-            var entry = this.Context.CreateNew<ConfigurationUpdate>();
-            entry.Version = (int)update.Version;
-            entry.Name = update.Name;
-            entry.Description = update.Description;
-            entry.CreatedAt = update.CreatedAt;
-            entry.InstalledAt = DateTime.UtcNow;
-        }
+        await NewDatabaseUpdates.InstallAsync(this.Context, this.GameConfiguration, updates).ConfigureAwait(false);
 
         var updateState = this.Context.CreateNew<ConfigurationUpdateState>();
         updateState.InitializationKey = this.Key;
-        updateState.CurrentInstalledVersion = updates.Max(u => (int)u.Version);
     }
 
     private async ValueTask CreateConnectServerDefinitionAsync()
     {
         var port = 44405;
+        byte serverId = 0;
         var clients = await this.Context.GetAsync<GameClientDefinition>().ConfigureAwait(false);
         foreach (var client in clients.OrderBy(c => c.Season))
         {
             var connectServer = this.Context.CreateNew<ConnectServerDefinition>();
             connectServer.InitializeDefaults();
             connectServer.SetGuid(client.Season, client.Episode);
+
+            // The server id is part of the id of the manageable server, so it has to be unique.
+            connectServer.ServerId = serverId;
             connectServer.Client = client;
             connectServer.ClientListenerPort = port;
             connectServer.Description = $"Connect Server ({client.Description})";
             port++;
+            serverId++;
         }
     }
 
     private async ValueTask CreateGameServerDefinitionsAsync(GameServerConfiguration gameServerConfiguration, int numberOfServers)
     {
-        var port = 55901;
+        var port = 45901;
         for (int i = 0; i < numberOfServers; i++)
         {
             var server = this.Context!.CreateNew<GameServerDefinition>();
@@ -277,7 +337,7 @@ public abstract class DataInitializationBase : IDataInitializationPlugIn
         var endPoint = this.Context.CreateNew<ChatServerEndpoint>();
         server.SetGuid(0);
         endPoint.Client = client;
-        endPoint.NetworkPort = 55980;
+        endPoint.NetworkPort = 45980;
         server.Endpoints.Add(endPoint);
     }
 

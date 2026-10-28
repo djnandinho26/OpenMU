@@ -6,11 +6,14 @@ namespace MUnique.OpenMU.Tests;
 
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.DataModel.Entities;
 using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.GameLogic.PlugIns;
 using MUnique.OpenMU.GameServer;
+using MUnique.OpenMU.GuildServer;
 using MUnique.OpenMU.Interfaces;
+using MUnique.OpenMU.Persistence;
 using MUnique.OpenMU.Persistence.InMemory;
 using MUnique.OpenMU.PlugIns;
 
@@ -132,6 +135,12 @@ public class GuildAllianceTest : GuildTestBase
         var isMaster = await this.GuildServer.IsAllianceMasterAsync(this._firstGuildId).ConfigureAwait(false);
 
         Assert.That(isMaster, Is.True);
+        var runtimeGuild = await this.GuildServer.GetGuildAsync(this._firstGuildId).ConfigureAwait(false);
+        Assert.That(runtimeGuild!.AllianceGuild, Is.SameAs(runtimeGuild));
+        using var context = this.PersistenceContextProvider.CreateNewGuildContext();
+        var persistentId = await this.GuildServer.GetPersistentGuildIdAsync(this._firstGuildId).ConfigureAwait(false);
+        var persistentGuild = await context.GetByIdAsync<MUnique.OpenMU.DataModel.Entities.Guild>(persistentId!.Value).ConfigureAwait(false);
+        Assert.That(persistentGuild!.AllianceGuild, Is.SameAs(persistentGuild));
     }
 
     /// <summary>
@@ -145,6 +154,26 @@ public class GuildAllianceTest : GuildTestBase
         var isMaster = await this.GuildServer.IsAllianceMasterAsync(this._secondGuildId).ConfigureAwait(false);
 
         Assert.That(isMaster, Is.False);
+    }
+
+    /// <summary>
+    /// An online alliance member can resolve the persistent master guild after the master's last member went offline.
+    /// </summary>
+    [Test]
+    public async ValueTask GetPersistentAllianceMasterGuildId_MasterOffline_ReturnsMasterId()
+    {
+        await this.GuildServer.CreateAllianceAsync(this._firstGuildId, this._secondGuildId).ConfigureAwait(false);
+        var masterPersistentId = await this.GuildServer.GetPersistentGuildIdAsync(this._firstGuildId).ConfigureAwait(false);
+
+        await this.GuildServer.GuildMemberLeftGameAsync(this._firstGuildId, this.GuildMaster.Id, 0).ConfigureAwait(false);
+        var masterGuildMember = (await this.GuildServer.GetGuildListAsync(this._firstGuildId).ConfigureAwait(false)).Single();
+        var resolvedMasterId = await this.GuildServer.GetPersistentAllianceMasterGuildIdAsync(this._secondGuildId).ConfigureAwait(false);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(masterGuildMember.ServerId, Is.EqualTo(MUnique.OpenMU.GuildServer.GuildServer.OfflineServerId));
+            Assert.That(resolvedMasterId, Is.EqualTo(masterPersistentId));
+        });
     }
 
     // -------------------------------------------------------------------------
@@ -164,6 +193,44 @@ public class GuildAllianceTest : GuildTestBase
 
         Assert.That(guilds.Count, Is.EqualTo(3));
         Assert.That(guilds.Select(g => g.Id), Is.EquivalentTo(new[] { this._firstGuildId, this._secondGuildId, this._thirdGuildId }));
+    }
+
+    /// <summary>
+    /// The first alliance lookup completes a newly-created runtime alliance from persistence,
+    /// while subsequent hot-path lookups use the known-complete runtime cache.
+    /// </summary>
+    [Test]
+    public async ValueTask GetAllianceGuilds_IncompleteRuntimeCache_LoadsPersistenceOnce()
+    {
+        var innerProvider = new InMemoryPersistenceContextProvider();
+        var provider = new CountingPersistenceContextProvider(innerProvider);
+        var guildServer = new MUnique.OpenMU.GuildServer.GuildServer(
+            new GuildChangeToGameServerPublisher(this.GameServers),
+            provider,
+            new NullLogger<MUnique.OpenMU.GuildServer.GuildServer>());
+        using var context = provider.CreateNewContext();
+        var firstMaster = context.CreateNew<Character>();
+        firstMaster.Name = "CacheMaster";
+        var secondMaster = context.CreateNew<Character>();
+        secondMaster.Name = "CacheMember";
+        await guildServer.CreateGuildAsync("CacheMasterGuild", firstMaster.Name, firstMaster.Id, new byte[16], 0).ConfigureAwait(false);
+        await guildServer.CreateGuildAsync("CacheMemberGuild", secondMaster.Name, secondMaster.Id, new byte[16], 0).ConfigureAwait(false);
+        var firstGuildId = await guildServer.GetGuildIdByNameAsync("CacheMasterGuild").ConfigureAwait(false);
+        var secondGuildId = await guildServer.GetGuildIdByNameAsync("CacheMemberGuild").ConfigureAwait(false);
+        await guildServer.CreateAllianceAsync(firstGuildId, secondGuildId).ConfigureAwait(false);
+        var contextsBeforeLookup = provider.GuildContextCreationCount;
+
+        var firstResult = await guildServer.GetAllianceGuildsAsync(firstGuildId).ConfigureAwait(false);
+        var contextsAfterFirstLookup = provider.GuildContextCreationCount;
+        var secondResult = await guildServer.GetAllianceGuildsAsync(firstGuildId).ConfigureAwait(false);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(firstResult.Select(guild => guild.Id), Is.EquivalentTo(new[] { firstGuildId, secondGuildId }));
+            Assert.That(secondResult.Select(guild => guild.Id), Is.EquivalentTo(new[] { firstGuildId, secondGuildId }));
+            Assert.That(contextsAfterFirstLookup, Is.EqualTo(contextsBeforeLookup + 1));
+            Assert.That(provider.GuildContextCreationCount, Is.EqualTo(contextsAfterFirstLookup));
+        });
     }
 
     /// <summary>
@@ -211,6 +278,17 @@ public class GuildAllianceTest : GuildTestBase
 
         Assert.That(removed, Is.True);
         Assert.That(guilds, Is.Empty);
+
+        foreach (var guildId in new[] { this._firstGuildId, this._secondGuildId, this._thirdGuildId })
+        {
+            Assert.That(await this.GuildServer.IsAllianceMasterAsync(guildId).ConfigureAwait(false), Is.False);
+            Assert.That(await this.GuildServer.GetAllianceGuildsAsync(guildId).ConfigureAwait(false), Is.Empty);
+            Assert.That((await this.GuildServer.GetGuildAsync(guildId).ConfigureAwait(false))!.AllianceGuild, Is.Null);
+        }
+
+        using var context = this.PersistenceContextProvider.CreateNewGuildContext();
+        var persistedGuilds = await context.GetAsync<MUnique.OpenMU.DataModel.Entities.Guild>().ConfigureAwait(false);
+        Assert.That(persistedGuilds.All(guild => guild.AllianceGuild is null), Is.True);
     }
 
     // -------------------------------------------------------------------------
@@ -255,6 +333,37 @@ public class GuildAllianceTest : GuildTestBase
         var relationship = await this.GuildServer.GetGuildRelationshipAsync(this._firstGuildId, this._secondGuildId).ConfigureAwait(false);
 
         Assert.That(relationship, Is.EqualTo(GuildRelationship.Union));
+    }
+
+    /// <summary>
+    /// Hostility applies to every guild of both alliances and is removed symmetrically.
+    /// </summary>
+    [Test]
+    public async ValueTask HostilityExpandsAcrossBothAlliancesAsync()
+    {
+        using var context = this.PersistenceContextProvider.CreateNewContext();
+        var fourthMaster = context.CreateNew<Character>();
+        fourthMaster.Name = "FourthMaster";
+        await this.GuildServer.CreateGuildAsync("FourthGuild", fourthMaster.Name, fourthMaster.Id, new byte[16], 0).ConfigureAwait(false);
+        var fourthGuildId = await this.GuildServer.GetGuildIdByNameAsync("FourthGuild").ConfigureAwait(false);
+        await this.GuildServer.CreateAllianceAsync(this._firstGuildId, this._secondGuildId).ConfigureAwait(false);
+        await this.GuildServer.CreateAllianceAsync(this._thirdGuildId, fourthGuildId).ConfigureAwait(false);
+
+        Assert.That(await this.GuildServer.SetHostilityAsync(this._firstGuildId, this._thirdGuildId, true).ConfigureAwait(false), Is.True);
+
+        foreach (var first in new[] { this._firstGuildId, this._secondGuildId })
+        {
+            foreach (var second in new[] { this._thirdGuildId, fourthGuildId })
+            {
+                Assert.That(await this.GuildServer.GetGuildRelationshipAsync(first, second).ConfigureAwait(false), Is.EqualTo(GuildRelationship.Rival));
+                Assert.That(await this.GuildServer.GetGuildRelationshipAsync(second, first).ConfigureAwait(false), Is.EqualTo(GuildRelationship.Rival));
+            }
+        }
+
+        Assert.That(await this.GuildServer.SetHostilityAsync(this._firstGuildId, this._thirdGuildId, false).ConfigureAwait(false), Is.True);
+        Assert.That(await this.GuildServer.GetGuildRelationshipAsync(this._secondGuildId, fourthGuildId).ConfigureAwait(false), Is.EqualTo(GuildRelationship.None));
+        Assert.That(await this.GuildServer.GetGuildRelationshipAsync(fourthGuildId, this._secondGuildId).ConfigureAwait(false), Is.EqualTo(GuildRelationship.None));
+        Assert.That(await this.GuildServer.GetGuildRelationshipAsync(this._firstGuildId, this._secondGuildId).ConfigureAwait(false), Is.EqualTo(GuildRelationship.Union));
     }
 
     /// <summary>
@@ -347,6 +456,48 @@ public class GuildAllianceTest : GuildTestBase
                 It.IsAny<IReadOnlyList<uint>>(),
                 It.IsAny<bool>()))
             .Returns(ValueTask.CompletedTask);
+    }
+
+    private sealed class CountingPersistenceContextProvider : IPersistenceContextProvider
+    {
+        private readonly IPersistenceContextProvider _innerProvider;
+
+        public CountingPersistenceContextProvider(IPersistenceContextProvider innerProvider)
+        {
+            this._innerProvider = innerProvider;
+        }
+
+        public int GuildContextCreationCount { get; private set; }
+
+        public IRepositoryProvider RepositoryProvider => this._innerProvider.RepositoryProvider;
+
+        public IContext CreateNewContext() => this._innerProvider.CreateNewContext();
+
+        public IContext CreateNewContext(GameConfiguration gameConfiguration)
+            => this._innerProvider.CreateNewContext(gameConfiguration);
+
+        public IConfigurationContext CreateNewConfigurationContext()
+            => this._innerProvider.CreateNewConfigurationContext();
+
+        public IContext CreateNewTradeContext() => this._innerProvider.CreateNewTradeContext();
+
+        public IPlayerContext CreateNewPlayerContext(GameConfiguration gameConfiguration)
+            => this._innerProvider.CreateNewPlayerContext(gameConfiguration);
+
+        public IFriendServerContext CreateNewFriendServerContext()
+            => this._innerProvider.CreateNewFriendServerContext();
+
+        public IGuildServerContext CreateNewGuildContext()
+        {
+            this.GuildContextCreationCount++;
+            return this._innerProvider.CreateNewGuildContext();
+        }
+
+        public IContext CreateNewTypedContext(
+            Type editType,
+            bool useCache,
+            GameConfiguration? gameConfiguration = null)
+            => this._innerProvider.CreateNewTypedContext(editType, useCache, gameConfiguration);
     }
 }
 
@@ -443,7 +594,50 @@ public class RivalGuildCacheTest
         Assert.That(this._gameServerContext.AreGuildsRival(100, 200), Is.False);
     }
 
-    private static GameServerContext CreateMinimalGameServerContext()
+    /// <summary>
+    /// Iteration visits every online alliance player exactly once and excludes unrelated guilds.
+    /// </summary>
+    [Test]
+    public async ValueTask ForEachAlliancePlayerVisitsOnlyOnlineAllianceMembersAsync()
+    {
+        const uint masterGuildId = 1;
+        const uint memberGuildId = 2;
+        var guildServer = new Mock<IGuildServer>();
+        guildServer.Setup(server => server.GetAllianceGuildsAsync(masterGuildId)).ReturnsAsync(
+        [
+            new(masterGuildId, "Master", 1, Memory<byte>.Empty),
+            new(memberGuildId, "Member", 2, Memory<byte>.Empty),
+            new(3, "Offline", 1, Memory<byte>.Empty),
+        ]);
+        var gameContext = CreateMinimalGameServerContext(guildServer.Object);
+        var players = new List<Player>();
+        foreach (var guildId in new uint[] { masterGuildId, memberGuildId, memberGuildId, 4 })
+        {
+            var player = await PlayerTestHelper.CreatePlayerAsync(gameContext).ConfigureAwait(false);
+            player.GuildStatus = new GuildMemberStatus(guildId, GuildPosition.NormalMember);
+            await gameContext.RegisterGuildMemberAsync(player).ConfigureAwait(false);
+            players.Add(player);
+        }
+
+        var visited = new System.Collections.Concurrent.ConcurrentBag<Player>();
+        await gameContext.ForEachAlliancePlayerAsync(masterGuildId, player =>
+        {
+            visited.Add(player);
+            return Task.CompletedTask;
+        }).ConfigureAwait(false);
+
+        Assert.That(visited, Is.EquivalentTo(players.Take(3)));
+        await gameContext.UnregisterGuildMemberAsync(players[1]).ConfigureAwait(false);
+        visited.Clear();
+        await gameContext.ForEachAlliancePlayerAsync(masterGuildId, player =>
+        {
+            visited.Add(player);
+            return Task.CompletedTask;
+        }).ConfigureAwait(false);
+        Assert.That(visited, Is.EquivalentTo(new[] { players[0], players[2] }));
+    }
+
+    private static GameServerContext CreateMinimalGameServerContext(IGuildServer? guildServer = null)
     {
         var persistenceProvider = new InMemoryPersistenceContextProvider();
         var gameConfiguration = new BasicModel.GameConfiguration();
@@ -455,7 +649,7 @@ public class RivalGuildCacheTest
                 GameConfiguration = gameConfiguration,
                 ServerConfiguration = new BasicModel.GameServerConfiguration(),
             },
-            new Mock<IGuildServer>().Object,
+            guildServer ?? new Mock<IGuildServer>().Object,
             new Mock<IEventPublisher>().Object,
             new Mock<ILoginServer>().Object,
             new Mock<IFriendServer>().Object,
@@ -469,6 +663,7 @@ public class RivalGuildCacheTest
         mapInitializer.PathFinderPool = ctx.PathFinderPool;
         return ctx;
     }
+
 }
 
 /// <summary>

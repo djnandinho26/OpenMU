@@ -4,6 +4,7 @@
 
 namespace MUnique.OpenMU.GameLogic;
 
+using System.Diagnostics.CodeAnalysis;
 using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Attributes;
 using MUnique.OpenMU.DataModel.Configuration;
@@ -34,6 +35,7 @@ public static class AttackableExtensions
         /// <summary>
         /// Gets a value indicating whether this instance is a summoned monster.
         /// </summary>
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1101:PrefixLocalCallsWithThis", Justification = "The receiver of an extension block can't be prefixed with 'this'.")]
         public bool IsSummonedMonster => attackable is Monster { SummonedBy: not null };
     }
 
@@ -209,8 +211,12 @@ public static class AttackableExtensions
 
         dmg -= (int)(dmg * defender.Attributes[Stats.ArmorDamageDecrease]);
 
-        var attackerLevel = attacker is Player ? attacker.Attributes[Stats.TotalLevel] :
-            attacker is AttackerSurrogate ? attackerPlayer!.Attributes![Stats.Level] : attacker.Attributes[Stats.Level];
+        var attackerLevel = attacker switch
+        {
+            Player => attacker.Attributes[Stats.TotalLevel],
+            AttackerSurrogate => attackerPlayer!.Attributes![Stats.Level],
+            _ => attacker.Attributes[Stats.Level],
+        };
         var minLevelDmg = Math.Max(1, (int)attackerLevel / 10);
         if (dmg < minLevelDmg)
         {
@@ -286,7 +292,6 @@ public static class AttackableExtensions
 
         if (dmg > 0)
         {
-            // To-do: Ice arrow magic effect duration is reduced by 1s for every successful hit (dmg >0)
             if (isCombo)
             {
                 dmg += (int)attacker.Attributes[Stats.ComboBonus];
@@ -323,13 +328,13 @@ public static class AttackableExtensions
     /// <returns>The calculated hit info.</returns>
     public static HitInfo GetHitInfo(this IAttackable defender, uint damage, DamageAttributes attributes, IAttacker attacker, uint manaToll = 0, SkillEntry? skill = null, uint petDamage = 0)
     {
-        var triggersHitShock = defender.GetsHitShocked(damage);
+        var triggersHitShock = !attributes.HasFlag(DamageAttributes.Bleed) && defender.GetsHitShocked(damage);
 
         if (skill?.EnsureSkillAttributes(attacker.Attributes) is { } skillAttributes
             && Rand.NextRandomBool(skillAttributes[Stats.DragonSlasherShieldDamageChance]))
         {
-            var shieldDamage = defender.Attributes[Stats.CurrentShield] * skillAttributes[Stats.DragonSlasherShieldDamageRate];
-            return new HitInfo(damage, (uint)shieldDamage, attributes, manaToll, petDamage, skill, triggersHitShock);
+            var slasherShieldDamage = defender.Attributes[Stats.CurrentShield] * skillAttributes[Stats.DragonSlasherShieldDamageRate];
+            return new HitInfo(damage, (uint)slasherShieldDamage, attributes, manaToll, petDamage, skill, triggersHitShock);
         }
 
         var shieldBypass = Rand.NextRandomBool(attacker.Attributes[Stats.ShieldBypassChance]);
@@ -338,12 +343,10 @@ public static class AttackableExtensions
             return new HitInfo(damage, 0, attributes, manaToll, petDamage, skill, triggersHitShock);
         }
 
-        var shieldRatio = 0.90;
-        shieldRatio -= attacker.Attributes[Stats.ShieldDecreaseRateIncrease];
-        shieldRatio += defender.Attributes[Stats.ShieldRateIncrease];
+        var shieldRatio = defender.Attributes[Stats.ShieldRatio] - attacker.Attributes[Stats.ShieldDecreaseRateIncrease];
         shieldRatio = Math.Max(0, shieldRatio);
-        shieldRatio = Math.Min(1, shieldRatio);
-        return new HitInfo((uint)(damage * (1 - shieldRatio)), (uint)(damage * shieldRatio), attributes, manaToll, petDamage, skill, triggersHitShock);
+        var shieldDamage = (uint)(damage * shieldRatio);
+        return new HitInfo(damage - shieldDamage, shieldDamage, attributes, manaToll, petDamage, skill, triggersHitShock);
     }
 
     /// <summary>

@@ -120,6 +120,17 @@ public partial class ItemDefinition
     public bool IsRepairable { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets a value indicating whether an expired time-limited item of this kind can be sold to
+    /// an NPC merchant, even if <see cref="IsSellableToNpc"/> doesn't allow it.
+    /// </summary>
+    /// <remarks>
+    /// The items which are rented in the cash shop can't be sold while they are valid, but once they
+    /// expired. Together with <see cref="IsDroppable"/> and <see cref="IsSellableToNpc"/> it decides
+    /// whether the player can get rid of such an item.
+    /// </remarks>
+    public bool IsSellableWhenExpired { get; set; }
+
+    /// <summary>
     /// Gets or sets the name of the item.
     /// </summary>
     public LocalizedString Name { get; set; }
@@ -199,6 +210,16 @@ public partial class ItemDefinition
     /// Gets or sets the maximum number of sockets an instance of this item can have.
     /// </summary>
     public int MaximumSockets { get; set; }
+
+    /// <summary>
+    /// Gets or sets the table from which the number of sockets of a dropped instance of this item is selected.
+    /// </summary>
+    /// <remarks>
+    /// Values above <see cref="MaximumSockets"/> are never selected. If <c>null</c>, the number of sockets is
+    /// selected uniformly between 1 and <see cref="MaximumSockets"/>. A drop group can override it,
+    /// see <see cref="DropItemGroup.SocketCountTable"/>.
+    /// </remarks>
+    public virtual WeightedValueTable? SocketCountTable { get; set; }
 
     /// <summary>
     /// Gets or sets the skill which this items adds to the skill list while wearing or which can be learned by consuming this item.

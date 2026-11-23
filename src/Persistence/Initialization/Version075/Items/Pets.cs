@@ -31,20 +31,27 @@ public class Pets : InitializerBase
     /// <inheritdoc />
     public override void Initialize()
     {
-#pragma warning disable SA1117 // Parameters should be on same line or separete lines
-        var angel = this.CreatePet(0, LocalizedString.FromResource(() => ItemNames.GuardianAngel), 23,
+        var angel = this.CreatePet(
+            0,
+            LocalizedString.FromResource(() => ItemNames.GuardianAngel),
+            23,
             (Stats.DamageReceiveDecrement, 0.8f, AggregateType.Multiplicate),
             (Stats.MaximumHealth, 50f, AggregateType.AddRaw));
         this.AddItemToJewelItemDrop(angel);
-        var imp = this.CreatePet(1, LocalizedString.FromResource(() => ItemNames.Imp), 28,
+        var imp = this.CreatePet(
+            1,
+            LocalizedString.FromResource(() => ItemNames.Imp),
+            28,
             (Stats.AttackDamageIncrease, 1.3f, AggregateType.Multiplicate));
         this.AddItemToJewelItemDrop(imp);
-        var uniria = this.CreatePet(2, LocalizedString.FromResource(() => ItemNames.HornOfUniria), 25,
+        var uniria = this.CreatePet(
+            2,
+            LocalizedString.FromResource(() => ItemNames.HornOfUniria),
+            25,
             (Stats.IsUniriaEquipped, 1, AggregateType.AddRaw),
             (Stats.MovementSpeed, MovementSpeedConstants.BasicMountMovementSpeed, AggregateType.Maximum),
             (Stats.MovementSpeedUnderwater, MovementSpeedConstants.BasicMountMovementSpeed, AggregateType.Maximum));
         this.AddItemToJewelItemDrop(uniria);
-#pragma warning restore SA1117
     }
 
     private ItemDefinition CreatePet(byte number, LocalizedString name, int dropLevelAndLevelRequirement, params (AttributeDefinition, float, AggregateType)[] basePowerUps)
@@ -60,7 +67,7 @@ public class Pets : InitializerBase
         pet.DropsFromMonsters = true;
         pet.Durability = 255;
         pet.ItemSlot = this.GameConfiguration.ItemSlotTypes.First(st => st.ItemSlots.Contains(8));
-        this.GameConfiguration.DetermineCharacterClasses(true, true, true).ForEach(pet.QualifiedCharacters.Add);
+        this.GameConfiguration.DetermineCharacterClasses(CharacterClasses.DarkWizard | CharacterClasses.DarkKnight | CharacterClasses.FairyElf).ForEach(pet.QualifiedCharacters.Add);
 
         this.CreateItemRequirementIfNeeded(pet, Stats.Level, dropLevelAndLevelRequirement);
 

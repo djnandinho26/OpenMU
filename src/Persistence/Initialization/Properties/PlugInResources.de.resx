@@ -267,10 +267,10 @@
     <value>Diese Aktualisierung fügt Daten für die Duellkonfiguration hinzu</value>
   </data>
   <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Name" xml:space="preserve">
-    <value>Korrektur der Monsterattribute von Blutburg 7/8</value>
+    <value>Season-6-Monsterattribute der Blutburg</value>
   </data>
   <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Description" xml:space="preserve">
-    <value>Tauscht die Attributwerte zwischen BC7 (Monster 138-143) und BC8 (Monster 428-433), damit die Progression stimmt: BC6 → BC7 → BC8.</value>
+    <value>Setzt Level, Leben, Schaden, Verteidigung, Angriffs- und Verteidigungsrate, Reichweiten und Verzögerungen der Monster von Blutburg 1 bis 8 auf die Season-6-Daten, damit die Schwierigkeit von Stufe zu Stufe steigt. Angepasste Werte dieser Attribute werden überschrieben.</value>
   </data>
   <data name="AddDoppelgangerDataUpdatePlugIn_Name" xml:space="preserve">
     <value>Doppelgänger-Daten hinzufügen</value>
@@ -307,12 +307,6 @@
   </data>
   <data name="FixAncientDiscriminatorsUpdatePlugIn_Description" xml:space="preserve">
     <value>Diese Aktualisierung korrigiert die Diskriminatoren einiger antiker Gegenstände.</value>
-  </data>
-  <data name="FixMurenRingOfFireBonusPlugIn_Name" xml:space="preserve">
-    <value>Bonus des Muren-Feuerrings korrigieren</value>
-  </data>
-  <data name="FixMurenRingOfFireBonusPlugIn_Description" xml:space="preserve">
-    <value>Gibt dem Feuerring des antiken Sets Muren seinen Energie-Bonus, der als Vitalität initialisiert wurde.</value>
   </data>
   <data name="AddSummonerBuffSkillsPlugIn_Name" xml:space="preserve">
     <value>Buff-Fähigkeiten des Beschwörers hinzufügen</value>
@@ -632,6 +626,12 @@
   <data name="AddMovementSpeedAttributesPlugInBase_Description" xml:space="preserve">
     <value>Fügt eine attributbasierte Konfiguration der Bewegungsgeschwindigkeit für Spieler, Monster, Gegenstände, Effekte und Unterwasserkarten hinzu.</value>
   </data>
+  <data name="AddShieldRatioAttributesPlugIn_Name" xml:space="preserve">
+    <value>Attribute für das Schildverhältnis hinzufügen</value>
+  </data>
+  <data name="AddShieldRatioAttributesPlugIn_Description" xml:space="preserve">
+    <value>Fügt das konfigurierbare Verhältnis des Schildschadens und den Schwellenwert für den Über-Schild-Burst hinzu.</value>
+  </data>
   <data name="SystemConfigurationAddedPlugInBase_Name" xml:space="preserve">
     <value>Systemkonfiguration hinzufügen</value>
   </data>
@@ -782,12 +782,6 @@
   <data name="AddCrywolfEventUpdatePlugIn_Description" xml:space="preserve">
     <value>Diese Aktualisierung fügt die Monster des Crywolf-Events und ihre Spawns hinzu, lässt die Statue und die Altäre der Festung immer auf der Karte, und fügt den Warp-Eintrag der Festung und die Geländevarianten der Besetzungszustände hinzu.</value>
   </data>
-  <data name="AddSantaVillageInvitationUpdatePlugIn_Name" xml:space="preserve">
-    <value>Einladung ins Dorf des Weihnachtsmanns hinzufügen</value>
-  </data>
-  <data name="AddSantaVillageInvitationUpdatePlugIn_Description" xml:space="preserve">
-    <value>Dieses Update fügt die Einladung ins Dorf des Weihnachtsmanns hinzu, die den Spieler ins Dorf des Weihnachtsmanns teleportiert, sowie ein Spawn-Tor im Dorf des Weihnachtsmanns.</value>
-  </data>
   <data name="AddSmallWingsUpdatePlugIn_Name" xml:space="preserve">
     <value>Kleine Flügel und Umhänge hinzufügen</value>
   </data>
@@ -874,6 +868,12 @@
   <data name="AddFreeTicketItemsUpdatePlugIn_Description" xml:space="preserve">
     <value>Diese Aktualisierung fügt die freien Tickets für Devil Square, Blood Castle, Illusion Temple und Chaos Castle hinzu, mit denen man das Event jeder Stufe betreten kann. Die Pakete des Item-Shops, die sie enthalten, werden zum Verkauf angeboten.</value>
   </data>
+  <data name="AddGoblinBoxesUpdatePlugIn_Name" xml:space="preserve">
+    <value>Goldene und silberne Boxen hinzufügen</value>
+  </data>
+  <data name="AddGoblinBoxesUpdatePlugIn_Description" xml:space="preserve">
+    <value>Diese Aktualisierung fügt den Goldschlüssel und den Silberschlüssel, die versiegelte goldene und silberne Box, die mit den Schlüsseln beim Chaos-Goblin geöffnet werden, sowie die goldene und silberne Box hinzu, die beim Fallenlassen einen Gegenstand oder Geld geben. Die Pakete des Item-Shops, die die Schlüssel enthalten, werden zum Verkauf angeboten.</value>
+  </data>
   <data name="AddKalimaTicketUpdatePlugIn_Name" xml:space="preserve">
     <value>Kalima-Ticket hinzufügen</value>
   </data>
@@ -910,10 +910,152 @@
   <data name="AddCraftingTalismansUpdatePlugIn_Description" xml:space="preserve">
     <value>Diese Aktualisierung fügt den Talisman des Glücks hinzu, der die Erfolgsrate einer Kombination um seine Haltbarkeit in Prozent erhöht, und den Talisman der Chaos-Kombination, der den Gegenstand einer fehlgeschlagenen Verbesserung auf +10 bis +15 erhält. Sie werden den Kombinationen hinzugefügt, die sie annehmen, und die Pakete des Item-Shops, die sie enthalten, werden zum Verkauf angeboten.</value>
   </data>
+  <data name="FixMurenRingOfFireBonusPlugIn_Name" xml:space="preserve">
+  <data name="RestrictWarpsOutsideOfOriginalWarpWindowPlugIn_Name" xml:space="preserve"><value>Warps außerhalb des ursprünglichen Warp-Fensters einschränken</value></data>
+  <data name="RestrictWarpsOutsideOfOriginalWarpWindowPlugIn_Description" xml:space="preserve"><value>Macht die Warps, die der ursprüngliche Client nicht in seinem Warp-Fenster anbietet (Crywolf, Loren Market und der zweite LaCleon-Warp), nur für Game Master verfügbar.</value></data>
+    <value>Bonus des Muren-Feuerrings korrigieren</value>
+  </data>
+  <data name="FixMurenRingOfFireBonusPlugIn_Description" xml:space="preserve">
+    <value>Gibt dem Feuerring des antiken Sets Muren seinen Energie-Bonus, der als Vitalität initialisiert wurde.</value>
+  </data>
+  <data name="FixDestroyPhantomArmorNamesPlugIn_Name" xml:space="preserve">
+    <value>Namen der Rüstungssets Zerstörer und Phantom korrigieren</value>
+  </data>
+  <data name="FixDestroyPhantomArmorNamesPlugIn_Description" xml:space="preserve">
+    <value>Tauscht die Namen der Rüstungssets Phantom (47) und Zerstörer (48) und ihrer Set-Boni, die mit dem Namen des jeweils anderen Sets initialisiert wurden, und korrigiert die Schreibweise „Destory“.</value>
+  </data>
+  <data name="HideSkillEffectTimesPlugIn_Name" xml:space="preserve">
+    <value>Zeiten von Fertigkeitseffekten ausblenden</value>
+  </data>
+  <data name="HideSkillEffectTimesPlugIn_Description" xml:space="preserve">
+    <value>Schaltet das Senden der Dauer der Fertigkeitseffekte aus, für die die Season-6-Daten sie gesendet haben: Infinite Arrow und die Verteidigungsverringerungen von Fire Slash und Beast Uppercut. Das Originalspiel zeigt für Fertigkeitseffekte keine Zeit. Es überschreibt die aktuelle Einstellung, auch eine auf der Seite Effektzeiten gemachte.</value>
+  </data>
+  <data name="AddSantaVillageInvitationUpdatePlugIn_Name" xml:space="preserve">
+    <value>Einladung ins Dorf des Weihnachtsmanns hinzufügen</value>
+  </data>
+  <data name="AddSantaVillageInvitationUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt die Einladung ins Dorf des Weihnachtsmanns hinzu, die den Spieler ins Dorf des Weihnachtsmanns teleportiert, sowie ein Spawn-Tor im Dorf des Weihnachtsmanns.</value>
+  </data>
   <data name="AddHitShockSettingsPlugIn_Name" xml:space="preserve">
     <value>Treffer-Schock-Einstellungen hinzufügen</value>
   </data>
   <data name="AddHitShockSettingsPlugIn_Description" xml:space="preserve">
     <value>Fügt die globalen Einstellungen für Treffer-Schock-Chance und Schadensschwelle sowie die Uniria-Kennzeichnung hinzu, damit Spieler mit ausgerüsteter Uniria keinen Treffer-Schock erleiden.</value>
+  </data>
+  <data name="AddSealItemDropRateUpdatePlugIn_Name" xml:space="preserve">
+    <value>Item-Droprate der Siegel hinzufügen</value>
+  </data>
+  <data name="AddSealItemDropRateUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt dem Siegel des Wohlstands, dem Siegel der Göttlichkeit und dem Meistersiegel des Wohlstands die Item-Droprate von 150 % hinzu, und fügt das zweite Siegel des Wohlstands (13/116) hinzu, das nur die Item-Droprate erhöht.</value>
+  </data>
+  <data name="AdjustIceArrowFreezeDurationUpdatePlugIn_Name" xml:space="preserve">
+    <value>Einfrierdauer des Eis-Pfeils anpassen</value>
+  </data>
+  <data name="AdjustIceArrowFreezeDurationUpdatePlugIn_Description" xml:space="preserve">
+    <value>Verlängert die standardmäßige Einfrierdauer des Eis-Pfeils und ergänzt ihre Verkürzung bei erfolgreichen Treffern. Angepasste Dauern bleiben unverändert. Außerdem werden die Magieeffekte von Ice Arrow Str, Chain Drive Str, Strike of Destruction Str und Poison Str an die Magieeffekte ihrer Basisfähigkeiten angeglichen.</value>
+  </data>
+  <data name="FieldMonsterSpawnsUpdatePlugInSeason6_Name" xml:space="preserve">
+    <value>Season-6-Monster-Spawns der Feldkarten</value>
+  </data>
+  <data name="FieldMonsterSpawnsUpdatePlugInSeason6_Description" xml:space="preserve">
+    <value>Bringt die Monster-Spawns der Feldkarten auf die Season-6-Daten: Devias, Noria und Elfenland erhalten die Aufteilung mit kleineren Bereichen und einzelnen Punkten statt Vierteln der Karte, mit den Spinnen in Noria und Elfenland. Fehlende Spawns von Verlies, Verlorener Turm, Ikarus, Kalima 3, 6 und 7, Land der Prüfungen, Aida, Crywolf-Festung, Kanturu III und Balgass-Kaserne werden hinzugefügt und überzählige entfernt, Spawns mit falschen Koordinaten in Crywolf-Festung, Balgass-Kaserne, Sumpf des Friedens, Vulkanus und Karutan korrigiert. Entfernt außerdem die doppelten Monster-Spawns von Verlies (254) und Verlorener Turm (2). Angepasste Spawns der Feldmonster von Devias, Noria und Elfenland werden überschrieben.</value>
+  </data>
+  <data name="FieldMonsterSpawnsUpdatePlugInBase_Name" xml:space="preserve">
+    <value>Season-6-Monster-Spawns der Feldkarten</value>
+  </data>
+  <data name="FieldMonsterSpawnsUpdatePlugInBase_Description" xml:space="preserve">
+    <value>Bringt die Monster-Spawns der Feldkarten auf die Season-6-Daten, die auch diese Version verwendet: Devias und Noria erhalten die Aufteilung mit kleineren Bereichen und einzelnen Punkten statt Vierteln der Karte, ohne die Spinnen von Season 6. Fehlende Spawns von Verlies, Verlorener Turm und Ikarus werden hinzugefügt und überzählige entfernt. Entfernt außerdem die doppelten Monster-Spawns von Verlies (254) und Verlorener Turm (2). Angepasste Spawns der Feldmonster von Devias und Noria werden überschrieben.</value>
+  </data>
+  <data name="MonsterStatsUpdatePlugInBase_Name" xml:space="preserve">
+    <value>Season-6-Monsterwerte</value>
+  </data>
+  <data name="MonsterStatsUpdatePlugInBase_Description" xml:space="preserve">
+    <value>Setzt Level, Leben, Schaden, Verteidigung, Angriffs- und Verteidigungsrate, Reichweiten, Verzögerungen und Respawn-Zeiten der Monster auf die Season-6-Daten, die auch diese Version verwendet. Korrigiert Feldmonster, Invasionsmonster und Wachen sowie in Season 6 Chaos Castle 4 und 7 sowie Devil Square 7. Angepasste Werte dieser Attribute werden überschrieben. Benennt in Season 6 das Monster 275 von Kalima 7 von „Illusion of Kundun 7“ in „Kundun“ um.</value>
+  </data>
+  <data name="MonsterResistancesUpdatePlugInBase_Name" xml:space="preserve">
+    <value>Elementare Resistenzen der Monster</value>
+  </data>
+  <data name="MonsterResistancesUpdatePlugInBase_Description" xml:space="preserve">
+    <value>Wandelt die elementaren Resistenzen der Monster in ganze Zahlen von 0 bis 255 um, welche die Resistenzprüfung erwartet; bisher widerstanden Monster Eis-, Gift- und Blitzeffekten nur bei etwa 1 bis 2 % der Treffer. Korrigiert die Resistenzen, die der Import der Monsterdaten den falschen Elementen zugeordnet hat (Eis und Gift vertauscht, Blitz als Wasser gespeichert), und setzt die Season-6-Werte. Angepasste Resistenzen werden auf die neue Skala umgerechnet, aber sonst nicht verändert.</value>
+  </data>
+  <data name="AddProtectionTalismansUpdatePlugIn_Name" xml:space="preserve">
+    <value>Schutztalismane hinzufügen</value>
+  </data>
+  <data name="AddProtectionTalismansUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt den Talisman des Wächters, der vor der Todesstrafe schützt, und den Talisman des Gegenstandsschutzes hinzu, der die Haltbarkeit der ausgerüsteten Gegenstände erhält.</value>
+  </data>
+  <data name="FixCrywolfGateTerrainUpdatePlugIn_Name" xml:space="preserve">
+    <value>Eingang nach Crywolf im Tal von Loren korrigieren</value>
+  </data>
+  <data name="FixCrywolfGateTerrainUpdatePlugIn_Description" xml:space="preserve">
+    <value>Macht den südlichen Zugang zum Tor der Festung Crywolf im Tal von Loren begehbar, den Spieler außerhalb der Burgbelagerung benutzen. Der nördliche Zugang und alle anderen Felder bleiben unverändert.</value>
+  </data>
+  <data name="AddTalismanOfResurrectionUpdatePlugIn_Name" xml:space="preserve">
+    <value>Talisman der Wiederbelebung hinzufügen</value>
+  </data>
+  <data name="AddTalismanOfResurrectionUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt den Talisman der Wiederbelebung hinzu, der einen toten Spieler am Ort seines Todes wieder erscheinen lässt. Die Pakete des In-Game-Shops, die ihn enthalten, werden zum Verkauf angeboten.</value>
+  </data>
+  <data name="AddLuckyCoinUpdatePlugIn_Name" xml:space="preserve">
+    <value>Glücksmünze hinzufügen</value>
+  </data>
+  <data name="AddLuckyCoinUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt die Glücksmünze hinzu, die beim NPC Delgado in Devias registriert oder gegen Gegenstände getauscht wird, und öffnet seinen Glücksmünzen-Dialog.</value>
+  </data>
+  <data name="AddGladiatorsHonorUpdatePlugIn_Name" xml:space="preserve">
+    <value>Ehre des Gladiators hinzufügen</value>
+  </data>
+  <data name="AddGladiatorsHonorUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt die Ehre des Gladiators hinzu, welche die Erfahrung in Vulcanus 30 Minuten lang um 20 % erhöht.</value>
+  </data>
+  <data name="AddRentalItemRulesUpdatePlugIn_Name" xml:space="preserve">
+    <value>Gemietete Gegenstände des Cash Shops verkaufen</value>
+  </data>
+  <data name="AddRentalItemRulesUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update bietet die zeitlich begrenzten Begleiter, Ringe, Halsketten und kleinen Flügel des Cash Shops zum Verkauf an, die als ablaufende Gegenstände geliefert werden, und erlaubt es, sie nach ihrem Ablauf für den kleinen festen Preis, den der Client anzeigt, an einen NPC zu verkaufen.</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugInSeason6_Name" xml:space="preserve">
+    <value>Season-6-NPC-Spawns</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugInSeason6_Description" xml:space="preserve">
+    <value>Bringt die NPCs auf ihre Season-6-Positionen und Blickrichtungen (Lorencia, Devias, Noria, Arena, Atlans, Elfenland, Aida, Crywolf-Festung, Tal von Loren, Karutan, Kanturu und Illusionstempel), ergänzt den fehlenden Elfensoldaten von Devias, die zwei fehlenden Elfensoldaten von Noria sowie den Goldenen Bogenschützen von Devias und entfernt die NPCs, die es in Season 6 nicht gibt: aus den älteren Versionen die Trankverkäuferinnen von Noria und Verlorener Turm, die Sicherheitswächter von Verlorener Turm, Arena und Atlans, die Wache bei 114/125 und den Goldenen Bogenschützen von Lorencia; Lugard, Priester Devin und Mirage in Devias, die Season 6 nur in Elfenland und in der Crywolf-Festung hat; sowie die zweite Krone im Tal von Loren. Angepasste Positionen und Blickrichtungen dieser NPCs werden überschrieben.</value>
+  </data>
+  <data name="IllusionTempleDataUpdatePlugIn_Name" xml:space="preserve">
+    <value>Daten des Illusionstempels</value>
+  </data>
+  <data name="IllusionTempleDataUpdatePlugIn_Description" xml:space="preserve">
+    <value>Diese Aktualisierung erstellt die Konfigurationsdaten für das Event Illusionstempel und weist dem NPC Mirage den Event-Dialog zu. Wenn die Gegenstände 13/50 und 13/51 vertauschte Daten haben (Schriftrolle des Blutes und Vertrag des Illusionszauberers), gibt sie ihnen ihre ursprünglichen Daten zurück: Namen, Größen, Haltbarkeit, Stufen und Drops, die Drop-Gruppen, die Tempel-Tickets und die Händler-Gegenstände von 13/51. Wenn beide ihre ursprünglichen Namen haben, aber die Größen noch vertauscht sind, Schankmädchen Lumen 13/51 statt 13/50 verkauft oder eine Drop-Gruppe des Vertrags 13/51 statt 13/50 enthält, setzt sie ihre ursprünglichen Größen, stellt die Tempel-Tickets von 13/50 auf 13/51 um und verschiebt nur diese Händler-Gegenstände von Schankmädchen Lumen und Drop-Gruppen des Vertrags von 13/51 auf 13/50. Eine Schriftrolle des Blutes, die Sie neben dem Vertrag hinzugefügt haben, bleibt. Wenn nur einer der beiden den vertauschten Namen hat, ändert sie keinen. Verweise auf die beiden Gegenstände, die Sie selbst hinzugefügt haben (Kombinationen, Quests, Item-Drops, Plugin-Einstellungen), bleiben, wie sie sind: prüfen Sie sie nach der Aktualisierung.</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugIn075_Name" xml:space="preserve">
+    <value>0.75-NPC-Spawns</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugIn075_Description" xml:space="preserve">
+    <value>Bringt die NPCs von 0.75 auf die Season-6-Daten: entfernt die zwei Trankverkäuferinnen von Noria, die Trankverkäuferin und den Sicherheitswächter von Verlorener Turm, die Sicherheitswächter von Arena und Atlans sowie die Armbrustwache bei 114/125 in Lorencia und versetzt den Fußball und die Arenawache der Arena auf ihre Season-6-Positionen.</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugIn095d_Name" xml:space="preserve">
+    <value>0.95d-NPC-Spawns</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugIn095d_Description" xml:space="preserve">
+    <value>Bringt die NPCs von 0.95d auf die Season-6-Daten: entfernt die zwei Trankverkäuferinnen von Noria, die Trankverkäuferin und den Sicherheitswächter von Verlorener Turm, die Sicherheitswächter von Arena und Atlans sowie die Armbrustwache bei 114/125 in Lorencia, versetzt den Fußball und die Arenawache der Arena auf ihre Season-6-Positionen und den Goldenen Bogenschützen von Lorencia nach Devias (226/66).</value>
+  </data>
+  <data name="AddSocketCountTablesUpdatePlugIn_Name" xml:space="preserve"><value>Tabellen der Sockelanzahl</value></data>
+  <data name="AddSocketCountTablesUpdatePlugIn_Description" xml:space="preserve"><value>Sockelgegenstände fallen meistens mit einem Sockel und selten mit drei (Zweihandwaffen: fünf), statt mit jeder Anzahl bis zum Maximum mit gleicher Wahrscheinlichkeit. Erhöht die maximale Sockelanzahl der Sockelgegenstände auf fünf; die Tabellen begrenzen die Drops. Sockelgegenstände, die schon eine Tabelle haben, behalten sie.</value></data>
+  <data name="AddFigurinesAndCharmsUpdatePlugIn_Name" xml:space="preserve">
+    <value>Figuren und Talismane hinzufügen</value>
+  </data>
+  <data name="AddFigurinesAndCharmsUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt die Falken- und Ziegenfigur sowie die (goldenen) Eichen- und Ahorntalismane hinzu, die ihre Boni geben, während sie im Inventar benutzt werden.</value>
+  </data>
+  <data name="AddLordsMixUpdatePlugIn_Name" xml:space="preserve">
+    <value>Lord's Mix</value>
+  </data>
+  <data name="AddLordsMixUpdatePlugIn_Description" xml:space="preserve">
+    <value>Fügt dem Senior der Burg den Lord's Mix hinzu: einmal pro Tag mischt der Gildenmeister der Gilde, der die Burg gehört, 30 Juwelen des Wächters, ein gepacktes Juwel des Segens und ein gepacktes Juwel der Seele (je 30 Juwelen) und 1.000.000.000 Zen zu einer exzellenten Waffe oder Rüstung mit zwei bis vier exzellenten Optionen oder einer normalen. Setzt die Grenze auf einen Mix pro Tag, wenn es noch keine Grenze gibt.</value>
+  </data>
+  <data name="AddWornHorseshoeUpdatePlugIn_Name" xml:space="preserve">
+    <value>Abgenutztes Hufeisen hinzufügen</value>
+  </data>
+  <data name="AddWornHorseshoeUpdatePlugIn_Description" xml:space="preserve">
+    <value>Dieses Update fügt das abgenutzte Hufeisen hinzu, das die Item-Droprate um 20 % erhöht, während es im Inventar benutzt wird.</value>
   </data>
 </root>

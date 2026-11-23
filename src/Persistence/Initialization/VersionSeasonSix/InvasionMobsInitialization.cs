@@ -1,4 +1,4 @@
-// <copyright file="InvasionMobsInitialization.cs" company="MUnique">
+﻿// <copyright file="InvasionMobsInitialization.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -53,16 +53,16 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.Level, 20 },
-                { Stats.MaximumHealth, 3200 },
+                { Stats.MaximumHealth, 3100 },
                 { Stats.MinimumPhysBaseDmg, 125 },
                 { Stats.MaximumPhysBaseDmg, 130 },
                 { Stats.DefenseBase, 50 },
                 { Stats.AttackRatePvm, 100 },
-                { Stats.DefenseRatePvm, 50 },
-                { Stats.PoisonResistance, 2f / 255 },
-                { Stats.IceResistance, 2f / 255 },
-                { Stats.WaterResistance, 2f / 255 },
-                { Stats.FireResistance, 2f / 255 },
+                { Stats.DefenseRatePvm, 30 },
+                { Stats.IceResistance, 2 },
+                { Stats.PoisonResistance, 2 },
+                { Stats.LightningResistance, 2 },
+                { Stats.FireResistance, 2 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 
@@ -80,22 +80,22 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.ViewRange = 7;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
             monster.AttackDelay = new TimeSpan(1800 * TimeSpan.TicksPerMillisecond);
-            monster.RespawnDelay = new TimeSpan(600 * TimeSpan.TicksPerSecond);
+            monster.RespawnDelay = new TimeSpan(5 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.Level, 80 },
-                { Stats.MaximumHealth, 22000 },
+                { Stats.MaximumHealth, 23000 },
                 { Stats.MinimumPhysBaseDmg, 300 },
                 { Stats.MaximumPhysBaseDmg, 350 },
                 { Stats.DefenseBase, 230 },
                 { Stats.AttackRatePvm, 400 },
                 { Stats.DefenseRatePvm, 90 },
-                { Stats.PoisonResistance, 9f / 255 },
-                { Stats.IceResistance, 7f / 255 },
-                { Stats.WaterResistance, 9f / 255 },
-                { Stats.FireResistance, 9f / 255 },
+                { Stats.IceResistance, 9 },
+                { Stats.PoisonResistance, 7 },
+                { Stats.LightningResistance, 9 },
+                { Stats.FireResistance, 9 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 
@@ -113,19 +113,19 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.ViewRange = 7;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
             monster.AttackDelay = new TimeSpan(1600 * TimeSpan.TicksPerMillisecond);
-            monster.RespawnDelay = new TimeSpan(600 * TimeSpan.TicksPerSecond);
+            monster.RespawnDelay = new TimeSpan(8 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.Level, 61 },
-                { Stats.MaximumHealth, 10000 },
+                { Stats.MaximumHealth, 6300 },
                 { Stats.MinimumPhysBaseDmg, 190 },
                 { Stats.MaximumPhysBaseDmg, 200 },
                 { Stats.DefenseBase, 110 },
                 { Stats.AttackRatePvm, 310 },
                 { Stats.DefenseRatePvm, 90 },
-                { Stats.WaterResistance, 3f / 255 },
+                { Stats.LightningResistance, 3 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
             monster.SetGuid(monster.Number);
@@ -142,7 +142,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.ViewRange = 7;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
             monster.AttackDelay = new TimeSpan(1600 * TimeSpan.TicksPerMillisecond);
-            monster.RespawnDelay = new TimeSpan(600 * TimeSpan.TicksPerSecond);
+            monster.RespawnDelay = new TimeSpan(15 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
             var attributes = new Dictionary<AttributeDefinition, float>
@@ -154,10 +154,10 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
                 { Stats.DefenseBase, 240 },
                 { Stats.AttackRatePvm, 415 },
                 { Stats.DefenseRatePvm, 150 },
-                { Stats.PoisonResistance, 9f / 255 },
-                { Stats.IceResistance, 7f / 255 },
-                { Stats.WaterResistance, 9f / 255 },
-                { Stats.FireResistance, 9f / 255 },
+                { Stats.IceResistance, 9 },
+                { Stats.PoisonResistance, 7 },
+                { Stats.LightningResistance, 9 },
+                { Stats.FireResistance, 9 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 
@@ -174,7 +174,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.ViewRange = 7;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
             monster.AttackDelay = new TimeSpan(1400 * TimeSpan.TicksPerMillisecond);
-            monster.RespawnDelay = new TimeSpan(600 * TimeSpan.TicksPerSecond);
+            monster.RespawnDelay = new TimeSpan(70 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
             var attributes = new Dictionary<AttributeDefinition, float>
@@ -186,10 +186,10 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
                 { Stats.DefenseBase, 230 },
                 { Stats.AttackRatePvm, 385 },
                 { Stats.DefenseRatePvm, 160 },
-                { Stats.PoisonResistance, 9f / 255 },
-                { Stats.IceResistance, 7f / 255 },
-                { Stats.WaterResistance, 9f / 255 },
-                { Stats.FireResistance, 9f / 255 },
+                { Stats.IceResistance, 9 },
+                { Stats.PoisonResistance, 7 },
+                { Stats.LightningResistance, 9 },
+                { Stats.FireResistance, 9 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
             monster.SetGuid(monster.Number);
@@ -206,22 +206,22 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.ViewRange = 7;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
             monster.AttackDelay = new TimeSpan(1400 * TimeSpan.TicksPerMillisecond);
-            monster.RespawnDelay = new TimeSpan(600 * TimeSpan.TicksPerSecond);
+            monster.RespawnDelay = new TimeSpan(70 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.Level, 90 },
-                { Stats.MaximumHealth, 32000 },
+                { Stats.MaximumHealth, 30000 },
                 { Stats.MinimumPhysBaseDmg, 450 },
                 { Stats.MaximumPhysBaseDmg, 560 },
                 { Stats.DefenseBase, 300 },
                 { Stats.AttackRatePvm, 450 },
                 { Stats.DefenseRatePvm, 185 },
-                { Stats.PoisonResistance, 9f / 255 },
-                { Stats.IceResistance, 7f / 255 },
-                { Stats.WaterResistance, 9f / 255 },
-                { Stats.FireResistance, 9f / 255 },
+                { Stats.IceResistance, 9 },
+                { Stats.PoisonResistance, 7 },
+                { Stats.LightningResistance, 9 },
+                { Stats.FireResistance, 9 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 
@@ -242,7 +242,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
             monster.ViewRange = 6;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
-            monster.AttackDelay = new TimeSpan(1400 * TimeSpan.TicksPerMillisecond);
+            monster.AttackDelay = new TimeSpan(2200 * TimeSpan.TicksPerMillisecond);
             monster.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
@@ -255,10 +255,10 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
                 { Stats.DefenseBase, 400 },
                 { Stats.AttackRatePvm, 550 },
                 { Stats.DefenseRatePvm, 200 },
-                { Stats.IceResistance, 15f / 255 },
-                { Stats.PoisonResistance, 15f / 255 },
-                { Stats.LightningResistance, 20f / 255 },
-                { Stats.FireResistance, 15f / 255 },
+                { Stats.IceResistance, 15 },
+                { Stats.PoisonResistance, 15 },
+                { Stats.LightningResistance, 20 },
+                { Stats.FireResistance, 15 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 
@@ -282,7 +282,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
             monster.ViewRange = 3;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
-            monster.AttackDelay = new TimeSpan(1400 * TimeSpan.TicksPerMillisecond);
+            monster.AttackDelay = new TimeSpan(1500 * TimeSpan.TicksPerMillisecond);
             monster.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
@@ -295,10 +295,10 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
                 { Stats.DefenseBase, 180 },
                 { Stats.AttackRatePvm, 400 },
                 { Stats.DefenseRatePvm, 125 },
-                { Stats.IceResistance, 7f / 255 },
-                { Stats.PoisonResistance, 7f / 255 },
-                { Stats.LightningResistance, 7f / 255 },
-                { Stats.FireResistance, 7f / 255 },
+                { Stats.IceResistance, 7 },
+                { Stats.PoisonResistance, 7 },
+                { Stats.LightningResistance, 7 },
+                { Stats.FireResistance, 7 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 
@@ -322,7 +322,7 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
             monster.AttackSkill = this.GameConfiguration.Skills.FirstOrDefault(s => s.Number == (short)SkillNumber.MonsterSkill);
             monster.ViewRange = 5;
             monster.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
-            monster.AttackDelay = new TimeSpan(1600 * TimeSpan.TicksPerMillisecond);
+            monster.AttackDelay = new TimeSpan(1800 * TimeSpan.TicksPerMillisecond);
             monster.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
             monster.Attribute = 2;
             monster.NumberOfMaximumItemDrops = 1;
@@ -335,10 +335,10 @@ internal class InvasionMobsInitialization : Version095d.InvasionMobsInitializati
                 { Stats.DefenseBase, 190 },
                 { Stats.AttackRatePvm, 440 },
                 { Stats.DefenseRatePvm, 130 },
-                { Stats.IceResistance, 8f / 255 },
-                { Stats.PoisonResistance, 8f / 255 },
-                { Stats.LightningResistance, 8f / 255 },
-                { Stats.FireResistance, 8f / 255 },
+                { Stats.IceResistance, 8 },
+                { Stats.PoisonResistance, 8 },
+                { Stats.LightningResistance, 8 },
+                { Stats.FireResistance, 8 },
             };
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
 

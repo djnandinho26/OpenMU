@@ -57,6 +57,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .HasColumnType("character varying(3)")
                         .HasDefaultValue("en");
 
+                    b.Property<DateTime>("LastSeenDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("LoginName")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -383,6 +386,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<Guid?>("SkillId1")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("WarpInfoId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AttributeId");
@@ -396,6 +402,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.HasIndex("SkillId");
 
                     b.HasIndex("SkillId1");
+
+                    b.HasIndex("WarpInfoId");
 
                     b.ToTable("AttributeRequirement", "config");
                 });
@@ -690,6 +698,12 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<Guid?>("LandOfTrialsMapDefinitionId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("LordsMixLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LordsMixLimitPeriod")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MaxAttackingGuilds")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -758,6 +772,12 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
 
                     b.Property<bool>("IsOccupied")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("LordsMixCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("LordsMixCountDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("OwnerGuildId")
                         .HasColumnType("uuid");
@@ -1521,6 +1541,12 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<float?>("ExcellentOptionsAddChance")
+                        .HasColumnType("real");
+
+                    b.Property<int?>("ExcellentOptionsMaximumOptionsPerItem")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("GameConfigurationId")
                         .HasColumnType("uuid");
 
@@ -1539,11 +1565,16 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<Guid?>("MonsterId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("SocketCountTableId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GameConfigurationId");
 
                     b.HasIndex("MonsterId");
+
+                    b.HasIndex("SocketCountTableId");
 
                     b.ToTable("DropItemGroup", "config");
                 });
@@ -2276,6 +2307,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<double>("Durability")
                         .HasColumnType("double precision");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("HasSkill")
                         .HasColumnType("boolean");
 
@@ -2506,6 +2540,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<byte?>("Durability")
                         .HasColumnType("smallint");
 
+                    b.Property<byte?>("ExcellentOptionChance")
+                        .HasColumnType("smallint");
+
                     b.Property<Guid?>("ItemDefinitionId")
                         .HasColumnType("uuid");
 
@@ -2590,6 +2627,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<bool>("IsSellableToNpc")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsSellableWhenExpired")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsStorable")
                         .HasColumnType("boolean");
 
@@ -2624,6 +2664,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<Guid?>("SkillId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("SocketCountTableId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("StatProfileId")
                         .HasColumnType("uuid");
 
@@ -2647,6 +2690,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.HasIndex("PriceDefinitionId");
 
                     b.HasIndex("SkillId");
+
+                    b.HasIndex("SocketCountTableId");
 
                     b.HasIndex("StatProfileId");
 
@@ -2714,6 +2759,12 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<int>("DropEffect")
                         .HasColumnType("integer");
 
+                    b.Property<float?>("ExcellentOptionsAddChance")
+                        .HasColumnType("real");
+
+                    b.Property<int?>("ExcellentOptionsMaximumOptionsPerItem")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("ItemDefinitionId")
                         .HasColumnType("uuid");
 
@@ -2744,6 +2795,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<short>("RequiredCharacterLevel")
                         .HasColumnType("smallint");
 
+                    b.Property<Guid?>("SocketCountTableId")
+                        .HasColumnType("uuid");
+
                     b.Property<byte>("SourceItemLevel")
                         .HasColumnType("smallint");
 
@@ -2752,6 +2806,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.HasIndex("ItemDefinitionId");
 
                     b.HasIndex("MonsterId");
+
+                    b.HasIndex("SocketCountTableId");
 
                     b.ToTable("ItemDropItemGroup", "config");
                 });
@@ -3379,6 +3435,40 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.HasIndex("ItemLevelBonusTableId");
 
                     b.ToTable("LevelBonus", "config");
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.LoginTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("LoginTicket", "data");
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.MagicEffectDefinition", b =>
@@ -4295,6 +4385,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<byte>("ResultItemExcellentOptionChance")
                         .HasColumnType("smallint");
 
+                    b.Property<Guid?>("ResultItemExcellentOptionCountTableId")
+                        .HasColumnType("uuid");
+
                     b.Property<byte>("ResultItemLuckOptionChance")
                         .HasColumnType("smallint");
 
@@ -4306,6 +4399,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
 
                     b.Property<byte>("ResultItemSkillChance")
                         .HasColumnType("smallint");
+
+                    b.Property<Guid?>("ResultItemSocketCountTableId")
+                        .HasColumnType("uuid");
 
                     b.Property<byte>("SuccessPercent")
                         .HasColumnType("smallint");
@@ -4326,6 +4422,10 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ResultItemExcellentOptionCountTableId");
+
+                    b.HasIndex("ResultItemSocketCountTableId");
 
                     b.ToTable("SimpleCraftingSettings", "config");
                 });
@@ -4592,6 +4692,34 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.ToTable("SystemConfiguration", "config");
                 });
 
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WaitingItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Reason")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("ItemId")
+                        .IsUnique();
+
+                    b.ToTable("WaitingItem", "data");
+                });
+
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WarpInfo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4610,6 +4738,9 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Property<int>("Index")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsWarpable")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("LevelRequirement")
                         .HasColumnType("integer");
 
@@ -4624,6 +4755,52 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.HasIndex("GateId");
 
                     b.ToTable("WarpInfo", "config");
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid?>("WeightedValueTableId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WeightedValueTableId");
+
+                    b.ToTable("WeightedValue", "config");
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("GameConfigurationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameConfigurationId");
+
+                    b.ToTable("WeightedValueTable", "config");
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.Account", b =>
@@ -4765,6 +4942,11 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.Skill", null)
                         .WithMany("RawRequirements")
                         .HasForeignKey("SkillId1")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.WarpInfo", null)
+                        .WithMany("RawRequirements")
+                        .HasForeignKey("WarpInfoId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("RawAttribute");
@@ -5184,7 +5366,13 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .WithMany()
                         .HasForeignKey("MonsterId");
 
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", "RawSocketCountTable")
+                        .WithMany()
+                        .HasForeignKey("SocketCountTableId");
+
                     b.Navigation("RawMonster");
+
+                    b.Navigation("RawSocketCountTable");
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.DropItemGroupItemDefinition", b =>
@@ -5644,6 +5832,10 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .WithMany()
                         .HasForeignKey("SkillId");
 
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", "RawSocketCountTable")
+                        .WithMany()
+                        .HasForeignKey("SocketCountTableId");
+
                     b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.ItemStatProfile", "RawStatProfile")
                         .WithMany()
                         .HasForeignKey("StatProfileId")
@@ -5656,6 +5848,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Navigation("RawPriceDefinition");
 
                     b.Navigation("RawSkill");
+
+                    b.Navigation("RawSocketCountTable");
 
                     b.Navigation("RawStatProfile");
                 });
@@ -5728,7 +5922,13 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .WithMany()
                         .HasForeignKey("MonsterId");
 
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", "RawSocketCountTable")
+                        .WithMany()
+                        .HasForeignKey("SocketCountTableId");
+
                     b.Navigation("RawMonster");
+
+                    b.Navigation("RawSocketCountTable");
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.ItemDropItemGroupItemDefinition", b =>
@@ -6008,6 +6208,15 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .WithMany("RawBonusPerLevel")
                         .HasForeignKey("ItemLevelBonusTableId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.LoginTicket", b =>
+                {
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.Account", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.MagicEffectDefinition", b =>
@@ -6404,6 +6613,21 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Navigation("RawSkillReward");
                 });
 
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.SimpleCraftingSettings", b =>
+                {
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", "RawResultItemExcellentOptionCountTable")
+                        .WithMany()
+                        .HasForeignKey("ResultItemExcellentOptionCountTableId");
+
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", "RawResultItemSocketCountTable")
+                        .WithMany()
+                        .HasForeignKey("ResultItemSocketCountTableId");
+
+                    b.Navigation("RawResultItemExcellentOptionCountTable");
+
+                    b.Navigation("RawResultItemSocketCountTable");
+                });
+
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.Skill", b =>
                 {
                     b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.AreaSkillSettings", "RawAreaSkillSettings")
@@ -6518,6 +6742,21 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Navigation("RawAttribute");
                 });
 
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WaitingItem", b =>
+                {
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.Character", null)
+                        .WithMany("RawWaitingItems")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.Item", "RawItem")
+                        .WithOne()
+                        .HasForeignKey("MUnique.OpenMU.Persistence.EntityFramework.Model.WaitingItem", "ItemId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("RawItem");
+                });
+
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WarpInfo", b =>
                 {
                     b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.GameConfiguration", null)
@@ -6530,6 +6769,22 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                         .HasForeignKey("GateId");
 
                     b.Navigation("RawGate");
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValue", b =>
+                {
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", null)
+                        .WithMany("RawValues")
+                        .HasForeignKey("WeightedValueTableId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", b =>
+                {
+                    b.HasOne("MUnique.OpenMU.Persistence.EntityFramework.Model.GameConfiguration", null)
+                        .WithMany("RawWeightedValueTables")
+                        .HasForeignKey("GameConfigurationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.Account", b =>
@@ -6597,6 +6852,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Navigation("RawLetters");
 
                     b.Navigation("RawQuestStates");
+
+                    b.Navigation("RawWaitingItems");
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.CharacterClass", b =>
@@ -6675,6 +6932,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
                     b.Navigation("RawSkills");
 
                     b.Navigation("RawWarpList");
+
+                    b.Navigation("RawWeightedValueTables");
                 });
 
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.GameMapDefinition", b =>
@@ -6868,6 +7127,16 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
             modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.SkillComboDefinition", b =>
                 {
                     b.Navigation("RawSteps");
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WarpInfo", b =>
+                {
+                    b.Navigation("RawRequirements");
+                });
+
+            modelBuilder.Entity("MUnique.OpenMU.Persistence.EntityFramework.Model.WeightedValueTable", b =>
+                {
+                    b.Navigation("RawValues");
                 });
 #pragma warning restore 612, 618
         }

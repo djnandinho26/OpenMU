@@ -1,4 +1,5 @@
-﻿@page "/edit-item-drops"
+@page "/edit-item-drops"
+@attribute [Authorize(Policy = AdminPolicies.Administrator)]
 
 @using MUnique.OpenMU.DataModel.Configuration
 @using MUnique.OpenMU.DataModel.Configuration.Items
@@ -21,10 +22,7 @@
 <CascadingValue TValue="IContext" Name="PersistenceContext" Value="this._persistenceContext" IsFixed="true">
 
 <div class="item-drops-toolbar d-flex flex-wrap align-items-center gap-2 mb-3">
-    <div class="flex-grow-1 auto-form-search-group">
-        <input type="text" class="form-control" placeholder="@($"{Resources.Search}...")"
-               @bind="this._filter" @bind:event="oninput" />
-    </div>
+    <SearchInput Class="flex-grow-1" @bind-Value="this._filter" />
     <button type="button" class="btn btn-primary" @onclick="this.OnSaveButtonClickAsync">@Resources.SaveChanges</button>
     <button type="button" class="btn btn-secondary" @onclick="this.OnCancelButtonClickAsync">@Resources.DiscardChanges</button>
 </div>
@@ -96,6 +94,7 @@
     <DropItemGroupTable Groups="@this.MapGroups"
                         Maps="@this._maps"
                         ShowMonsterRestriction="true"
+                        WarnWhenUnassigned="true"
                         OnMapsChanged="@this.StateHasChanged"
                         OnRemove="@this.OnDeleteGroupAsync"
                         RemoveTitle="@Resources.Delete" />

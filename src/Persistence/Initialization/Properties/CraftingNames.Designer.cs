@@ -70,6 +70,15 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to Lord&apos;s Mix.
+        /// </summary>
+        public static string LordsMix {
+            get {
+                return ResourceManager.GetString("LordsMix", resourceCulture);
+            }
+        }
+        
         /// <summary>Gets Plus11ItemCombination from the configuration name resources.</summary>
         public static string Plus11ItemCombination {
             get {
@@ -319,6 +328,20 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
         public static string GemstoneRefinery {
             get {
                 return ResourceManager.GetString("GemstoneRefinery", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets GoldenBoxCombination from the configuration name resources.</summary>
+        public static string GoldenBoxCombination {
+            get {
+                return ResourceManager.GetString("GoldenBoxCombination", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets SilverBoxCombination from the configuration name resources.</summary>
+        public static string SilverBoxCombination {
+            get {
+                return ResourceManager.GetString("SilverBoxCombination", resourceCulture);
             }
         }
 

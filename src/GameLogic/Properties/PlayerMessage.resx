@@ -480,6 +480,9 @@
   <data name="PickupLimitReached" xml:space="preserve">
     <value>Limit reached for '{0}'.</value>
   </data>
+  <data name="MoneyPickupLimitReached" xml:space="preserve">
+    <value>You can't carry more zen.</value>
+  </data>
   <data name="NotEnoughMoneyToEnter" xml:space="preserve">
     <value>Not enough zen to enter {0}.</value>
   </data>
@@ -683,6 +686,9 @@
   </data>
   <data name="MissingMapRequirement" xml:space="preserve">
     <value>Missing requirement to enter the map: {0}</value>
+  </data>
+  <data name="MissingWarpRequirement" xml:space="preserve">
+    <value>Missing requirement for this warp: {0}</value>
   </data>
   <data name="UnexpectedErrorDuringClosingTrade" xml:space="preserve">
     <value>An unexpected error occured during closing the trade.</value>
@@ -1170,5 +1176,50 @@ Inventory Extensions: {18}</value>
   </data>
   <data name="MapIsNotActive" xml:space="preserve">
     <value>This map is not available.</value>
+  </data>
+  <data name="WarpOnlyForGameMasters" xml:space="preserve">
+    <value>This warp is only available to game masters.</value>
+  </data>
+  <data name="ItemCantBeUsedOnThisMap" xml:space="preserve">
+    <value>This item can't be used on this map.</value>
+  </data>
+  <data name="ItemsWaitForSpace" xml:space="preserve">
+    <value>{0} item(s) wait for space in your inventory. They are put into it as soon as they fit:</value>
+  </data>
+  <data name="NoWaitingItems" xml:space="preserve">
+    <value>No items wait for space in your inventory.</value>
+  </data>
+  <data name="WaitingItemDelivered" xml:space="preserve">
+    <value>{0} was put into your inventory.</value>
+  </data>
+  <data name="MoreWaitingItems" xml:space="preserve">
+    <value>... and {0} more. /waiting lists more of them.</value>
+  </data>
+  <data name="CantDeleteCharacterWithWaitingItems" xml:space="preserve">
+    <value>Can't delete a character while items wait for space in its inventory. Enter the game with it and make room first.</value>
+  </data>
+  <data name="MoreWaitingItemsNotNamed" xml:space="preserve">
+    <value>... and {0} more.</value>
+  </data>
+  <data name="CantDeleteCharacterWithUndeliverableWaitingItems" xml:space="preserve">
+    <value>Can't delete a character while items wait for it whose item type doesn't exist anymore. Please ask an admin.</value>
+  </data>
+  <data name="ItemHasExpired" xml:space="preserve">
+    <value>{0} has expired.</value>
+  </data>
+  <data name="TimeLimitedItemCannotBeMixed" xml:space="preserve">
+    <value>A time-limited item can't be used here.</value>
+  </data>
+  <data name="QuestZenLimitReached" xml:space="preserve">
+    <value>You have reached your Zen limit. Can't complete the quest.</value>
+  </data>
+  <data name="SameItemAlreadyInUse" xml:space="preserve">
+    <value>An item of the same kind is already in use. Stop using it first, and then try again.</value>
+  </data>
+  <data name="LordsMixOnlyForCastleOwner" xml:space="preserve">
+    <value>Only the guild master of the guild which owns the castle can use the Lord's Mix.</value>
+  </data>
+  <data name="LordsMixLimitReached" xml:space="preserve">
+    <value>The limit of the Lord's Mix is reached; it can be used again in the next period.</value>
   </data>
 </root>

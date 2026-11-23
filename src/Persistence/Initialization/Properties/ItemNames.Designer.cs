@@ -1778,10 +1778,10 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
             }
         }
 
-        /// <summary>Gets DestoryArmor from the configuration name resources.</summary>
-        public static string DestoryArmor {
+        /// <summary>Gets DestroyArmor from the configuration name resources.</summary>
+        public static string DestroyArmor {
             get {
-                return ResourceManager.GetString("DestoryArmor", resourceCulture);
+                return ResourceManager.GetString("DestroyArmor", resourceCulture);
             }
         }
 
@@ -2177,10 +2177,10 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
             }
         }
 
-        /// <summary>Gets DestoryPants from the configuration name resources.</summary>
-        public static string DestoryPants {
+        /// <summary>Gets DestroyPants from the configuration name resources.</summary>
+        public static string DestroyPants {
             get {
-                return ResourceManager.GetString("DestoryPants", resourceCulture);
+                return ResourceManager.GetString("DestroyPants", resourceCulture);
             }
         }
 
@@ -2947,10 +2947,10 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
             }
         }
 
-        /// <summary>Gets DestoryBoots from the configuration name resources.</summary>
-        public static string DestoryBoots {
+        /// <summary>Gets DestroyBoots from the configuration name resources.</summary>
+        public static string DestroyBoots {
             get {
-                return ResourceManager.GetString("DestoryBoots", resourceCulture);
+                return ResourceManager.GetString("DestroyBoots", resourceCulture);
             }
         }
 
@@ -4872,10 +4872,38 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
             }
         }
 
-        /// <summary>Gets InvitationToSantaVillage from the configuration name resources.</summary>
-        public static string InvitationToSantaVillage {
+        /// <summary>Gets ResetFruitStrength from the configuration name resources.</summary>
+        public static string ResetFruitStrength {
             get {
-                return ResourceManager.GetString("InvitationToSantaVillage", resourceCulture);
+                return ResourceManager.GetString("ResetFruitStrength", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets ResetFruitAgility from the configuration name resources.</summary>
+        public static string ResetFruitAgility {
+            get {
+                return ResourceManager.GetString("ResetFruitAgility", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets ResetFruitVitality from the configuration name resources.</summary>
+        public static string ResetFruitVitality {
+            get {
+                return ResourceManager.GetString("ResetFruitVitality", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets ResetFruitEnergy from the configuration name resources.</summary>
+        public static string ResetFruitEnergy {
+            get {
+                return ResourceManager.GetString("ResetFruitEnergy", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets ResetFruitCommand from the configuration name resources.</summary>
+        public static string ResetFruitCommand {
+            get {
+                return ResourceManager.GetString("ResetFruitCommand", resourceCulture);
             }
         }
 
@@ -4949,38 +4977,45 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
             }
         }
 
-        /// <summary>Gets ResetFruitStrength from the configuration name resources.</summary>
-        public static string ResetFruitStrength {
+        /// <summary>Gets SilverKey from the configuration name resources.</summary>
+        public static string SilverKey {
             get {
-                return ResourceManager.GetString("ResetFruitStrength", resourceCulture);
+                return ResourceManager.GetString("SilverKey", resourceCulture);
             }
         }
 
-        /// <summary>Gets ResetFruitAgility from the configuration name resources.</summary>
-        public static string ResetFruitAgility {
+        /// <summary>Gets GoldKey from the configuration name resources.</summary>
+        public static string GoldKey {
             get {
-                return ResourceManager.GetString("ResetFruitAgility", resourceCulture);
+                return ResourceManager.GetString("GoldKey", resourceCulture);
             }
         }
 
-        /// <summary>Gets ResetFruitVitality from the configuration name resources.</summary>
-        public static string ResetFruitVitality {
+        /// <summary>Gets SealedGoldenBox from the configuration name resources.</summary>
+        public static string SealedGoldenBox {
             get {
-                return ResourceManager.GetString("ResetFruitVitality", resourceCulture);
+                return ResourceManager.GetString("SealedGoldenBox", resourceCulture);
             }
         }
 
-        /// <summary>Gets ResetFruitEnergy from the configuration name resources.</summary>
-        public static string ResetFruitEnergy {
+        /// <summary>Gets SealedSilverBox from the configuration name resources.</summary>
+        public static string SealedSilverBox {
             get {
-                return ResourceManager.GetString("ResetFruitEnergy", resourceCulture);
+                return ResourceManager.GetString("SealedSilverBox", resourceCulture);
             }
         }
 
-        /// <summary>Gets ResetFruitCommand from the configuration name resources.</summary>
-        public static string ResetFruitCommand {
+        /// <summary>Gets GoldenBox from the configuration name resources.</summary>
+        public static string GoldenBox {
             get {
-                return ResourceManager.GetString("ResetFruitCommand", resourceCulture);
+                return ResourceManager.GetString("GoldenBox", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets SilverBox from the configuration name resources.</summary>
+        public static string SilverBox {
+            get {
+                return ResourceManager.GetString("SilverBox", resourceCulture);
             }
         }
 
@@ -5429,6 +5464,97 @@ namespace MUnique.OpenMU.Persistence.Initialization.Properties {
         public static string TalismanOfChaosAssembly {
             get {
                 return ResourceManager.GetString("TalismanOfChaosAssembly", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets InvitationToSantaVillage from the configuration name resources.</summary>
+        public static string InvitationToSantaVillage {
+            get {
+                return ResourceManager.GetString("InvitationToSantaVillage", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets TalismanOfGuardian from the configuration name resources.</summary>
+        public static string TalismanOfGuardian {
+            get {
+                return ResourceManager.GetString("TalismanOfGuardian", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets TalismanOfItemProtection from the configuration name resources.</summary>
+        public static string TalismanOfItemProtection {
+            get {
+                return ResourceManager.GetString("TalismanOfItemProtection", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets TalismanOfResurrection from the configuration name resources.</summary>
+        public static string TalismanOfResurrection {
+            get {
+                return ResourceManager.GetString("TalismanOfResurrection", resourceCulture);
+            }
+        }
+        
+        /// <summary>Gets LuckyCoin from the configuration name resources.</summary>
+        public static string LuckyCoin {
+            get {
+                return ResourceManager.GetString("LuckyCoin", resourceCulture);
+            }
+        }
+        
+        /// <summary>Gets GladiatorsHonor from the configuration name resources.</summary>
+        public static string GladiatorsHonor {
+            get {
+                return ResourceManager.GetString("GladiatorsHonor", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets HawkFigurine from the configuration name resources.</summary>
+        public static string HawkFigurine {
+            get {
+                return ResourceManager.GetString("HawkFigurine", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets GoatFigurine from the configuration name resources.</summary>
+        public static string GoatFigurine {
+            get {
+                return ResourceManager.GetString("GoatFigurine", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets OakCharm from the configuration name resources.</summary>
+        public static string OakCharm {
+            get {
+                return ResourceManager.GetString("OakCharm", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets MapleCharm from the configuration name resources.</summary>
+        public static string MapleCharm {
+            get {
+                return ResourceManager.GetString("MapleCharm", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets GoldenOakCharm from the configuration name resources.</summary>
+        public static string GoldenOakCharm {
+            get {
+                return ResourceManager.GetString("GoldenOakCharm", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets GoldenMapleCharm from the configuration name resources.</summary>
+        public static string GoldenMapleCharm {
+            get {
+                return ResourceManager.GetString("GoldenMapleCharm", resourceCulture);
+            }
+        }
+
+        /// <summary>Gets WornHorseshoe from the configuration name resources.</summary>
+        public static string WornHorseshoe {
+            get {
+                return ResourceManager.GetString("WornHorseshoe", resourceCulture);
             }
         }
     }

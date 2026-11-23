@@ -192,6 +192,12 @@
   <data name="TheValueMustNotContain" xml:space="preserve">
     <value>{0}：值不能包含“{1}”。</value>
   </data>
+  <data name="ShowAllLanguages" xml:space="preserve">
+    <value>显示所有语言</value>
+  </data>
+  <data name="ShowSelectedLanguageOnly" xml:space="preserve">
+    <value>仅显示所选语言</value>
+  </data>
   <data name="PleaseSelectItemDefinition" xml:space="preserve">
     <value>&lt;请选择物品定义&gt;</value>
   </data>
@@ -282,14 +288,20 @@
   <data name="ToggleTheme" xml:space="preserve">
     <value>切换主题</value>
   </data>
-  <data name="SwitchToDarkMode" xml:space="preserve">
-    <value>切换至深色模式</value>
+  <data name="Theme" xml:space="preserve">
+    <value>主题</value>
   </data>
-  <data name="SwitchToLightMode" xml:space="preserve">
-    <value>切换至浅色模式</value>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>深色</value>
+  </data>
+  <data name="ThemeAuto" xml:space="preserve">
+    <value>自动（跟随系统）</value>
   </data>
   <data name="MapEditorShortcutPan" xml:space="preserve">
-    <value>单击空白区域并拖动以平移地图</value>
+    <value>按住鼠标中键拖动以平移地图</value>
   </data>
   <data name="MapEditorShortcutDrag" xml:space="preserve">
     <value>按住 CTRL 并单击对象以拖动</value>
@@ -637,5 +649,14 @@
   </data>
   <data name="ZoomOut" xml:space="preserve">
     <value>缩小</value>
+  </data>
+  <data name="ItemEdit_IsTimeLimited" xml:space="preserve">
+    <value>限时</value>
+  </data>
+  <data name="ItemEdit_ExpiresAt" xml:space="preserve">
+    <value>过期时间（UTC）</value>
+  </data>
+  <data name="ItemEdit_CannotBeTimeLimited" xml:space="preserve">
+    <value>此物品不能限时：只有可装备、不会被消耗、且过期后可丢弃或出售给 NPC 的物品才能限时。</value>
   </data>
 </root>

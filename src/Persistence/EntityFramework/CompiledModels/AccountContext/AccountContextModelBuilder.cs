@@ -12,7 +12,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForAccountCo
     public partial class AccountContextModel
     {
         private AccountContextModel()
-            : base(skipDetectChanges: false, modelId: new Guid("58d27c62-721e-444e-a4f1-8bdbbd4d4ad7"), entityTypeCount: 49)
+            : base(skipDetectChanges: false, modelId: new Guid("73f5b04b-9cbf-4552-bb1d-f81d48d191e7"), entityTypeCount: 51)
         {
         }
 
@@ -57,6 +57,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForAccountCo
             var itemStorage = ItemStorageEntityType.Create(this);
             var letterBody = LetterBodyEntityType.Create(this);
             var letterHeader = LetterHeaderEntityType.Create(this);
+            var loginTicket = LoginTicketEntityType.Create(this);
             var masterSkillDefinitionSkill = MasterSkillDefinitionSkillEntityType.Create(this);
             var miniGameRankingEntry = MiniGameRankingEntryEntityType.Create(this);
             var monsterDefinitionDropItemGroup = MonsterDefinitionDropItemGroupEntityType.Create(this);
@@ -67,6 +68,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForAccountCo
             var skillCharacterClass = SkillCharacterClassEntityType.Create(this);
             var skillEntry = SkillEntryEntityType.Create(this);
             var statAttribute = StatAttributeEntityType.Create(this);
+            var waitingItem = WaitingItemEntityType.Create(this);
 
             AccountEntityType.CreateForeignKey1(account, itemStorage);
             AccountAttributeGrantEntityType.CreateForeignKey1(accountAttributeGrant, account);
@@ -93,12 +95,15 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForAccountCo
             LetterBodyEntityType.CreateForeignKey1(letterBody, letterHeader);
             LetterBodyEntityType.CreateForeignKey2(letterBody, appearanceData);
             LetterHeaderEntityType.CreateForeignKey1(letterHeader, character);
+            LoginTicketEntityType.CreateForeignKey1(loginTicket, account);
             MiniGameRankingEntryEntityType.CreateForeignKey1(miniGameRankingEntry, character);
             PowerUpDefinitionEntityType.CreateForeignKey1(powerUpDefinition, powerUpDefinitionValue);
             QuestMonsterKillRequirementStateEntityType.CreateForeignKey1(questMonsterKillRequirementState, characterQuestState);
             SkillEntryEntityType.CreateForeignKey1(skillEntry, character);
             StatAttributeEntityType.CreateForeignKey1(statAttribute, account);
             StatAttributeEntityType.CreateForeignKey2(statAttribute, character);
+            WaitingItemEntityType.CreateForeignKey1(waitingItem, character);
+            WaitingItemEntityType.CreateForeignKey2(waitingItem, item);
 
             AccountEntityType.CreateAnnotations(account);
             AccountAttributeGrantEntityType.CreateAnnotations(accountAttributeGrant);
@@ -139,6 +144,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForAccountCo
             ItemStorageEntityType.CreateAnnotations(itemStorage);
             LetterBodyEntityType.CreateAnnotations(letterBody);
             LetterHeaderEntityType.CreateAnnotations(letterHeader);
+            LoginTicketEntityType.CreateAnnotations(loginTicket);
             MasterSkillDefinitionSkillEntityType.CreateAnnotations(masterSkillDefinitionSkill);
             MiniGameRankingEntryEntityType.CreateAnnotations(miniGameRankingEntry);
             MonsterDefinitionDropItemGroupEntityType.CreateAnnotations(monsterDefinitionDropItemGroup);
@@ -149,6 +155,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForAccountCo
             SkillCharacterClassEntityType.CreateAnnotations(skillCharacterClass);
             SkillEntryEntityType.CreateAnnotations(skillEntry);
             StatAttributeEntityType.CreateAnnotations(statAttribute);
+            WaitingItemEntityType.CreateAnnotations(waitingItem);
 
             AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
             AddAnnotation("ProductVersion", "10.0.2");

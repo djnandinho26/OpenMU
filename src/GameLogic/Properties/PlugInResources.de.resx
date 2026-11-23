@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2009,5 +2009,122 @@
   </data>
   <data name="MediumEliteHealingPotionConsumeHandlerPlugIn_Description" xml:space="preserve">
     <value>Plugin, das den Verbrauch des mittleren Elite-Heiltranks verarbeitet. Er stellt einen Teil der Lebenspunkte sofort wieder her.</value>
+  </data>
+  <data name="ShowWarpListAfterEnterWorldPlugIn_Name" xml:space="preserve">
+    <value>Warp-Liste nach dem Betreten des Spiels anzeigen</value>
+  </data>
+  <data name="ShowWarpListAfterEnterWorldPlugIn_Description" xml:space="preserve">
+    <value>Teilt dem Client beim Betreten des Spiels mit, welche Warps der Spieler im Warp-Fenster auswählen kann.</value>
+  </data>
+  <data name="TalismanOfResurrectionSpawnGatePlugIn_Name" xml:space="preserve">
+    <value>Talisman der Wiederbelebung</value>
+  </data>
+  <data name="TalismanOfResurrectionSpawnGatePlugIn_Description" xml:space="preserve">
+    <value>Lässt einen toten Spieler am Ort seines Todes wieder erscheinen, wenn er einen Talisman der Wiederbelebung trägt, der dabei verbraucht wird. Gilt nicht in Minispielen, Duellen und Gildenkriegen.</value>
+  </data>
+  <data name="TalismanOfResurrectionSpawnGatePlugInConfiguration_ItemGroup_Caption" xml:space="preserve">
+    <value>Gegenstandsgruppe</value>
+  </data>
+  <data name="TalismanOfResurrectionSpawnGatePlugInConfiguration_ItemNumber_Caption" xml:space="preserve">
+    <value>Gegenstandsnummer</value>
+  </data>
+  <data name="LuckyCoinFeaturePlugIn_Name" xml:space="preserve">
+    <value>Glücksmünzen-Event</value>
+  </data>
+  <data name="LuckyCoinFeaturePlugIn_Description" xml:space="preserve">
+    <value>Spieler können beim NPC Delgado Glücksmünzen registrieren oder 10, 20 oder 30 davon gegen einen Gegenstand tauschen. Die Belohnungen des Tauschs werden hier konfiguriert.</value>
+  </data>
+  <data name="GladiatorsHonorConsumeHandlerPlugIn_Name" xml:space="preserve">
+    <value>Verbrauch der Ehre des Gladiators</value>
+  </data>
+  <data name="GladiatorsHonorConsumeHandlerPlugIn_Description" xml:space="preserve">
+    <value>Wendet den Effekt der Ehre des Gladiators an, die nur in Vulcanus benutzt werden kann.</value>
+  </data>
+  <data name="VulcanusExperiencePlugIn_Name" xml:space="preserve">
+    <value>Erfahrungsbonus in Vulcanus</value>
+  </data>
+  <data name="VulcanusExperiencePlugIn_Description" xml:space="preserve">
+    <value>Erhöht die Erfahrung von Spielern in Vulcanus um ihre Vulcanus-Erfahrungsrate, z. B. durch die Ehre des Gladiators.</value>
+  </data>
+  <data name="VulcanusMapConfiguration_MapNumber_Name" xml:space="preserve">
+    <value>Kartennummer</value>
+  </data>
+  <data name="WaitingItemsDeliveryPlugIn_Name" xml:space="preserve">
+    <value>Zustellung wartender Gegenstände</value>
+  </data>
+  <data name="WaitingItemsDeliveryPlugIn_Description" xml:space="preserve">
+    <value>Legt die Gegenstände, die auf Platz im Inventar eines Charakters warten, hinein, sobald sie passen: wenn der Charakter das Spiel betritt oder das Lager öffnet und danach regelmäßig. Ist es deaktiviert, warten die Gegenstände weiter.</value>
+  </data>
+  <data name="WaitingItemsChatCommandPlugIn_Name" xml:space="preserve">
+    <value>Chatbefehl wartende Gegenstände</value>
+  </data>
+  <data name="WaitingItemsChatCommandPlugIn_Description" xml:space="preserve">
+    <value>Verarbeitet den Chatbefehl '/waiting'. Listet die Gegenstände auf, die auf Platz im Inventar warten.</value>
+  </data>
+  <data name="WaitingItemsDeliveryPlugInConfiguration_CheckInterval_Name" xml:space="preserve">
+    <value>Prüfintervall</value>
+  </data>
+  <data name="WaitingItemsDeliveryPlugInConfiguration_CheckInterval_Description" xml:space="preserve">
+    <value>Wie oft die wartenden Gegenstände in die Inventare gelegt werden, soweit sie hineinpassen.</value>
+  </data>
+  <data name="WaitingItemsDeliveryPlugInConfiguration_ItemsNamed_Name" xml:space="preserve">
+    <value>Genannte Gegenstände</value>
+  </data>
+  <data name="WaitingItemsDeliveryPlugInConfiguration_ItemsNamed_Description" xml:space="preserve">
+    <value>Die Anzahl der wartenden Gegenstände, die genannt werden, einer pro Nachricht, wenn der Spieler beim Betreten des Spiels oder beim Öffnen des Lagers darüber informiert wird.</value>
+  </data>
+  <data name="WaitingItemsCommandConfiguration_ItemsNamed_Name" xml:space="preserve">
+    <value>Genannte Gegenstände</value>
+  </data>
+  <data name="WaitingItemsCommandConfiguration_ItemsNamed_Description" xml:space="preserve">
+    <value>Die Anzahl der wartenden Gegenstände, die genannt werden, einer pro Nachricht.</value>
+  </data>
+  <data name="ItemExpirationPlugIn_Name" xml:space="preserve">
+    <value>Ablauf zeitlich begrenzter Gegenstände</value>
+  </data>
+  <data name="ItemExpirationPlugIn_Description" xml:space="preserve">
+    <value>Teilt den Spielern mit, wenn einer ihrer zeitlich begrenzten Gegenstände abgelaufen ist, z. B. ein im Cash Shop gemieteter Begleiter, entfernt seine Wirkung und zeigt ihn im Client als abgelaufen an. Ein abgelaufener Gegenstand bleibt im Inventar.</value>
+  </data>
+  <data name="InventoryItemUseFeaturePlugIn_Name" xml:space="preserve">
+    <value>Im Inventar benutzte Gegenstände</value>
+  </data>
+  <data name="InventoryItemUseFeaturePlugIn_Description" xml:space="preserve">
+    <value>Gegenstände wie die Figuren und Talismane werden im Inventar benutzt. Solange so ein Gegenstand benutzt wird, gelten seine Boni.</value>
+  </data>
+  <data name="InventoryItemUseConfiguration_Items_Name" xml:space="preserve">
+    <value>Gegenstände</value>
+  </data>
+  <data name="InventoryItemUseConfiguration_Items_Description" xml:space="preserve">
+    <value>Die Gegenstände, die im Inventar benutzt statt ausgerüstet werden, z.B. die Figuren und Talismane. Gegenstände derselben exklusiven Gruppe können nicht gleichzeitig benutzt werden.</value>
+  </data>
+  <data name="InventoryItemUseConfiguration_InUseDurability_Name" xml:space="preserve">
+    <value>Haltbarkeit in Benutzung</value>
+  </data>
+  <data name="InventoryItemUseConfiguration_InUseDurability_Description" xml:space="preserve">
+    <value>Die Haltbarkeit eines Gegenstands, der benutzt wird. Der Spiel-Client erkennt daran, ob er benutzt wird, daher muss sie zum Client passen (Standard 254).</value>
+  </data>
+  <data name="InventoryItemUseConfiguration_NotInUseDurability_Name" xml:space="preserve">
+    <value>Haltbarkeit ohne Benutzung</value>
+  </data>
+  <data name="InventoryItemUseConfiguration_NotInUseDurability_Description" xml:space="preserve">
+    <value>Die Haltbarkeit eines Gegenstands, der nicht benutzt wird, und eines neuen Gegenstands. Sie muss zum Spiel-Client passen (Standard 255).</value>
+  </data>
+  <data name="InventoryUsedItemIdentifier_Group_Name" xml:space="preserve">
+    <value>Gruppe</value>
+  </data>
+  <data name="InventoryUsedItemIdentifier_Group_Description" xml:space="preserve">
+    <value>Die Gruppe der Gegenstandsdefinition.</value>
+  </data>
+  <data name="InventoryUsedItemIdentifier_Number_Name" xml:space="preserve">
+    <value>Nummer</value>
+  </data>
+  <data name="InventoryUsedItemIdentifier_Number_Description" xml:space="preserve">
+    <value>Die Nummer der Gegenstandsdefinition.</value>
+  </data>
+  <data name="InventoryUsedItemIdentifier_ExclusiveGroup_Name" xml:space="preserve">
+    <value>Exklusive Gruppe</value>
+  </data>
+  <data name="InventoryUsedItemIdentifier_ExclusiveGroup_Description" xml:space="preserve">
+    <value>Nur ein Gegenstand derselben exklusiven Gruppe kann gleichzeitig benutzt werden, z.B. entweder die Falken- oder die Ziegenfigur. Mit 0 ist nur ein weiterer Gegenstand derselben Definition ausgeschlossen.</value>
   </data>
 </root>

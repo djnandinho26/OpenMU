@@ -5764,6 +5764,12 @@
   <data name="WarpInfo_Gate_Description" xml:space="preserve">
     <value></value>
   </data>
+  <data name="WarpInfo_Requirements_Caption" xml:space="preserve">
+    <value>传送要求</value>
+  </data>
+  <data name="WarpInfo_Requirements_Description" xml:space="preserve">
+    <value>角色除等级要求和目标地图要求外还需要满足的属性。开源客户端会获知最低大师等级和最低转生次数，并将角色尚不能使用的传送显示为不可用。</value>
+  </data>
   <data name="Account_IsBot_Caption" xml:space="preserve">
     <value>机器人账号</value>
   </data>
@@ -6459,5 +6465,122 @@
   </data>
   <data name="ItemRequirementFormula_Attribute_Description" xml:space="preserve">
     <value>此公式适用的物品需求属性。</value>
+  </data>
+  <data name="Character_WaitingItems_Caption" xml:space="preserve">
+    <value>等待中的物品</value>
+  </data>
+  <data name="Character_WaitingItems_Description" xml:space="preserve">
+    <value>在其存放位置找不到空间、正在等待背包空间的物品。有足够空间时会自动放入背包。</value>
+  </data>
+  <data name="WaitingItem_TypeCaption" xml:space="preserve">
+    <value>等待中的物品</value>
+  </data>
+  <data name="WaitingItem_TypeCaptionPlural" xml:space="preserve">
+    <value>等待中的物品</value>
+  </data>
+  <data name="WaitingItem_TypeDescription" xml:space="preserve">
+    <value>正在等待角色背包空间的物品。</value>
+  </data>
+  <data name="WaitingItem_Item_Caption" xml:space="preserve">
+    <value>物品</value>
+  </data>
+  <data name="WaitingItem_Item_Description" xml:space="preserve">
+    <value>正在等待的物品。</value>
+  </data>
+  <data name="WaitingItem_Reason_Caption" xml:space="preserve">
+    <value>原因</value>
+  </data>
+  <data name="WaitingItem_Reason_Description" xml:space="preserve">
+    <value>物品等待的原因。</value>
+  </data>
+  <data name="WaitingItem_AddedAt_Caption" xml:space="preserve">
+    <value>添加时间</value>
+  </data>
+  <data name="WaitingItem_AddedAt_Description" xml:space="preserve">
+    <value>物品开始等待的时间（UTC）。最早的物品最先放入背包。</value>
+  </data>
+  <data name="WaitingItemReason_TypeCaption" xml:space="preserve">
+    <value>物品等待原因</value>
+  </data>
+  <data name="WaitingItemReason_TypeDescription" xml:space="preserve">
+    <value>物品等待背包空间的原因。</value>
+  </data>
+  <data name="WaitingItemReason_NoSpaceWhenLoaded_Caption" xml:space="preserve">
+    <value>加载时无空间</value>
+  </data>
+  <data name="WaitingItemReason_NoSpaceWhenLoaded_Description" xml:space="preserve">
+    <value>加载存放位置时物品找不到空间，例如其定义的尺寸变大了。</value>
+  </data>
+  <data name="GameConfiguration_WeightedValueTables_Caption" xml:space="preserve">
+    <value>加权数值表</value>
+  </data>
+  <data name="ItemDefinition_SocketCountTable_Caption" xml:space="preserve">
+    <value>镶嵌孔数量表</value>
+  </data>
+  <data name="DropItemGroup_SocketCountTable_Caption" xml:space="preserve">
+    <value>镶嵌孔数量表</value>
+  </data>
+  <data name="WeightedValueTable_TypeCaption" xml:space="preserve">
+    <value>加权数值表</value>
+  </data>
+  <data name="WeightedValueTable_TypeCaptionPlural" xml:space="preserve">
+    <value>加权数值表</value>
+  </data>
+  <data name="WeightedValueTable_Name_Caption" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="WeightedValueTable_Description_Caption" xml:space="preserve">
+    <value>描述</value>
+  </data>
+  <data name="WeightedValueTable_Values_Caption" xml:space="preserve">
+    <value>数值</value>
+  </data>
+  <data name="WeightedValue_TypeCaption" xml:space="preserve">
+    <value>加权数值</value>
+  </data>
+  <data name="WeightedValue_TypeCaptionPlural" xml:space="preserve">
+    <value>加权数值</value>
+  </data>
+  <data name="WeightedValue_Value_Caption" xml:space="preserve">
+    <value>数值</value>
+  </data>
+  <data name="WeightedValue_Weight_Caption" xml:space="preserve">
+    <value>权重</value>
+  </data>
+  <data name="SimpleCraftingSettings_ResultItemExcellentOptionCountTable_Caption" xml:space="preserve">
+    <value>结果物品卓越属性数量表</value>
+  </data>
+  <data name="SimpleCraftingSettings_ResultItemSocketCountTable_Caption" xml:space="preserve">
+    <value>结果物品镶嵌孔数量表</value>
+  </data>
+  <data name="CastleSiegeConfiguration_LordsMixLimit_Caption" xml:space="preserve">
+    <value>领主合成次数上限</value>
+  </data>
+  <data name="CastleSiegeData_LordsMixCount_Caption" xml:space="preserve">
+    <value>领主合成次数</value>
+  </data>
+  <data name="CastleSiegeConfiguration_LordsMixLimitPeriod_Caption" xml:space="preserve">
+    <value>领主合成次数上限周期</value>
+  </data>
+  <data name="CastleSiegeConfiguration_LordsMixLimitPeriod_Description" xml:space="preserve">
+    <value>领主合成次数上限的周期：每天（服务器本地时间午夜重置）或每个攻城周期（攻城结束时重置）。</value>
+  </data>
+  <data name="CastleSiegeData_LordsMixCountDate_Caption" xml:space="preserve">
+    <value>领主合成计数日期</value>
+  </data>
+  <data name="CastleSiegeData_LordsMixCountDate_Description" xml:space="preserve">
+    <value>最后一次计入的领主合成的日期（服务器本地时间），用于每天的次数上限。</value>
+  </data>
+  <data name="ItemCraftingResultItem_ExcellentOptionChance_Caption" xml:space="preserve">
+    <value>卓越属性几率</value>
+  </data>
+  <data name="ItemCraftingResultItem_ExcellentOptionChance_Description" xml:space="preserve">
+    <value>此结果物品的卓越属性几率（百分比），代替合成的几率。为空时，使用合成的几率。</value>
+  </data>
+  <data name="LordsMixLimitPeriod_Day_Caption" xml:space="preserve">
+    <value>天</value>
+  </data>
+  <data name="LordsMixLimitPeriod_SiegeCycle_Caption" xml:space="preserve">
+    <value>攻城周期</value>
   </data>
 </root>

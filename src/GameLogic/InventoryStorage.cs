@@ -7,7 +7,9 @@ namespace MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.DataModel;
 using MUnique.OpenMU.GameLogic.Attributes;
 using MUnique.OpenMU.GameLogic.Views.World;
+using MUnique.OpenMU.GameLogic.WaitingItems;
 using MUnique.OpenMU.PlugIns;
+using Nito.AsyncEx;
 using static MUnique.OpenMU.DataModel.InventoryConstants;
 
 /// <summary>
@@ -20,16 +22,40 @@ public class InventoryStorage : Storage, IInventoryStorage
     private readonly Player _player;
 
     /// <summary>
+    /// Serializes the updates of the item power ups. The event is raised from different threads
+    /// (e.g. several monsters hitting the same player at once, each one ticking on its own timer thread),
+    /// and the update is a multi-step remove/dispose/add operation which must not interleave.
+    /// </summary>
+    private readonly AsyncLock _powerUpLock = new();
+
+    private Item? _itemMovedInsideInventory;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="InventoryStorage" /> class.
     /// </summary>
     /// <param name="player">The player.</param>
     /// <param name="context">The game context.</param>
     public InventoryStorage(Player player, IGameContext context)
+        : this(player, context, [])
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InventoryStorage" /> class.
+    /// </summary>
+    /// <param name="player">The player.</param>
+    /// <param name="context">The game context.</param>
+    /// <param name="itemsWithoutPlace">
+    /// Collects the items which find no place in the main inventory or in their extension. They get another try
+    /// when all extensions exist, and only the ones which still find no place wait for space.
+    /// </param>
+    private InventoryStorage(Player player, IGameContext context, List<Item> itemsWithoutPlace)
         : base(
             GetInventorySize(0),
             EquippableSlotsCount,
             0,
-            new ItemStorageAdapter(player.SelectedCharacter?.Inventory ?? throw Error.NotInitializedProperty(player, "SelectedCharacter.Inventory"), FirstEquippableItemSlotIndex, player.InventorySize))
+            new ItemStorageAdapter(player.SelectedCharacter?.Inventory ?? throw Error.NotInitializedProperty(player, "SelectedCharacter.Inventory"), FirstEquippableItemSlotIndex, player.InventorySize),
+            KeepItemWithoutPlace(itemsWithoutPlace))
     {
         this._player = player;
         this.EquippedItemsChanged += async eventArgs => await this.UpdateItemsOnChangeAsync(eventArgs.Item, eventArgs.IsEquipped).ConfigureAwait(false);
@@ -43,11 +69,23 @@ public class InventoryStorage : Storage, IInventoryStorage
             for (int i = 0; i < player.SelectedCharacter.InventoryExtensions; i++)
             {
                 var offset = FirstExtensionItemSlotIndex + (i * sizePerExtension);
-                var extension = new Storage(sizePerExtension, 0, offset, this.ItemStorage);
+                var extension = new Storage(sizePerExtension, 0, offset, this.ItemStorage, KeepItemWithoutPlace(itemsWithoutPlace));
                 extensions.Add(extension);
             }
 
             this.Extensions = extensions;
+        }
+
+        if (itemsWithoutPlace.Count > 0)
+        {
+            // The items are still in the item storage. Like in the Storage, each one is removed only after
+            // it was put aside, so that none is lost when putting it aside throws.
+            var putAside = player.PutAsideWhenLoaded(player.SelectedCharacter);
+            foreach (var item in itemsWithoutPlace.Where(item => !this.TryAddItemWithoutPlace(item)).ToList())
+            {
+                putAside(item);
+                this.ItemStorage.Items.Remove(item);
+            }
         }
 
         this.InitializePowerUps();
@@ -113,6 +151,28 @@ public class InventoryStorage : Storage, IInventoryStorage
             {
                 await this.RaiseEquippedItemsChangedAsync(convertedItem ?? item, true).ConfigureAwait(false);
             }
+            else
+            {
+                this.OnItemAddedToInventory(convertedItem ?? item);
+                if (convertedItem is not null)
+                {
+                    // The hook may change the durability, e.g. of an item which is used inside the inventory.
+                    // The temporary item is sent to the client when it's picked up, so it has to tell the same.
+                    item.Durability = convertedItem.Durability;
+                }
+            }
+        }
+
+        return success;
+    }
+
+    /// <inheritdoc />
+    public override async ValueTask<bool> AddItemAsync(Item item)
+    {
+        var success = await base.AddItemAsync(item).ConfigureAwait(false);
+        if (success && !this.IsWearingSlot(item.ItemSlot))
+        {
+            this.OnItemAddedToInventory(item);
         }
 
         return success;
@@ -127,6 +187,23 @@ public class InventoryStorage : Storage, IInventoryStorage
         {
             await this.RaiseEquippedItemsChangedAsync(item, false).ConfigureAwait(false);
         }
+        else
+        {
+            this.OnItemRemovedFromInventory(item);
+        }
+    }
+
+    /// <summary>
+    /// Keeps the use state and the power-ups of an item which is used inside the inventory,
+    /// while it's moved to another slot of the inventory, until the returned object is disposed.
+    /// Otherwise, removing the item would stop its use, like when it leaves the inventory.
+    /// </summary>
+    /// <param name="item">The item which is moved inside the inventory.</param>
+    /// <returns>The object which ends keeping the use state when it's disposed.</returns>
+    public IDisposable KeepInventoryUseWhileMoving(Item item)
+    {
+        this._itemMovedInsideInventory = item;
+        return new MoveInsideInventoryScope(this);
     }
 
     /// <summary>
@@ -151,6 +228,72 @@ public class InventoryStorage : Storage, IInventoryStorage
         }
     }
 
+    /// <summary>
+    /// Creates the function which keeps an item, which finds no place when a storage is loaded, in the given list
+    /// instead of putting it aside, so that it gets another try when all extensions exist.
+    /// </summary>
+    /// <param name="itemsWithoutPlace">The list of the items without place.</param>
+    /// <returns>The function; it doesn't take the item, so it stays in the item storage.</returns>
+    private static Func<Item, bool> KeepItemWithoutPlace(List<Item> itemsWithoutPlace)
+    {
+        return item =>
+        {
+            itemsWithoutPlace.Add(item);
+            return false;
+        };
+    }
+
+    /// <summary>
+    /// Handles an item which was added to an inventory slot which isn't equippable.
+    /// An item which is used inside the inventory gets its power-ups while it's in use.
+    /// </summary>
+    /// <param name="item">The item.</param>
+    private void OnItemAddedToInventory(Item item)
+    {
+        if (this._player.Attributes is not { } attributes
+            || item.GetInventoryItemUseConfiguration(this._gameContext) is not { } configuration)
+        {
+            return;
+        }
+
+        if (item.IsInUseInsideInventory(this._gameContext) && attributes.ItemPowerUps.ContainsKey(item))
+        {
+            // It's still in use, e.g. after it was moved inside the inventory.
+            return;
+        }
+
+        if ((int)item.Durability != configuration.InUseDurability
+            || this.Items.Any(other => other != item && other.Definition is { } otherDefinition && configuration.AreExclusive(item.Definition!, otherDefinition) && other.IsInUseInsideInventory(this._gameContext)))
+        {
+            // A new item starts without being used, and only one item of the same kind or exclusive group can be used at the same time.
+            item.Durability = configuration.NotInUseDurability;
+        }
+
+        attributes.UpdateInventoryUsedItemPowerUps(item, this._gameContext);
+    }
+
+    /// <summary>
+    /// Handles an item which was removed from an inventory slot which isn't equippable.
+    /// An item which is used inside the inventory stops being used when it leaves the inventory, e.g. when it's dropped.
+    /// Its power-ups are removed even when the item is no longer configured to be used inside the inventory,
+    /// so that the player doesn't keep them.
+    /// </summary>
+    /// <param name="item">The item.</param>
+    private void OnItemRemovedFromInventory(Item item)
+    {
+        if (item == this._itemMovedInsideInventory)
+        {
+            return;
+        }
+
+        if (item.GetInventoryItemUseConfiguration(this._gameContext) is { } configuration)
+        {
+            item.Durability = configuration.NotInUseDurability;
+        }
+
+        this._player.Attributes?.RemoveInventoryUsedItemPowerUps(item);
+    }
+
     private bool IsWearingSlot(int slot)
     {
         return slot >= FirstEquippableItemSlotIndex && slot <= LastEquippableItemSlotIndex;
@@ -164,31 +307,37 @@ public class InventoryStorage : Storage, IInventoryStorage
             p => p.AppearanceChangedAsync(this._player, item, isEquipped),
             false).ConfigureAwait(false); // in my tests it was not needed to send the appearance to the own players client.
 
-        if (this._player.Attributes is null)
+        if (this._player.Attributes is not { } attributes)
         {
             return;
         }
 
-        if (this._player.Attributes.ItemPowerUps.Remove(item, out var itemPowerUps))
+        // The lock is intentionally not held while sending the appearance above (network I/O).
+        // Inside the lock, nothing raises EquippedItemsChanged again, so it can't be re-entered.
+        using (await this._powerUpLock.LockAsync().ConfigureAwait(false))
         {
-            foreach (var powerUp in itemPowerUps)
+            if (attributes.ItemPowerUps.Remove(item, out var itemPowerUps))
             {
-                powerUp.Dispose();
+                foreach (var powerUp in itemPowerUps)
+                {
+                    powerUp.Dispose();
+                }
             }
-        }
 
-        this.UpdateSetPowerUps();
+            this.UpdateSetPowerUps();
 
-        var itemAdded = this.EquippedItems.Contains(item);
-        if (itemAdded)
-        {
-            var factory = this._gameContext.ItemPowerUpFactory;
-            this._player.Attributes.ItemPowerUps.Add(item, factory.GetPowerUps(item, this._player.Attributes).ToList());
-
-            // reset player equipped ammunition amount
-            if (this.EquippedAmmunitionItem is { } ammoItem)
+            // Evaluated inside the lock, so it reflects the state which this update has to apply.
+            var itemAdded = this.EquippedItems.Contains(item);
+            if (itemAdded)
             {
-                this._player.Attributes[Stats.AmmunitionAmount] = (float)ammoItem.Durability;
+                var factory = this._gameContext.ItemPowerUpFactory;
+                attributes.ItemPowerUps[item] = factory.GetPowerUps(item, attributes).ToList();
+
+                // reset player equipped ammunition amount
+                if (this.EquippedAmmunitionItem is { } ammoItem)
+                {
+                    attributes[Stats.AmmunitionAmount] = (float)ammoItem.Durability;
+                }
             }
         }
     }
@@ -205,12 +354,16 @@ public class InventoryStorage : Storage, IInventoryStorage
             powerUp.Dispose();
         }
 
-        var factory = this._gameContext?.ItemPowerUpFactory;
-        if (factory != null)
+        if (this._gameContext?.ItemPowerUpFactory is { } factory)
         {
             foreach (var item in this.EquippedItems)
             {
                 this._player.Attributes.ItemPowerUps.Add(item, factory.GetPowerUps(item, this._player.Attributes).ToList());
+            }
+
+            foreach (var item in this.Items.Where(item => item.IsInUseInsideInventory(this._gameContext)))
+            {
+                this._player.Attributes.ItemPowerUps.Add(item, factory.GetPowerUps(item, this._player.Attributes, true).ToList());
             }
 
             this.UpdateSetPowerUps();
@@ -238,5 +391,28 @@ public class InventoryStorage : Storage, IInventoryStorage
 
         var factory = this._gameContext.ItemPowerUpFactory;
         this._player.Attributes.ItemSetPowerUps = factory.GetSetPowerUps(this.EquippedItems, this._player.Attributes, this._player.GameContext.Configuration).ToList();
+    }
+
+    /// <summary>
+    /// The scope in which an item is moved inside the inventory, see <see cref="KeepInventoryUseWhileMoving"/>.
+    /// </summary>
+    private sealed class MoveInsideInventoryScope : IDisposable
+    {
+        private readonly InventoryStorage _inventory;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoveInsideInventoryScope"/> class.
+        /// </summary>
+        /// <param name="inventory">The inventory.</param>
+        public MoveInsideInventoryScope(InventoryStorage inventory)
+        {
+            this._inventory = inventory;
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this._inventory._itemMovedInsideInventory = null;
+        }
     }
 }

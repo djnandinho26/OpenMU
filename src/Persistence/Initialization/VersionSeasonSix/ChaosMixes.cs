@@ -64,6 +64,7 @@ public class ChaosMixes : InitializerBase
         chaosGoblin.ItemCraftings.Add(this.ThirdWingsStage2Crafting());
         chaosGoblin.ItemCraftings.Add(this.Level380OptionCrafting());
         chaosGoblin.ItemCraftings.Add(this.SecromiconCrafting());
+        new GoblinBoxItems(this.Context, this.GameConfiguration).AddCraftings();
 
         var elphis = this.GameConfiguration.Monsters.Single(m => m.NpcWindow == NpcWindow.ElphisRefinery);
         elphis.ItemCraftings.Add(this.GemstoneRefinery());
@@ -83,6 +84,8 @@ public class ChaosMixes : InitializerBase
 
         var david = this.GameConfiguration.Monsters.Single(m => m.NpcWindow == NpcWindow.CombineLuckyItem);
         david.ItemCraftings.Add(new LuckyItems(this.Context, this.GameConfiguration).CreateTicketExchangeCrafting());
+
+        LordsMix.AddIfMissing(this.Context, this.GameConfiguration);
     }
 
     private ItemCrafting ItemLevelUpgradeCrafting(byte craftingNumber, byte targetLevel)

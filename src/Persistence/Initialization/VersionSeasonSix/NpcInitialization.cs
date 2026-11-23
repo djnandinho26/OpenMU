@@ -719,6 +719,7 @@ internal partial class NpcInitialization : Version095d.NpcInitialization
             def.Number = 478;
             def.Designation = LocalizedString.FromResource(() => MonsterNames.DelgadoLuckyCoins);
             def.ObjectKind = NpcObjectKind.PassiveNpc;
+            def.NpcWindow = NpcWindow.DelgadoLuckyCoinRegistration;
             this.GameConfiguration.Monsters.Add(def);
             def.SetGuid(def.Number);
         }
@@ -881,6 +882,10 @@ internal partial class NpcInitialization : Version095d.NpcInitialization
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.MaximumHealth, 5000000 },
+                { Stats.IceResistance, 100 },
+                { Stats.PoisonResistance, 100 },
+                { Stats.LightningResistance, 100 },
+                { Stats.FireResistance, 100 },
             };
             def.AddAttributes(attributes, this.Context, this.GameConfiguration);
             def.SetGuid(def.Number);
@@ -896,6 +901,10 @@ internal partial class NpcInitialization : Version095d.NpcInitialization
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.MaximumHealth, 5000000 },
+                { Stats.IceResistance, 100 },
+                { Stats.PoisonResistance, 100 },
+                { Stats.LightningResistance, 100 },
+                { Stats.FireResistance, 100 },
             };
             def.AddAttributes(attributes, this.Context, this.GameConfiguration);
             def.SetGuid(def.Number);
@@ -918,6 +927,10 @@ internal partial class NpcInitialization : Version095d.NpcInitialization
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.MaximumHealth, 5000000 },
+                { Stats.IceResistance, 100 },
+                { Stats.PoisonResistance, 100 },
+                { Stats.LightningResistance, 100 },
+                { Stats.FireResistance, 100 },
             };
             def.AddAttributes(attributes, this.Context, this.GameConfiguration);
             def.SetGuid(def.Number);
@@ -932,6 +945,10 @@ internal partial class NpcInitialization : Version095d.NpcInitialization
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.MaximumHealth, 5000000 },
+                { Stats.IceResistance, 100 },
+                { Stats.PoisonResistance, 100 },
+                { Stats.LightningResistance, 100 },
+                { Stats.FireResistance, 100 },
             };
             def.AddAttributes(attributes, this.Context, this.GameConfiguration);
             def.SetGuid(def.Number);

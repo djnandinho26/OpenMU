@@ -192,6 +192,12 @@
   <data name="TheValueMustNotContain" xml:space="preserve">
     <value>{0}: The value must not contain "{1}".</value>
   </data>
+  <data name="ShowAllLanguages" xml:space="preserve">
+    <value>Show all languages</value>
+  </data>
+  <data name="ShowSelectedLanguageOnly" xml:space="preserve">
+    <value>Show selected language only</value>
+  </data>
   <data name="PleaseSelectItemDefinition" xml:space="preserve">
     <value>&lt;Please select a definition&gt;</value>
   </data>
@@ -282,14 +288,20 @@
   <data name="ToggleTheme" xml:space="preserve">
     <value>Toggle theme</value>
   </data>
-  <data name="SwitchToDarkMode" xml:space="preserve">
-    <value>Switch to dark mode</value>
+  <data name="Theme" xml:space="preserve">
+    <value>Theme</value>
   </data>
-  <data name="SwitchToLightMode" xml:space="preserve">
-    <value>Switch to light mode</value>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="ThemeAuto" xml:space="preserve">
+    <value>Auto (system)</value>
   </data>
   <data name="MapEditorShortcutPan" xml:space="preserve">
-    <value>Click on empty space and drag to pan the map</value>
+    <value>Middle click and drag to pan the map</value>
   </data>
   <data name="MapEditorShortcutDrag" xml:space="preserve">
     <value>CTRL + Click on object to drag it</value>
@@ -661,5 +673,14 @@ Level: {2} - {3}</value>
   </data>
   <data name="ZoomOut" xml:space="preserve">
     <value>Zoom out</value>
+  </data>
+  <data name="ItemEdit_IsTimeLimited" xml:space="preserve">
+    <value>Time-limited</value>
+  </data>
+  <data name="ItemEdit_ExpiresAt" xml:space="preserve">
+    <value>Expires at (UTC)</value>
+  </data>
+  <data name="ItemEdit_CannotBeTimeLimited" xml:space="preserve">
+    <value>This item can't be time-limited: only an item which is worn, isn't consumed, and can be dropped or sold to an NPC once it expired.</value>
   </data>
 </root>

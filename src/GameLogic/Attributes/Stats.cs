@@ -128,6 +128,12 @@ public class Stats
     public static AttributeDefinition BonusExperienceRate { get; } = new(new Guid("D48A9D05-533A-4556-9FC3-F71C8BEC4B8E"), "Bonus Experience Rate", "The bonus experience rate which is added to the base experience rate multiplier.");
 
     /// <summary>
+    /// Gets the experience rate which is added while the player is in Vulcanus, e.g. by the Gladiator's Honor.
+    /// </summary>
+    /// <remarks>The experience is multiplied by one plus this rate by the <c>VulcanusExperiencePlugIn</c>.</remarks>
+    public static AttributeDefinition VulcanusExperienceRate { get; } = new(new Guid("199015AC-3139-4E6B-A7C0-5439DD4F7052"), "Vulcanus Experience Rate", "The experience rate which is added while the player is in Vulcanus.");
+
+    /// <summary>
     /// Gets the master level definition.
     /// </summary>
     public static AttributeDefinition MasterLevel { get; } = new(new Guid("70CD8C10-391A-4C51-9AA4-A854600E3A9F"), "Master Level", "The level of the character.");
@@ -158,9 +164,32 @@ public class Stats
     public static AttributeDefinition TotalRegisteredRenas { get; } = new(new Guid("56C2D3B4-4F5A-6B7C-8D9E-0F1A2B3C4D5E"), "Total Registered Renas", "Total registered items (all-time counter)");
 
     /// <summary>
+    /// Gets the attribute definition of the count of the lucky coins which a character registered at the NPC Delgado.
+    /// </summary>
+    public static AttributeDefinition RegisteredLuckyCoins { get; } = new(new Guid("7D4A0CDF-124F-4CFF-89FF-357A2001B041"), "Registered Lucky Coins", "The count of the lucky coins which were registered at the NPC Delgado.");
+
+    /// <summary>
     /// Gets the zen amount rate attribute definition.
     /// </summary>
     public static AttributeDefinition MoneyAmountRate { get; } = new(new Guid("D84D1A5C-3A56-4CB9-8DD4-158AFD4D1EDB"), "Money Drop Amount Rate", "Defines a multiplier for the amount of a money drop.");
+
+    /// <summary>
+    /// Gets the bonus item drop rate attribute definition. It raises the chances of the drop item groups
+    /// of a killed monster which drop items, e.g. by 0.5 for 50 % more item drops.
+    /// </summary>
+    public static AttributeDefinition BonusItemDropRate { get; } = new(new Guid("EEDAFF4A-E9AA-4D28-B07C-A9120434DF97"), "Bonus Item Drop Rate", "The bonus which is added to the item drop rate multiplier of 1.0, e.g. 0.5 for 50 % more item drops. It's increased by seals.");
+
+    /// <summary>
+    /// Gets the death penalty protection attribute definition. If it's greater than 0, the player keeps its
+    /// experience and money when it's killed by a monster, e.g. by the Talisman of Guardian.
+    /// </summary>
+    public static AttributeDefinition DeathPenaltyProtection { get; } = new(new Guid("3CA30A73-E8C8-4201-9703-FB46E31E7FBD"), "Death Penalty Protection", "If it's greater than 0, the player doesn't lose experience or money when it's killed by a monster. It's set by the Talisman of Guardian.");
+
+    /// <summary>
+    /// Gets the item durability protection attribute definition. If it's greater than 0, the equipped items
+    /// of the player, except pets, don't lose durability, e.g. by the Talisman of Item Protection.
+    /// </summary>
+    public static AttributeDefinition ItemDurabilityProtection { get; } = new(new Guid("7232B55F-9680-41F7-98AC-3172E66FCABE"), "Item Durability Protection", "If it's greater than 0, the equipped items of the player, except pets, don't lose durability. It's set by the Talisman of Item Protection.");
 
     /// <summary>
     /// Gets the current health attribute definition.
@@ -1072,37 +1101,37 @@ public class Stats
     public static AttributeDefinition IsBleeding { get; } = new(new Guid("BD5C685D-C360-4CC5-A43E-46644AD61F09"), "Is bleeding", "The player is damaged every second for a while.");
 
     /// <summary>
-    /// Gets the ice resistance attribute definition. Value range from 0 to 1.
+    /// Gets the ice resistance attribute definition. Whole numbers from 0 to 255, where 255 means immunity.
     /// </summary>
     public static AttributeDefinition IceResistance { get; } = new(new Guid("47235C36-41BB-44B4-8823-6FC415709F59"), "Ice Resistance", string.Empty);
 
     /// <summary>
-    /// Gets the fire resistance attribute definition. Value range from 0 to 1.
+    /// Gets the fire resistance attribute definition. Whole numbers from 0 to 255, where 255 means immunity.
     /// </summary>
     public static AttributeDefinition FireResistance { get; } = new(new Guid("9AE4D80D-5706-48B9-AD11-EAC4FE088A81"), "Fire Resistance", string.Empty);
 
     /// <summary>
-    /// Gets the water resistance attribute definition. Value range from 0 to 1.
+    /// Gets the water resistance attribute definition. Whole numbers from 0 to 255, where 255 means immunity.
     /// </summary>
     public static AttributeDefinition WaterResistance { get; } = new(new Guid("3AF88672-D8DB-44E1-937A-7E6484134C39"), "Water Resistance", string.Empty);
 
     /// <summary>
-    /// Gets the earth resistance attribute definition. Value range from 0 to 1.
+    /// Gets the earth resistance attribute definition. Whole numbers from 0 to 255, where 255 means immunity.
     /// </summary>
     public static AttributeDefinition EarthResistance { get; } = new(new Guid("4470890F-00CE-44A6-BADB-203684B6014D"), "Earth Resistance", string.Empty);
 
     /// <summary>
-    /// Gets the wind resistance attribute definition. Value range from 0 to 1.
+    /// Gets the wind resistance attribute definition. Whole numbers from 0 to 255, where 255 means immunity.
     /// </summary>
     public static AttributeDefinition WindResistance { get; } = new(new Guid("03A29C46-7B7E-424D-8325-8390692570C3"), "Wind Resistance", string.Empty);
 
     /// <summary>
-    /// Gets the poison resistance attribute definition. Value range from 0 to 1.
+    /// Gets the poison resistance attribute definition. Whole numbers from 0 to 255, where 255 means immunity.
     /// </summary>
     public static AttributeDefinition PoisonResistance { get; } = new(new Guid("3D50D0B7-63A2-4DA9-8855-12173EAE6B39"), "Poison Resistance", string.Empty);
 
     /// <summary>
-    /// Gets the lightning resistance attribute definition. Value range from 0 to 1.
+    /// Gets the lightning resistance attribute definition. Whole numbers from 0 to 255, where 255 means immunity.
     /// </summary>
     public static AttributeDefinition LightningResistance { get; } = new(new Guid("3E339393-2D17-452E-81D9-3987947A407F"), "Lightning Resistance", string.Empty);
 
@@ -1481,6 +1510,20 @@ public class Stats
     /// Gets the hit shock damage threshold attribute definition.
     /// </summary>
     public static AttributeDefinition HitShockDamageThreshold { get; } = new(new Guid("22F07E43-9A6A-4007-9EB4-D1B549F7FDC3"), "Hit Shock Damage Threshold", "The minimum damage required for a hit to cause hit shock.");
+
+    /// <summary>
+    /// Gets the shield ratio attribute definition.
+    /// </summary>
+    public static AttributeDefinition ShieldRatio { get; } = new(new Guid("7D2F9A1E-4C6B-48D3-A7F1-9E2C5B8D4A6F"), "Shield Ratio", "The ratio that defines how much of the hit damage goes to shield.")
+    {
+        MaximumValue = 1,
+    };
+
+    /// <summary>
+    /// Gets the over-shield burst damage ratio attribute definition.
+    /// </summary>
+    /// <remarks>The health damage ratio that when overcome triggers the shield burst effect.</remarks>
+    public static AttributeDefinition OverShieldBurstDamageRatio { get; } = new(new Guid("9A2D4F7C-B6E1-4A83-9D2F-1C7E5B3A8D4F"), "Over-shield Burst Damage Ratio", "The over-shield health damage ratio that triggers a shield burst effect to be displayed.");
 
     /// <summary>
     /// Gets the is uniria equipped attribute definition.

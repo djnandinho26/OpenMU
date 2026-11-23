@@ -169,9 +169,7 @@ public sealed class GameConfigurationLoaderGenerator
     {
         var keyProperty = navigation.ForeignKey.Properties[0];
         var navigationType = (IEntityType)keyProperty.DeclaringType;
-#pragma warning disable EF1001 // Internal EF Core API usage.
-        if (Microsoft.EntityFrameworkCore.Metadata.Internal.EntityTypeExtensions.FindDeclaredPrimaryKey(navigationType) is not { } primaryKey)
-#pragma warning restore EF1001 // Internal EF Core API usage.
+        if (navigationType.FindPrimaryKeyIfDeclared() is not { } primaryKey)
         {
             return;
         }
@@ -448,6 +446,7 @@ public sealed class GameConfigurationLoaderGenerator
             ("integer", var t) when t.IsEnum => $"({GetCSharpName(t)})reader.GetInt32({ordinal})",
             ("bigint", var t) when t == typeof(long) => $"reader.GetInt64({ordinal})",
             ("interval", var t) when t == typeof(TimeSpan) => $"reader.GetFieldValue<global::System.TimeSpan>({ordinal})",
+            ("timestamp with time zone", var t) when t == typeof(DateTime) => $"reader.GetFieldValue<global::System.DateTime>({ordinal})",
             ("bytea", var t) when t == typeof(byte[]) => $"reader.GetFieldValue<byte[]>({ordinal})",
             _ => throw new NotSupportedException($"The column {loadedType.EntityType.Name}.{column.Name} of type {storeType} can't be read into {propertyType}."),
         };

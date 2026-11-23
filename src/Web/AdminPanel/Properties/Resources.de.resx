@@ -735,6 +735,9 @@
   <data name="AccessDeniedDescription" xml:space="preserve">
     <value>Ihr Konto ist nicht berechtigt, diese Seite zu öffnen.</value>
   </data>
+  <data name="ChangeNotPermitted" xml:space="preserve">
+    <value>Ihr Konto ist nicht berechtigt, diese Änderung vorzunehmen.</value>
+  </data>
   <data name="AccountSecurity" xml:space="preserve">
     <value>Kontosicherheit</value>
   </data>
@@ -1713,6 +1716,9 @@
   <data name="Active" xml:space="preserve">
     <value>Aktiv</value>
   </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
   <data name="Number" xml:space="preserve">
     <value>Nummer</value>
   </data>
@@ -1784,6 +1790,9 @@
   </data>
   <data name="RoleCashShop" xml:space="preserve">
     <value>Nur Cash-Shop-Münzen</value>
+  </data>
+  <data name="RoleLoginTicket" xml:space="preserve">
+    <value>Nur Anmelde-Tickets</value>
   </data>
   <data name="SelectAll" xml:space="preserve">
     <value>Alle auswählen</value>
@@ -1936,7 +1945,7 @@
     <value>Produkt {0} hat keinen Gegenstand.</value>
   </data>
   <data name="CashShopIssueTimeLimited" xml:space="preserve">
-    <value>Produkt {0} ist zeitlich begrenzt, was noch nicht unterstützt wird.</value>
+    <value>Produkt {0} ist zeitlich begrenzt, aber sein Gegenstand kann nicht ablaufen: nur ein Gegenstand, der angelegt und nicht verbraucht wird und nach Ablauf fallen gelassen oder an einen NPC verkauft werden kann.</value>
   </data>
   <data name="CashShopIssueNegativeBundlePrice" xml:space="preserve">
     <value>Der Bündelpreis ist negativ.</value>
@@ -2601,5 +2610,107 @@
   </data>
   <data name="Inspect" xml:space="preserve">
     <value>Untersuchen</value>
+  </data>
+  <data name="ExportShop" xml:space="preserve">
+    <value>Shop exportieren</value>
+  </data>
+  <data name="ImportShop" xml:space="preserve">
+    <value>Shop importieren</value>
+  </data>
+  <data name="ShopImportQuestion" xml:space="preserve">
+    <value>Der Import ersetzt alle Items des Shops von "{0}". Fortfahren?</value>
+  </data>
+  <data name="ShopImported" xml:space="preserve">
+    <value>{0} Item(s) wurden in den Shop importiert. Mit "Änderungen speichern" werden sie übernommen.</value>
+  </data>
+  <data name="ShopImportInvalidFile" xml:space="preserve">
+    <value>Die Datei ist kein gültiger Shop-Export.</value>
+  </data>
+  <data name="ShopImportSelectionChanged" xml:space="preserve">
+    <value>Der Import wurde abgebrochen, da sich der ausgewählte Händler oder die Bearbeitungssitzung in der Zwischenzeit geändert hat.</value>
+  </data>
+  <data name="ShopImportFailed" xml:space="preserve">
+    <value>Der Import ist fehlgeschlagen. Der Shop ist möglicherweise teilweise geändert; nutze "Änderungen verwerfen", um die ungespeicherten Änderungen zurückzusetzen.</value>
+  </data>
+  <data name="ShopImportRejected" xml:space="preserve">
+    <value>Der Shop wurde nicht geändert, da die Datei Einträge enthält, die nicht importiert werden können: {0}</value>
+  </data>
+  <data name="EffectTimes" xml:space="preserve">
+    <value>Effektzeiten</value>
+  </data>
+  <data name="EffectTimesDescription" xml:space="preserve">
+    <value>Lege fest, welche magischen Effekte ihre Restzeit an den Client senden, damit Spieler sehen, wie lange sie dauern. Ob Spieler das wissen, ist Spieldesign. Die Season-6-Daten senden sie für die Effekte verbrauchter Gegenstände, da das Originalspiel für Fertigkeitseffekte keine Zeit zeigt. Der Open-Source-Client zeigt die Zeit jedes Effekts, der sie sendet; die Original-Clients erhalten sie nur für verbrauchte Gegenstände, die Angriffsgeschwindigkeit, Schaden, Verteidigung, maximale Lebenspunkte oder maximales Mana ändern. Wird sie für einen solchen Gegenstand ausgeschaltet, bleibt seine Zeit in MuMain sichtbar: Es zeigt dann die Dauer aus seinen eigenen Gegenstandsdaten.</value>
+  </data>
+  <data name="SendsTime" xml:space="preserve">
+    <value>Zeit senden</value>
+  </data>
+  <data name="AllOn" xml:space="preserve">
+    <value>Alle an</value>
+  </data>
+  <data name="AllOff" xml:space="preserve">
+    <value>Alle aus</value>
+  </data>
+  <data name="AllShownEffectsHint" xml:space="preserve">
+    <value>Gilt für alle angezeigten Effekte. Die Änderungen werden nach dem Speichern übernommen.</value>
+  </data>
+  <data name="DefaultsFormat" xml:space="preserve">
+    <value>{0}-Standard</value>
+  </data>
+  <data name="DefaultsHintFormat" xml:space="preserve">
+    <value>Setzt jeden angezeigten Effekt wie in den {0}-Daten; Effekte, die {0} nicht kennt, bleiben unverändert. Die Änderungen werden nach dem Speichern übernommen.</value>
+  </data>
+  <data name="DefaultsLoading" xml:space="preserve">
+    <value>Die Standardwerte werden geladen...</value>
+  </data>
+  <data name="DefaultsNotAvailable" xml:space="preserve">
+    <value>Die Standardwerte der Daten, aus denen die Konfiguration erstellt wurde, sind nicht verfügbar; das Log nennt den Grund beim ersten Versuch nach dem Start.</value>
+  </data>
+  <data name="SendingCountFormat" xml:space="preserve">
+    <value>{0} von {1} Effekten senden ihre Zeit.</value>
+  </data>
+  <data name="EffectTimesConfirmFormat" xml:space="preserve">
+    <value>Diese {0} Effekte senden dann ihre Zeit: {1}. Diese {2} Effekte nicht: {3}. Fortfahren?</value>
+  </data>
+  <data name="EffectTimesHint" xml:space="preserve">
+    <value>Welche magischen Effekte Spielern ihre Restzeit zeigen:</value>
+  </data>
+  <data name="RoleWebManager" xml:space="preserve">
+    <value>Website (nur ausgewählte Funktionen)</value>
+  </data>
+  <data name="WebsitePermissions" xml:space="preserve">
+    <value>Website-Funktionen</value>
+  </data>
+  <data name="WebsitePermissionStatus" xml:space="preserve">
+    <value>Serverstatus</value>
+  </data>
+  <data name="WebsitePermissionRegister" xml:space="preserve">
+    <value>Konten registrieren</value>
+  </data>
+  <data name="WebsitePermissionRanking" xml:space="preserve">
+    <value>Charakter-Rangliste</value>
+  </data>
+  <data name="WebsitePermissionMiniGameRanking" xml:space="preserve">
+    <value>Minispiel-Ranglisten</value>
+  </data>
+  <data name="WebsitePermissionEvents" xml:space="preserve">
+    <value>Eventplan</value>
+  </data>
+  <data name="WebsitePermissionCharacter" xml:space="preserve">
+    <value>Charakterprofile (ausgerüstete Gegenstände)</value>
+  </data>
+  <data name="WebsitePermissionLogin" xml:space="preserve">
+    <value>Anmeldung mit Spielkonten (prüft Passwörter)</value>
+  </data>
+  <data name="WebsitePermissionChangePassword" xml:space="preserve">
+    <value>Kontopasswörter ändern (erfordert das aktuelle Passwort)</value>
+  </data>
+  <data name="WebsitePermissionCashShopGrant" xml:space="preserve">
+    <value>Cash-Shop-Münzen gutschreiben</value>
+  </data>
+  <data name="SocketCountTable" xml:space="preserve">
+    <value>Tabelle der Sockelanzahl</value>
+  </data>
+  <data name="SocketCountTableHint" xml:space="preserve">
+    <value>Bestimmt die Sockelanzahl der Sockelgegenstände, die diese Gruppe fallen lässt, auch über die drei eines normalen Drops hinaus, bis zur maximalen Sockelanzahl des Gegenstands. Leer bedeutet, dass die Tabelle des Gegenstands gilt.</value>
   </data>
 </root>

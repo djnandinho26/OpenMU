@@ -12,7 +12,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
     public partial class EntityDataContextModel
     {
         private EntityDataContextModel()
-            : base(skipDetectChanges: false, modelId: new Guid("f7f8b383-ff32-43f8-baec-11c76e079c81"), entityTypeCount: 129)
+            : base(skipDetectChanges: false, modelId: new Guid("379a65c9-7c08-4185-abb5-748c0f4fa2ea"), entityTypeCount: 133)
         {
         }
 
@@ -114,6 +114,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             var letterBody = LetterBodyEntityType.Create(this);
             var letterHeader = LetterHeaderEntityType.Create(this);
             var levelBonus = LevelBonusEntityType.Create(this);
+            var loginTicket = LoginTicketEntityType.Create(this);
             var magicEffectDefinition = MagicEffectDefinitionEntityType.Create(this);
             var masterSkillDefinition = MasterSkillDefinitionEntityType.Create(this);
             var masterSkillDefinitionSkill = MasterSkillDefinitionSkillEntityType.Create(this);
@@ -146,7 +147,10 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             var statAttribute = StatAttributeEntityType.Create(this);
             var statAttributeDefinition = StatAttributeDefinitionEntityType.Create(this);
             var systemConfiguration = SystemConfigurationEntityType.Create(this);
+            var waitingItem = WaitingItemEntityType.Create(this);
             var warpInfo = WarpInfoEntityType.Create(this);
+            var weightedValue = WeightedValueEntityType.Create(this);
+            var weightedValueTable = WeightedValueTableEntityType.Create(this);
 
             AccountEntityType.CreateForeignKey1(account, itemStorage);
             AccountAttributeGrantEntityType.CreateForeignKey1(accountAttributeGrant, account);
@@ -169,6 +173,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             AttributeRequirementEntityType.CreateForeignKey4(attributeRequirement, itemDefinition);
             AttributeRequirementEntityType.CreateForeignKey5(attributeRequirement, skill);
             AttributeRequirementEntityType.CreateForeignKey6(attributeRequirement, skill);
+            AttributeRequirementEntityType.CreateForeignKey7(attributeRequirement, warpInfo);
             BattleZoneDefinitionEntityType.CreateForeignKey1(battleZoneDefinition, rectangle);
             BattleZoneDefinitionEntityType.CreateForeignKey2(battleZoneDefinition, rectangle);
             BattleZoneDefinitionEntityType.CreateForeignKey3(battleZoneDefinition, rectangle);
@@ -225,6 +230,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             ConstValueAttributeEntityType.CreateForeignKey3(constValueAttribute, gameConfiguration);
             DropItemGroupEntityType.CreateForeignKey1(dropItemGroup, gameConfiguration);
             DropItemGroupEntityType.CreateForeignKey2(dropItemGroup, monsterDefinition);
+            DropItemGroupEntityType.CreateForeignKey3(dropItemGroup, weightedValueTable);
             DropItemGroupItemDefinitionEntityType.CreateForeignKey1(dropItemGroupItemDefinition, dropItemGroup);
             DropItemGroupItemDefinitionEntityType.CreateForeignKey2(dropItemGroupItemDefinition, itemDefinition);
             DuelAreaEntityType.CreateForeignKey1(duelArea, duelConfiguration);
@@ -285,7 +291,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             ItemDefinitionEntityType.CreateForeignKey3(itemDefinition, itemSlotType);
             ItemDefinitionEntityType.CreateForeignKey4(itemDefinition, itemPriceDefinition);
             ItemDefinitionEntityType.CreateForeignKey5(itemDefinition, skill);
-            ItemDefinitionEntityType.CreateForeignKey6(itemDefinition, itemStatProfile);
+            ItemDefinitionEntityType.CreateForeignKey6(itemDefinition, weightedValueTable);
+            ItemDefinitionEntityType.CreateForeignKey7(itemDefinition, itemStatProfile);
             ItemDefinitionCharacterClassEntityType.CreateForeignKey1(itemDefinitionCharacterClass, characterClass);
             ItemDefinitionCharacterClassEntityType.CreateForeignKey2(itemDefinitionCharacterClass, itemDefinition);
             ItemDefinitionItemOptionDefinitionEntityType.CreateForeignKey1(itemDefinitionItemOptionDefinition, itemDefinition);
@@ -294,6 +301,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             ItemDefinitionItemSetGroupEntityType.CreateForeignKey2(itemDefinitionItemSetGroup, itemSetGroup);
             ItemDropItemGroupEntityType.CreateForeignKey1(itemDropItemGroup, itemDefinition);
             ItemDropItemGroupEntityType.CreateForeignKey2(itemDropItemGroup, monsterDefinition);
+            ItemDropItemGroupEntityType.CreateForeignKey3(itemDropItemGroup, weightedValueTable);
             ItemDropItemGroupItemDefinitionEntityType.CreateForeignKey1(itemDropItemGroupItemDefinition, itemDefinition);
             ItemDropItemGroupItemDefinitionEntityType.CreateForeignKey2(itemDropItemGroupItemDefinition, itemDropItemGroup);
             ItemItemOfItemSetEntityType.CreateForeignKey1(itemItemOfItemSet, item);
@@ -330,6 +338,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             LetterBodyEntityType.CreateForeignKey2(letterBody, appearanceData);
             LetterHeaderEntityType.CreateForeignKey1(letterHeader, character);
             LevelBonusEntityType.CreateForeignKey1(levelBonus, itemLevelBonusTable);
+            LoginTicketEntityType.CreateForeignKey1(loginTicket, account);
             MagicEffectDefinitionEntityType.CreateForeignKey1(magicEffectDefinition, powerUpDefinitionValue);
             MagicEffectDefinitionEntityType.CreateForeignKey2(magicEffectDefinition, powerUpDefinitionValue);
             MagicEffectDefinitionEntityType.CreateForeignKey3(magicEffectDefinition, powerUpDefinitionValue);
@@ -385,6 +394,8 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             QuestRewardEntityType.CreateForeignKey2(questReward, item);
             QuestRewardEntityType.CreateForeignKey3(questReward, questDefinition);
             QuestRewardEntityType.CreateForeignKey4(questReward, skill);
+            SimpleCraftingSettingsEntityType.CreateForeignKey1(simpleCraftingSettings, weightedValueTable);
+            SimpleCraftingSettingsEntityType.CreateForeignKey2(simpleCraftingSettings, weightedValueTable);
             SkillEntityType.CreateForeignKey1(skill, areaSkillSettings);
             SkillEntityType.CreateForeignKey2(skill, attributeDefinition);
             SkillEntityType.CreateForeignKey3(skill, gameConfiguration);
@@ -401,8 +412,12 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             StatAttributeEntityType.CreateForeignKey3(statAttribute, attributeDefinition);
             StatAttributeDefinitionEntityType.CreateForeignKey1(statAttributeDefinition, attributeDefinition);
             StatAttributeDefinitionEntityType.CreateForeignKey2(statAttributeDefinition, characterClass);
+            WaitingItemEntityType.CreateForeignKey1(waitingItem, character);
+            WaitingItemEntityType.CreateForeignKey2(waitingItem, item);
             WarpInfoEntityType.CreateForeignKey1(warpInfo, gameConfiguration);
             WarpInfoEntityType.CreateForeignKey2(warpInfo, exitGate);
+            WeightedValueEntityType.CreateForeignKey1(weightedValue, weightedValueTable);
+            WeightedValueTableEntityType.CreateForeignKey1(weightedValueTable, gameConfiguration);
 
             AccountEntityType.CreateAnnotations(account);
             AccountAttributeGrantEntityType.CreateAnnotations(accountAttributeGrant);
@@ -500,6 +515,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             LetterBodyEntityType.CreateAnnotations(letterBody);
             LetterHeaderEntityType.CreateAnnotations(letterHeader);
             LevelBonusEntityType.CreateAnnotations(levelBonus);
+            LoginTicketEntityType.CreateAnnotations(loginTicket);
             MagicEffectDefinitionEntityType.CreateAnnotations(magicEffectDefinition);
             MasterSkillDefinitionEntityType.CreateAnnotations(masterSkillDefinition);
             MasterSkillDefinitionSkillEntityType.CreateAnnotations(masterSkillDefinitionSkill);
@@ -532,7 +548,10 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
             StatAttributeEntityType.CreateAnnotations(statAttribute);
             StatAttributeDefinitionEntityType.CreateAnnotations(statAttributeDefinition);
             SystemConfigurationEntityType.CreateAnnotations(systemConfiguration);
+            WaitingItemEntityType.CreateAnnotations(waitingItem);
             WarpInfoEntityType.CreateAnnotations(warpInfo);
+            WeightedValueEntityType.CreateAnnotations(weightedValue);
+            WeightedValueTableEntityType.CreateAnnotations(weightedValueTable);
 
             AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
             AddAnnotation("ProductVersion", "10.0.2");

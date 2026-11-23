@@ -112,6 +112,51 @@ also define which monsters are bosses, by their monster numbers (e.g. 275 for
 Kundun), and which levels and master levels are milestones (by default, level
 400).
 
+## Game event webhook
+
+The *Game Event Webhook* plugin forwards the events of the *Game Event
+Publisher* (which has to be active, too) as JSON to a URL of your choice, for
+example to a news feed on the server's website. It's disabled by default.
+
+In its configuration you set:
+
+* the **URL**, e.g. `https://example.com/api/realm-events`. Use HTTPS when the
+  receiver runs on another machine.
+* the **secret**, which the receiver knows too. Nothing is sent without one.
+* which kinds of events are forwarded: boss kills, level milestones, item drops,
+  mini game results (and, off by default, their openings and starts),
+  invasions, castle siege state changes and global notices.
+* for item drops, the item names to forward (all, when the list is empty) and
+  the minimum item level.
+
+Chat messages, letters, logins and account links are never forwarded.
+
+Each event is posted on its own:
+
+```http
+POST <URL>
+Content-Type: application/json
+X-OpenMU-Timestamp: 1763380800
+X-OpenMU-Signature: sha256=<hex>
+
+{"id":"<guid>","event":{"$type":"BossKilledEvent","killerName":"…","monsterName":"…","mapName":"…","serverId":0,"timestampUtc":"…"}}
+```
+
+The signature is the HMAC-SHA256, with the secret as key, of the timestamp, a
+dot and the body. The receiver should compute it the same way, compare it in
+constant time, and refuse requests whose timestamp is more than a few minutes
+off. The `id` stays the same when a post is retried, so the receiver can drop
+duplicates.
+
+The game never waits for the receiver: events wait in a queue of up to 1000,
+and when it's full the oldest one is dropped. A failed post is retried up to
+five times, with a doubling delay from 2 seconds; a refusal (a 4xx answer other
+than 408 or 429) is not retried.
+
+The plugin runs where the game events are received: in the all-in-one server,
+or in the host of the Discord integration in the distributed deployment, which
+has to run for it, even without a Discord bot.
+
 ## Discord integration of the client
 
 The feature plugin *Discord integration of the client* tells game clients which
@@ -136,6 +181,26 @@ Its configuration has:
 The announcements are shown in their order; after the last one, it starts over
 with the first one. Each game server has its own rotation. The text can be translated:
 players see the translation for their language, if there is one.
+
+## Jewels and refine stones
+
+The handlers which upgrade an item option — the *Jewel of Life*, the *Jewel of
+Harmony* and the refine stones — share one configuration type, so their
+behaviour can be changed without a rebuild. Each of them has its own default
+values; the configuration contains:
+
+| Field | Meaning |
+|---|---|
+| Option type | The item option type which is upgraded: the normal item option for the Jewel of Life, the harmony option for the Harmony jewel and the refine stones. |
+| Adds the option | Whether an item without the option can get it by consuming the source item. |
+| Increases the option | Whether the level of an existing option can be increased. |
+| Success chance | The chance between 0 and 1 that an attempt succeeds. The Jewel of Life uses `0.5`. |
+| Behaviour on failure | `None` keeps the option level as it is, `SetOptionToBaseLevel` resets it to its lowest level, and `RemoveOption` removes the option. |
+| Boost option type | An option of the target item which increases the success chance, e.g. luck. |
+| Success chance boost | The additional chance when the target item has the boost option. |
+
+The value is not limited by the game client: it doesn't display a success chance
+for these jewels, so a server owner can use any value between 0 and 1.
 
 ## Writing your own plugin
 

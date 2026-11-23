@@ -5,11 +5,13 @@
 namespace MUnique.OpenMU.Web.Shared.Components.ItemEdit;
 
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using MUnique.OpenMU.DataModel;
 using MUnique.OpenMU.DataModel.Configuration.Items;
 using MUnique.OpenMU.DataModel.Entities;
 using MUnique.OpenMU.GameLogic;
+using MUnique.OpenMU.GameLogic.CashShop;
 using MUnique.OpenMU.Persistence;
 using Nito.AsyncEx.Synchronous;
 using Nito.Disposables.Internals;
@@ -17,7 +19,7 @@ using Nito.Disposables.Internals;
 /// <summary>
 /// The view model for an <see cref="Item"/>.
 /// </summary>
-public class ItemViewModel : INotifyPropertyChanged
+public class ItemViewModel : INotifyPropertyChanged, IValidatableObject
 {
     private readonly IContext _persistenceContext;
 
@@ -62,7 +64,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_ItemSlot), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public byte ItemSlot
     {
-        get => this.Item.ItemSlot;
+        get
+        {
+            return this.Item.ItemSlot;
+        }
         set
         {
             if (value == this.Item.ItemSlot)
@@ -81,7 +86,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_Definition), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public ItemDefinition? Definition
     {
-        get => this.Item.Definition;
+        get
+        {
+            return this.Item.Definition;
+        }
         set
         {
             if (this.Definition == value)
@@ -101,7 +109,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_Level), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public byte Level
     {
-        get => this.Item.Level;
+        get
+        {
+            return this.Item.Level;
+        }
         set
         {
             if (this.Item.Level == value)
@@ -135,7 +146,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_Durability), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public double Durability
     {
-        get => this.Item.Durability;
+        get
+        {
+            return this.Item.Durability;
+        }
         set
         {
             if (Math.Abs(this.Item.Durability - value) < 0.0001)
@@ -151,12 +165,64 @@ public class ItemViewModel : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether this item is time-limited, i.e. it has an <see cref="Item.ExpiresAt"/>.
+    /// Switching it on lets the item expire in one day, which can be changed with <see cref="ExpiresAt"/>.
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_IsTimeLimited), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
+    public bool IsTimeLimited
+    {
+        get
+        {
+            return this.Item.ExpiresAt is not null;
+        }
+
+        set
+        {
+            if (this.IsTimeLimited == value)
+            {
+                return;
+            }
+
+            this.Item.ExpiresAt = value ? DateTime.UtcNow.AddDays(1) : null;
+            this.OnPropertyChanged();
+            this.OnPropertyChanged(nameof(this.ExpiresAt));
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the timestamp (UTC) at which a time-limited item expires.
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_ExpiresAt), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
+    public DateTime ExpiresAt
+    {
+        get
+        {
+            return this.Item.ExpiresAt ?? DateTime.UtcNow;
+        }
+
+        set
+        {
+            var utcValue = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+            if (!this.IsTimeLimited || this.Item.ExpiresAt == utcValue)
+            {
+                return;
+            }
+
+            this.Item.ExpiresAt = utcValue;
+            this.OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
     /// Gets or sets a value indicating whether this item has skill.
     /// </summary>
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_HasSkill), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public bool HasSkill
     {
-        get => this.Item.HasSkill;
+        get
+        {
+            return this.Item.HasSkill;
+        }
         set
         {
             if (this.Item.HasSkill == value)
@@ -175,7 +241,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_HasLuck), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public bool HasLuck
     {
-        get => this.Item.ItemOptions.Any(io => io.ItemOption?.OptionType == ItemOptionTypes.Luck);
+        get
+        {
+            return this.Item.ItemOptions.Any(io => io.ItemOption?.OptionType == ItemOptionTypes.Luck);
+        }
         set
         {
             if (this.HasLuck == value)
@@ -212,7 +281,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_HasGuardianOption), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public bool HasGuardianOption
     {
-        get => this.Item.ItemOptions.Any(io => io.ItemOption?.OptionType == ItemOptionTypes.GuardianOption);
+        get
+        {
+            return this.Item.ItemOptions.Any(io => io.ItemOption?.OptionType == ItemOptionTypes.GuardianOption);
+        }
         set
         {
             if (this.HasGuardianOption == value)
@@ -264,7 +336,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_NormalOption), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public IncreasableItemOption? NormalOption
     {
-        get => this.NormalOptionLink?.ItemOption;
+        get
+        {
+            return this.NormalOptionLink?.ItemOption;
+        }
         set
         {
             if (this.NormalOption == value)
@@ -305,7 +380,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_HarmonyOption), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public IncreasableItemOption? HarmonyOption
     {
-        get => this.HarmonyOptionLink?.ItemOption;
+        get
+        {
+            return this.HarmonyOptionLink?.ItemOption;
+        }
         set
         {
             if (this.HarmonyOption == value)
@@ -342,7 +420,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_SocketBonusOption), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public IncreasableItemOption? SocketBonusOption
     {
-        get => this.SocketBonusOptionLink?.ItemOption;
+        get
+        {
+            return this.SocketBonusOptionLink?.ItemOption;
+        }
         set
         {
             if (this.SocketBonusOption == value)
@@ -378,7 +459,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_FenrirOption), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public ItemOptionType? FenrirOption
     {
-        get => this.FenrirOptionLinks.FirstOrDefault()?.ItemOption?.OptionType;
+        get
+        {
+            return this.FenrirOptionLinks.FirstOrDefault()?.ItemOption?.OptionType;
+        }
         set
         {
             if (this.FenrirOption == value)
@@ -408,7 +492,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_HasOption), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public bool HasOption
     {
-        get => this.NormalOption is { };
+        get
+        {
+            return this.NormalOption is { };
+        }
         set
         {
             if (this.HasOption == value)
@@ -428,7 +515,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_SocketCount), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public int SocketCount
     {
-        get => this.Item.SocketCount;
+        get
+        {
+            return this.Item.SocketCount;
+        }
         set
         {
             if (this.Item.SocketCount == value)
@@ -472,7 +562,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_PetExperience), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public int PetExperience
     {
-        get => this.Item.PetExperience;
+        get
+        {
+            return this.Item.PetExperience;
+        }
         set
         {
             if (this.Item.PetExperience == value)
@@ -503,7 +596,10 @@ public class ItemViewModel : INotifyPropertyChanged
     [System.ComponentModel.DataAnnotations.Display(Name = nameof(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_AncientSet), ResourceType = typeof(MUnique.OpenMU.Web.Shared.Properties.Resources))]
     public ItemSetGroup? AncientSet
     {
-        get => this.ItemSetGroups.FirstOrDefault(io => io.AncientSetDiscriminator > 0)?.ItemSetGroup;
+        get
+        {
+            return this.ItemSetGroups.FirstOrDefault(io => io.AncientSetDiscriminator > 0)?.ItemSetGroup;
+        }
         set
         {
             if (this.AncientSet == value)
@@ -708,6 +804,19 @@ public class ItemViewModel : INotifyPropertyChanged
                 .Where(isi => isi.ItemDefinition == this.Definition)
                 .Where(isi => isi.AncientSetDiscriminator > 0)
                 ?? Enumerable.Empty<ItemOfItemSet>();
+        }
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// A time-limited item must be one which can expire: worn, not consumed, and droppable or sellable once it expired.
+    /// Otherwise, it would stay in the inventory forever.
+    /// </remarks>
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (this.IsTimeLimited && this.Definition is { } definition && !definition.CanBeTimeLimited())
+        {
+            yield return new ValidationResult(MUnique.OpenMU.Web.Shared.Properties.Resources.ItemEdit_CannotBeTimeLimited, [nameof(this.IsTimeLimited)]);
         }
     }
 

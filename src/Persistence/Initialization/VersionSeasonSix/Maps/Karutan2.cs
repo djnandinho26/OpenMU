@@ -157,7 +157,7 @@ internal class Karutan2 : BaseMapInitializer
         yield return this.CreateMonsterSpawn(405, this.NpcDictionary[576], 092, 080); // Narcondra
         yield return this.CreateMonsterSpawn(406, this.NpcDictionary[576], 141, 056); // Narcondra
         yield return this.CreateMonsterSpawn(407, this.NpcDictionary[576], 170, 035); // Narcondra
-        yield return this.CreateMonsterSpawn(408, this.NpcDictionary[576], 190, 192, 038, 038); // Narcondra
+        yield return this.CreateMonsterSpawn(408, this.NpcDictionary[576], 190, 038); // Narcondra
         yield return this.CreateMonsterSpawn(409, this.NpcDictionary[576], 195, 061); // Narcondra
         yield return this.CreateMonsterSpawn(410, this.NpcDictionary[576], 210, 043); // Narcondra
         yield return this.CreateMonsterSpawn(411, this.NpcDictionary[576], 202, 080); // Narcondra
@@ -210,10 +210,10 @@ internal class Karutan2 : BaseMapInitializer
                 { Stats.DefenseBase, 545 },
                 { Stats.AttackRatePvm, 1020 },
                 { Stats.DefenseRatePvm, 315 },
-                { Stats.PoisonResistance, 100f / 255 },
-                { Stats.IceResistance, 100f / 255 },
-                { Stats.LightningResistance, 100f / 255 },
-                { Stats.FireResistance, 240f / 255 },
+                { Stats.IceResistance, 100 },
+                { Stats.PoisonResistance, 100 },
+                { Stats.LightningResistance, 100 },
+                { Stats.FireResistance, 240 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -241,11 +241,11 @@ internal class Karutan2 : BaseMapInitializer
                 { Stats.MaximumPhysBaseDmg, 790 },
                 { Stats.DefenseBase, 610 },
                 { Stats.AttackRatePvm, 1200 },
-                { Stats.DefenseRatePvm, 406 },
-                { Stats.PoisonResistance, 255f / 255 },
-                { Stats.IceResistance, 150f / 255 },
-                { Stats.LightningResistance, 255f / 255 },
-                { Stats.FireResistance, 255f / 255 },
+                { Stats.DefenseRatePvm, 405 },
+                { Stats.IceResistance, 150 },
+                { Stats.PoisonResistance, 255 },
+                { Stats.LightningResistance, 255 },
+                { Stats.FireResistance, 255 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -274,10 +274,10 @@ internal class Karutan2 : BaseMapInitializer
                 { Stats.DefenseBase, 640 },
                 { Stats.AttackRatePvm, 1265 },
                 { Stats.DefenseRatePvm, 425 },
-                { Stats.PoisonResistance, 255f / 255 },
-                { Stats.IceResistance, 150f / 255 },
-                { Stats.LightningResistance, 255f / 255 },
-                { Stats.FireResistance, 255f / 255 },
+                { Stats.IceResistance, 150 },
+                { Stats.PoisonResistance, 255 },
+                { Stats.LightningResistance, 255 },
+                { Stats.FireResistance, 255 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);

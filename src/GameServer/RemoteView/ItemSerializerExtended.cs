@@ -52,6 +52,8 @@ public class ItemSerializerExtended : IItemSerializer
         targetStruct.Group = (byte)item.Definition.Group;
         targetStruct.Number = (ushort)item.Definition.Number;
         targetStruct.Level = item.IsTrainablePet() ? (byte)0 : (byte)item.Level;
+        targetStruct.IsTimeLimited = item.IsTimeLimited();
+        targetStruct.IsExpired = item.IsExpired(DateTime.UtcNow);
         targetStruct.Durability = item.Durability();
         targetStruct.Options = this.GetOptionFlags(item);
 
@@ -107,13 +109,13 @@ public class ItemSerializerExtended : IItemSerializer
     }
 
     /// <inheritdoc />
-    public Item DeserializeItem(Span<byte> array, GameConfiguration gameConfiguration, IContext persistenceContext)
+    public Item DeserializeItem(Span<byte> source, GameConfiguration gameConfiguration, IContext persistenceContext)
     {
-        var itemStruct = new ItemStruct(array);
+        var itemStruct = new ItemStruct(source);
         var itemGroup = itemStruct.Group;
         var itemNumber = itemStruct.Number;
         var definition = gameConfiguration.Items.FirstOrDefault(def => def.Number == itemNumber && def.Group == itemGroup)
-                         ?? throw new ArgumentException($"Couldn't find the item definition for the given byte array. Extracted item number and group: {itemNumber}, {itemGroup}");
+                         ?? throw new ArgumentException($"Couldn't find the item definition for the given byte source. Extracted item number and group: {itemNumber}, {itemGroup}");
 
         var item = persistenceContext.CreateNew<Item>();
         item.Definition = definition;
@@ -221,7 +223,9 @@ public class ItemSerializerExtended : IItemSerializer
     /// Layout:
     ///   Group:  4 bit
     ///   Number: 12 bit
-    ///   Level:  8 bit
+    ///   Level:  6 bit
+    ///   TimeLimited: 1 bit (0x40 of the level byte), a period item of the client
+    ///   Expired: 1 bit (0x80 of the level byte), an expired period item
     ///   Dura:   8 bit
     ///   OptFlags: 8 bit
     ///     HasOpt
@@ -247,11 +251,18 @@ public class ItemSerializerExtended : IItemSerializer
     /// </summary>
     private readonly ref struct ItemStruct(Span<byte> data)
     {
+        private const byte LevelMask = 0x3F;
+        private const byte TimeLimitedFlag = 0x40;
+        private const byte ExpiredFlag = 0x80;
+
         private readonly Span<byte> _data = data;
 
         public byte Group
         {
-            get => (byte)((this._data[0] >> 4) & 0xF);
+            get
+            {
+                return (byte)((this._data[0] >> 4) & 0xF);
+            }
             set
             {
                 value <<= 4;
@@ -262,7 +273,10 @@ public class ItemSerializerExtended : IItemSerializer
 
         public ushort Number
         {
-            get => (ushort)(((this._data[0] & 0xF) << 8) + this._data[1]);
+            get
+            {
+                return (ushort)(((this._data[0] & 0xF) << 8) + this._data[1]);
+            }
             set
             {
                 // Higher 4 bits of the first byte for the higher bits of the value
@@ -273,10 +287,31 @@ public class ItemSerializerExtended : IItemSerializer
             }
         }
 
+        /// <summary>
+        /// Gets or sets the item level. Setting it clears the flags of the level byte, so they're set afterwards.
+        /// </summary>
         public byte Level
         {
-            get => this._data[2];
-            set => this._data[2] = value;
+            get => (byte)(this._data[2] & LevelMask);
+            set => this._data[2] = (byte)(value & LevelMask);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the item is time-limited.
+        /// </summary>
+        public bool IsTimeLimited
+        {
+            get => (this._data[2] & TimeLimitedFlag) != 0;
+            set => this._data[2] = value ? (byte)(this._data[2] | TimeLimitedFlag) : (byte)(this._data[2] & ~TimeLimitedFlag);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the time-limited item is expired.
+        /// </summary>
+        public bool IsExpired
+        {
+            get => (this._data[2] & ExpiredFlag) != 0;
+            set => this._data[2] = value ? (byte)(this._data[2] | ExpiredFlag) : (byte)(this._data[2] & ~ExpiredFlag);
         }
 
         public byte Durability
@@ -305,7 +340,10 @@ public class ItemSerializerExtended : IItemSerializer
 
         public byte OptionType
         {
-            get => this.Options.HasFlag(OptionFlags.HasOption) ? (byte)((this._data[5] & 0xF0) >> 4) : default;
+            get
+            {
+                return this.Options.HasFlag(OptionFlags.HasOption) ? (byte)((this._data[5] & 0xF0) >> 4) : default;
+            }
             set
             {
                 value = (byte)((value & 0xF) << 4);
@@ -334,7 +372,10 @@ public class ItemSerializerExtended : IItemSerializer
 
         public byte AncientBonusLevel
         {
-            get => this.Options.HasFlag(OptionFlags.HasAncient) ? (byte)((this._data[this.AncientIndex] & 0xF0) >> 4) : default;
+            get
+            {
+                return this.Options.HasFlag(OptionFlags.HasAncient) ? (byte)((this._data[this.AncientIndex] & 0xF0) >> 4) : default;
+            }
             set
             {
                 value = (byte)((value & 0xF) << 4);
@@ -351,7 +392,10 @@ public class ItemSerializerExtended : IItemSerializer
 
         public byte SocketBonus
         {
-            get => this.Options.HasFlag(OptionFlags.HasSockets) ? (byte)((this._data[this.SocketStartIndex] & 0xF0) >> 4) : default;
+            get
+            {
+                return this.Options.HasFlag(OptionFlags.HasSockets) ? (byte)((this._data[this.SocketStartIndex] & 0xF0) >> 4) : default;
+            }
             set
             {
                 value = (byte)((value & 0xF) << 4);

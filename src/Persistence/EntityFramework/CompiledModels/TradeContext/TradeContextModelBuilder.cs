@@ -12,7 +12,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForTradeCont
     public partial class TradeContextModel
     {
         private TradeContextModel()
-            : base(skipDetectChanges: false, modelId: new Guid("3354f79e-6c11-4196-b706-28c658530ea2"), entityTypeCount: 48)
+            : base(skipDetectChanges: false, modelId: new Guid("55de8d65-3cae-4e09-923d-3ebe17ffe736"), entityTypeCount: 50)
         {
         }
 
@@ -56,6 +56,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForTradeCont
             var itemOptionLink = ItemOptionLinkEntityType.Create(this);
             var letterBody = LetterBodyEntityType.Create(this);
             var letterHeader = LetterHeaderEntityType.Create(this);
+            var loginTicket = LoginTicketEntityType.Create(this);
             var masterSkillDefinitionSkill = MasterSkillDefinitionSkillEntityType.Create(this);
             var miniGameRankingEntry = MiniGameRankingEntryEntityType.Create(this);
             var monsterDefinitionDropItemGroup = MonsterDefinitionDropItemGroupEntityType.Create(this);
@@ -66,6 +67,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForTradeCont
             var skillCharacterClass = SkillCharacterClassEntityType.Create(this);
             var skillEntry = SkillEntryEntityType.Create(this);
             var statAttribute = StatAttributeEntityType.Create(this);
+            var waitingItem = WaitingItemEntityType.Create(this);
 
             AccountAttributeGrantEntityType.CreateForeignKey1(accountAttributeGrant, account);
             AccountCharacterClassEntityType.CreateForeignKey1(accountCharacterClass, account);
@@ -89,12 +91,15 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForTradeCont
             LetterBodyEntityType.CreateForeignKey1(letterBody, letterHeader);
             LetterBodyEntityType.CreateForeignKey2(letterBody, appearanceData);
             LetterHeaderEntityType.CreateForeignKey1(letterHeader, character);
+            LoginTicketEntityType.CreateForeignKey1(loginTicket, account);
             MiniGameRankingEntryEntityType.CreateForeignKey1(miniGameRankingEntry, character);
             PowerUpDefinitionEntityType.CreateForeignKey1(powerUpDefinition, powerUpDefinitionValue);
             QuestMonsterKillRequirementStateEntityType.CreateForeignKey1(questMonsterKillRequirementState, characterQuestState);
             SkillEntryEntityType.CreateForeignKey1(skillEntry, character);
             StatAttributeEntityType.CreateForeignKey1(statAttribute, account);
             StatAttributeEntityType.CreateForeignKey2(statAttribute, character);
+            WaitingItemEntityType.CreateForeignKey1(waitingItem, character);
+            WaitingItemEntityType.CreateForeignKey2(waitingItem, item);
 
             AccountEntityType.CreateAnnotations(account);
             AccountAttributeGrantEntityType.CreateAnnotations(accountAttributeGrant);
@@ -134,6 +139,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForTradeCont
             ItemOptionLinkEntityType.CreateAnnotations(itemOptionLink);
             LetterBodyEntityType.CreateAnnotations(letterBody);
             LetterHeaderEntityType.CreateAnnotations(letterHeader);
+            LoginTicketEntityType.CreateAnnotations(loginTicket);
             MasterSkillDefinitionSkillEntityType.CreateAnnotations(masterSkillDefinitionSkill);
             MiniGameRankingEntryEntityType.CreateAnnotations(miniGameRankingEntry);
             MonsterDefinitionDropItemGroupEntityType.CreateAnnotations(monsterDefinitionDropItemGroup);
@@ -144,6 +150,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForTradeCont
             SkillCharacterClassEntityType.CreateAnnotations(skillCharacterClass);
             SkillEntryEntityType.CreateAnnotations(skillEntry);
             StatAttributeEntityType.CreateAnnotations(statAttribute);
+            WaitingItemEntityType.CreateAnnotations(waitingItem);
 
             AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
             AddAnnotation("ProductVersion", "10.0.2");

@@ -49,8 +49,10 @@ public class ExtendedTypeContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Entities.ItemOptionLink>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Entities.ItemStorage>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Entities.LetterBody>();
+        modelBuilder.Ignore<MUnique.OpenMU.DataModel.Entities.LoginTicket>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Entities.QuestMonsterKillRequirementState>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Entities.SkillEntry>();
+        modelBuilder.Ignore<MUnique.OpenMU.DataModel.Entities.WaitingItem>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.AreaSkillSettings>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.BattleZoneDefinition>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.Buff>();
@@ -102,6 +104,8 @@ public class ExtendedTypeContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.StatAttributeDefinition>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.SystemConfiguration>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.WarpInfo>();
+        modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.WeightedValue>();
+        modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.WeightedValueTable>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.Quests.QuestDefinition>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.Quests.QuestItemRequirement>();
         modelBuilder.Ignore<MUnique.OpenMU.DataModel.Configuration.Quests.QuestMonsterKillRequirement>();
@@ -153,10 +157,12 @@ public class ExtendedTypeContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.Entity<Character>().HasMany(entity => entity.RawLearnedSkills).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Character>().HasOne(entity => entity.RawInventory).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Character>().HasMany(entity => entity.RawQuestStates).WithOne().OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Character>().HasMany(entity => entity.RawWaitingItems).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<CharacterQuestState>().HasMany(entity => entity.RawRequirementStates).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Item>().HasMany(entity => entity.RawItemOptions).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ItemStorage>().HasMany(entity => entity.RawItems).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<LetterBody>().HasOne(entity => entity.RawSenderAppearance).WithOne().OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WaitingItem>().HasOne(entity => entity.RawItem).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<BattleZoneDefinition>().HasOne(entity => entity.RawGround).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<BattleZoneDefinition>().HasOne(entity => entity.RawLeftGoal).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<BattleZoneDefinition>().HasOne(entity => entity.RawRightGoal).WithOne().OnDelete(DeleteBehavior.Cascade);
@@ -188,6 +194,7 @@ public class ExtendedTypeContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.Entity<GameConfiguration>().HasMany(entity => entity.RawCharacterClasses).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<GameConfiguration>().HasMany(entity => entity.RawItems).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<GameConfiguration>().HasMany(entity => entity.RawItemLevelBonusTables).WithOne().OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<GameConfiguration>().HasMany(entity => entity.RawWeightedValueTables).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<GameConfiguration>().HasMany(entity => entity.RawItemStatProfiles).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<GameConfiguration>().HasMany(entity => entity.RawItemPriceDefinitions).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<GameConfiguration>().HasMany(entity => entity.RawItemSlotTypes).WithOne().OnDelete(DeleteBehavior.Cascade);
@@ -238,6 +245,8 @@ public class ExtendedTypeContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.Entity<Skill>().HasOne(entity => entity.RawMasterDefinition).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Skill>().HasOne(entity => entity.RawAreaSkillSettings).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<SkillComboDefinition>().HasMany(entity => entity.RawSteps).WithOne().OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WarpInfo>().HasMany(entity => entity.RawRequirements).WithOne().OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WeightedValueTable>().HasMany(entity => entity.RawValues).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<QuestDefinition>().HasMany(entity => entity.RawRequiredMonsterKills).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<QuestDefinition>().HasMany(entity => entity.RawRequiredItems).WithOne().OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<QuestDefinition>().HasMany(entity => entity.RawRewards).WithOne().OnDelete(DeleteBehavior.Cascade);

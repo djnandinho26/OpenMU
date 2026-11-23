@@ -78,7 +78,10 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     /// <inheritdoc/>
     public override Point Position
     {
-        get => base.Position;
+        get
+        {
+            return base.Position;
+        }
         set
         {
             if (base.Position != value)
@@ -130,6 +133,11 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
 
         if (hitInfo.HealthDamage > 0)
         {
+            if (this.Attributes[Stats.IsFrozen] > 0)
+            {
+                await this.MagicEffectList.ShortenEffectsProducingSpecificStatAsync(Stats.IsFrozen, 1).ConfigureAwait(false);
+            }
+
             if (this.Attributes[Stats.IsAsleep] > 0)
             {
                 await this.MagicEffectList.ClearAllEffectsProducingSpecificStatAsync(Stats.IsAsleep).ConfigureAwait(false);
@@ -155,13 +163,7 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     }
 
     /// <inheritdoc />
-    public abstract ValueTask ReflectDamageAsync(IAttacker reflector, uint damage);
-
-    /// <inheritdoc />
-    public abstract ValueTask ApplyPoisonDamageAsync(IAttacker initialAttacker, uint damage);
-
-    /// <inheritdoc />
-    public abstract ValueTask ApplyBleedingDamageAsync(IAttacker initialAttacker, uint damage);
+    public abstract ValueTask ApplyDamageAsync(IAttacker attacker, uint damage, DamageAttributes damageAttributes);
 
     /// <inheritdoc/>
     public ValueTask KillInstantlyAsync()
@@ -187,15 +189,15 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
     }
 
     /// <inheritdoc/>
-    protected override void Dispose(bool managed)
+    protected override void Dispose(bool disposing)
     {
-        if (managed)
+        if (disposing)
         {
             this.Died = null;
             this.IsAlive = false;
         }
 
-        base.Dispose(managed);
+        base.Dispose(disposing);
     }
 
     /// <summary>
@@ -241,6 +243,7 @@ public abstract class AttackableNpcBase : NonPlayerCharacter, IAttackable
 
             await player.InvokeViewPlugInAsync<IShowHitPlugIn>(p => p.ShowHitAsync(this, hitInfo)).ConfigureAwait(false);
             player.GameContext.PlugInManager.GetPlugInPoint<IAttackableGotHitPlugIn>()?.AttackableGotHit(this, attacker, hitInfo);
+            player.GameContext.PlugInManager.GetPlugInPoint<IAttackableGotHitWithSkillPlugIn>()?.AttackableGotHit(this, attacker, hitInfo, skill);
         }
 
         if (killed)

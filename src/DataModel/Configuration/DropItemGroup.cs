@@ -1,4 +1,4 @@
-﻿// <copyright file="DropItemGroup.cs" company="MUnique">
+// <copyright file="DropItemGroup.cs" company="MUnique">
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 // </copyright>
 
@@ -96,6 +96,34 @@ public partial class DropItemGroup
     /// Gets or sets the special type of the item.
     /// </summary>
     public SpecialItemType ItemType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the chance for each excellent option, when <see cref="ItemType"/> is <see cref="SpecialItemType.Excellent"/>.
+    /// </summary>
+    /// <remarks>
+    /// If <c>null</c>, the <see cref="Items.ItemOptionDefinition.AddChance"/> of the item's excellent option definition is used.
+    /// This allows a drop source, e.g. a specific level of the Box of Kundun, to use a different chance than other drops.
+    /// </remarks>
+    public float? ExcellentOptionsAddChance { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum number of excellent options per item, when <see cref="ItemType"/> is <see cref="SpecialItemType.Excellent"/>.
+    /// </summary>
+    /// <remarks>
+    /// If <c>null</c>, the <see cref="Items.ItemOptionDefinition.MaximumOptionsPerItem"/> of the item's excellent option definition is used.
+    /// This allows a drop source, e.g. a specific level of the Box of Kundun, to create items with more options than other drops.
+    /// </remarks>
+    public int? ExcellentOptionsMaximumOptionsPerItem { get; set; }
+
+    /// <summary>
+    /// Gets or sets the table from which the number of sockets of the socket items dropped by this group is selected.
+    /// </summary>
+    /// <remarks>
+    /// If <c>null</c>, the <see cref="Items.ItemDefinition.SocketCountTable"/> of the dropped item is used.
+    /// This allows a drop source, e.g. a boss or a box, to drop socket items with more sockets than other drops.
+    /// Values above the <see cref="Items.ItemDefinition.MaximumSockets"/> of the item are never selected.
+    /// </remarks>
+    public virtual WeightedValueTable? SocketCountTable { get; set; }
 
     /// <summary>
     /// Gets or sets the possible items which can be dropped.

@@ -24,6 +24,9 @@ claim of comparison against every entry in a current Chinese client.
 
 Additional references include:
 
+- [Season 6 jewel combinations](https://mu.zhaouc.com/news/Update/214.html):
+  `Jewel of Chaos` is 玛雅之石, also used in its item and price-group
+  translations.
 - [Magic Gladiator skills](https://mu.zhaouc.com/Guide/GameIntro/01_character04.html):
   `Orb of Fire Slash` (12/16) is 玄月斩之石, not 天雷闪之石. The latter conflates
   the orb with the separate weapon skill 天雷闪.
@@ -97,10 +100,11 @@ armor sets 39, 42, 43, 44, 50, 51 and 59–61 (*Mistery*, *Black Rose*, *Aura*,
 *Lilium*, *Faith*, *Paewang*, *Sacred*, *Storm Hard*, *Piercing*) are called
 *Violent Wind*, *Demonic*, *Storm Blitz*, *Eternal Wing*, *Divine*, *Royal*,
 *Sacred Fire*, *Storm Jahad* and *Piercing Groove* in the client, and get the
-German names of those (e.g. *Sturmwindhelm*). The sets 47 and 48 are an
-exception: the neutral names *Destory* (47) and *Phantom* (48) are swapped
-compared to the client (*Phantom* at 47, *Destroy* at 48). Each of these keeps the
-translation of its own name (*Zerstörerrüstung*, *Phantom-Rüstung*).
+German names of those (e.g. *Sturmwindhelm*). The sets 47 and 48 had the
+neutral names of each other (and the spelling *Destory*); they are now called
+like in the client, *Phantom* (47, *Phantom-Rüstung*) and *Destroy* (48,
+*Zerstörerrüstung*). Existing configurations get these names with the update
+*Fix Destroy and Phantom Armor Names*.
 
 Conventions:
 

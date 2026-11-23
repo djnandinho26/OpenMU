@@ -117,7 +117,7 @@ public class GuildWarAnswerAction
         // PropertyChanged requires a void handler. The handler catches and logs all exceptions, so none get lost.
 #pragma warning disable VSTHRD100 // Avoid async void methods
         async void OnScorePropertyChanged(object? sender, PropertyChangedEventArgs args)
-#pragma warning restore VSTHRD100 // Avoid async void methods
+#pragma warning restore VSTHRD100
         {
             try
             {
@@ -147,8 +147,10 @@ public class GuildWarAnswerAction
             {
                 if (player.GuildWarContext is { } context)
                 {
-                    var isWinner = context.Team == score.Winners;
-                    await player.InvokeViewPlugInAsync<IShowGuildWarResultPlugIn>(p => p.ShowResultAsync(context.EnemyTeamName, isWinner ? GuildWarResult.Won : GuildWarResult.Lost)).ConfigureAwait(false);
+                    var result = score.Winners is null
+                        ? GuildWarResult.CancelledWar
+                        : context.Team == score.Winners ? GuildWarResult.Won : GuildWarResult.Lost;
+                    await player.InvokeViewPlugInAsync<IShowGuildWarResultPlugIn>(p => p.ShowResultAsync(context.EnemyTeamName, result)).ConfigureAwait(false);
                     if (soccerMap is not null)
                     {
                         var spawnGates = soccerMap.Definition.ExitGates.Where(g => g.IsSpawnGate);

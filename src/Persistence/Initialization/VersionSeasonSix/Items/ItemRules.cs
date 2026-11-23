@@ -10,8 +10,8 @@ using MUnique.OpenMU.DataModel.Configuration.Items;
 /// <summary>
 /// Sets the item rules (<see cref="ItemDefinition.IsTradable"/>, <see cref="ItemDefinition.IsDroppable"/>,
 /// <see cref="ItemDefinition.IsStorable"/>, <see cref="ItemDefinition.IsSellableToNpc"/>,
-/// <see cref="ItemDefinition.IsPersonalStoreSellable"/> and <see cref="ItemDefinition.IsRepairable"/>)
-/// of the Season 6 items.
+/// <see cref="ItemDefinition.IsPersonalStoreSellable"/>, <see cref="ItemDefinition.IsRepairable"/> and
+/// <see cref="ItemDefinition.IsSellableWhenExpired"/>) of the Season 6 items.
 /// </summary>
 /// <remarks>
 /// The values are the ones of the MuMain client item data (src/bin/Data/Items), so the client and the
@@ -200,10 +200,14 @@ public class ItemRules : InitializerBase
         Rule(13, 65, Blocked.Trade, Blocked.SellToNpc, Blocked.Repair), // Spirit of Guardian
         Rule(13, 67, Blocked.Repair), // Pet Rudolf
         Rule(13, 68, Blocked.Repair), // Snowman Transformation Ring
+        Rule(13, 69, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Talisman of Resurrection
         Rule(13, 76, Blocked.Trade, Blocked.SellToNpc, Blocked.Repair), // Panda Ring
         Rule(13, 80, Blocked.Trade, Blocked.SellToNpc, Blocked.Repair), // Pet Panda
+        Rule(13, 81, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Talisman of Guardian
+        Rule(13, 82, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Talisman of Item Protection
         Rule(13, 93, Blocked.Trade, Blocked.Drop, Blocked.Store, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Master Seal of Ascension
         Rule(13, 94, Blocked.Trade, Blocked.Drop, Blocked.Store, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Master Seal of Wealth
+        Rule(13, 95, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Gladiator's Honor
         Rule(13, 104, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Max AG Boost Aura
         Rule(13, 105, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Max SD Boost Aura
         Rule(13, 106, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Pet Unicorn
@@ -215,6 +219,7 @@ public class ItemRules : InitializerBase
         Rule(13, 113, Blocked.Trade, Blocked.Drop, Blocked.PersonalStore, Blocked.Repair), // Ruby Necklace
         Rule(13, 114, Blocked.Trade, Blocked.Drop, Blocked.PersonalStore, Blocked.Repair), // Emerald Necklace
         Rule(13, 115, Blocked.Trade, Blocked.Drop, Blocked.PersonalStore, Blocked.Repair), // Sapphire Necklace
+        Rule(13, 116, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Seal of Wealth (item drop)
         Rule(13, 121, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Open Access Ticket to Chaos Castle
         Rule(13, 122, Blocked.Trade, Blocked.SellToNpc, Blocked.Repair), // Skeleton Transformation Ring
         Rule(13, 123, Blocked.Trade, Blocked.SellToNpc, Blocked.Repair), // Pet Skeleton
@@ -314,6 +319,12 @@ public class ItemRules : InitializerBase
         Rule(14, 107, Blocked.Repair), // Fifth Secromicon Fragment
         Rule(14, 108, Blocked.Repair), // Sixth Secromicon Fragment
         Rule(14, 109, Blocked.Repair), // Complete Secromicon
+        Rule(14, 112, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Silver Key
+        Rule(14, 113, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Gold Key
+        Rule(14, 121, Blocked.Drop, Blocked.Repair), // Sealed Golden Box
+        Rule(14, 122, Blocked.Drop, Blocked.Repair), // Sealed Silver Box
+        Rule(14, 123, Blocked.Trade, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Golden Box
+        Rule(14, 124, Blocked.Trade, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Silver Box
         Rule(14, 133, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Elite SD Potion
         Rule(14, 140, Blocked.Trade, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Scroll of Healing
         Rule(14, 160, Blocked.Drop, Blocked.SellToNpc, Blocked.PersonalStore, Blocked.Repair), // Jewel of Extension
@@ -356,6 +367,39 @@ public class ItemRules : InitializerBase
         Rule(15, 36, Blocked.Repair), // Increase Block Parchment
     };
 
+    /// <summary>
+    /// Gets the items which can be sold to an NPC once they expired (<see cref="ItemDefinition.IsSellableWhenExpired"/>),
+    /// like the client's <c>sellableWhenRentalExpired</c>: the items which are rented in the cash shop.
+    /// </summary>
+    public static IReadOnlyList<(byte Group, short Number)> SellableWhenExpired { get; } = new (byte Group, short Number)[]
+    {
+        (12, 130), // Small Cape of Lord
+        (12, 131), // Small Wing of Curse
+        (12, 132), // Small Wings of Elf
+        (12, 133), // Small Wings of Heaven
+        (12, 134), // Small Wings of Satan
+        (12, 135), // Little Warrior's Cloak
+        (13, 64), // Demon
+        (13, 65), // Spirit of Guardian
+        (13, 76), // Panda Ring
+        (13, 80), // Pet Panda
+        (13, 106), // Pet Unicorn
+        (13, 107), // Lethal Wizard's Ring
+        (13, 109), // Sapphire Ring
+        (13, 110), // Ruby Ring
+        (13, 111), // Topaz Ring
+        (13, 112), // Amethyst Ring
+        (13, 113), // Ruby Necklace
+        (13, 114), // Emerald Necklace
+        (13, 115), // Sapphire Necklace
+        (13, 122), // Skeleton Transformation Ring
+        (13, 123), // Pet Skeleton
+        (14, 112), // Silver Key
+        (14, 113), // Gold Key
+        (14, 123), // Golden Box
+        (14, 124), // Silver Box
+    };
+
     /// <inheritdoc />
     public override void Initialize()
     {
@@ -374,12 +418,14 @@ public class ItemRules : InitializerBase
     }
 
     /// <summary>
-    /// Applies the <see cref="Rules"/> to the given items. Items which are not listed are skipped.
+    /// Applies the <see cref="Rules"/> and <see cref="SellableWhenExpired"/> to the given items. Items which are not listed are skipped.
     /// </summary>
     /// <param name="items">The items.</param>
     internal static void Apply(IEnumerable<ItemDefinition> items)
     {
         var rules = Rules.ToDictionary(rule => (rule.Group, rule.Number), rule => rule.BlockedActions);
+        items = items.ToList();
+        ApplySellableWhenExpired(items);
         foreach (var item in items)
         {
             if (!rules.TryGetValue((item.Group, item.Number), out var blocked))
@@ -393,6 +439,20 @@ public class ItemRules : InitializerBase
             item.IsSellableToNpc = !blocked.Contains(Blocked.SellToNpc);
             item.IsPersonalStoreSellable = !blocked.Contains(Blocked.PersonalStore);
             item.IsRepairable = !blocked.Contains(Blocked.Repair);
+        }
+    }
+
+    /// <summary>
+    /// Sets <see cref="ItemDefinition.IsSellableWhenExpired"/> on the items of <see cref="SellableWhenExpired"/>.
+    /// The other items are skipped.
+    /// </summary>
+    /// <param name="items">The items.</param>
+    internal static void ApplySellableWhenExpired(IEnumerable<ItemDefinition> items)
+    {
+        var sellableWhenExpired = SellableWhenExpired.ToHashSet();
+        foreach (var item in items.Where(item => sellableWhenExpired.Contains((item.Group, item.Number))))
+        {
+            item.IsSellableWhenExpired = true;
         }
     }
 

@@ -43,22 +43,9 @@ internal class LostTower : BaseMapInitializer
     protected override LocalizedString MapName => Name;
 
     /// <inheritdoc/>
-    protected override IEnumerable<MonsterSpawnArea> CreateNpcSpawns()
-    {
-        yield return this.CreateMonsterSpawn(1, this.NpcDictionary[253], 207, 76, Direction.SouthWest);
-        yield return this.CreateMonsterSpawn(2, this.NpcDictionary[240], 201, 76, Direction.SouthEast);
-    }
-
-    /// <inheritdoc/>
     protected override IEnumerable<MonsterSpawnArea> CreateMonsterSpawns()
     {
         yield return this.CreateMonsterSpawn(100, this.NpcDictionary[40], 6, 98);
-        yield return this.CreateMonsterSpawn(101, this.NpcDictionary[40], 10, 110);
-        yield return this.CreateMonsterSpawn(102, this.NpcDictionary[40], 5, 110);
-        yield return this.CreateMonsterSpawn(103, this.NpcDictionary[40], 15, 105);
-        yield return this.CreateMonsterSpawn(104, this.NpcDictionary[40], 12, 99);
-        yield return this.CreateMonsterSpawn(105, this.NpcDictionary[40], 10, 100);
-        yield return this.CreateMonsterSpawn(106, this.NpcDictionary[40], 12, 100);
         yield return this.CreateMonsterSpawn(107, this.NpcDictionary[36], 193, 239);
         yield return this.CreateMonsterSpawn(108, this.NpcDictionary[36], 191, 131);
         yield return this.CreateMonsterSpawn(109, this.NpcDictionary[36], 191, 118);
@@ -290,7 +277,6 @@ internal class LostTower : BaseMapInitializer
         yield return this.CreateMonsterSpawn(335, this.NpcDictionary[35], 23, 40);
         yield return this.CreateMonsterSpawn(336, this.NpcDictionary[40], 22, 30);
         yield return this.CreateMonsterSpawn(337, this.NpcDictionary[40], 39, 38);
-        yield return this.CreateMonsterSpawn(338, this.NpcDictionary[40], 6, 98);
         yield return this.CreateMonsterSpawn(339, this.NpcDictionary[40], 33, 86);
         yield return this.CreateMonsterSpawn(340, this.NpcDictionary[40], 46, 86);
         yield return this.CreateMonsterSpawn(341, this.NpcDictionary[40], 55, 87);
@@ -488,7 +474,6 @@ internal class LostTower : BaseMapInitializer
         yield return this.CreateMonsterSpawn(533, this.NpcDictionary[40], 91, 56);
         yield return this.CreateMonsterSpawn(534, this.NpcDictionary[39], 195, 32);
         yield return this.CreateMonsterSpawn(535, this.NpcDictionary[39], 189, 38);
-        yield return this.CreateMonsterSpawn(536, this.NpcDictionary[36], 195, 40);
         yield return this.CreateMonsterSpawn(537, this.NpcDictionary[39], 189, 48);
         yield return this.CreateMonsterSpawn(538, this.NpcDictionary[39], 196, 54);
         yield return this.CreateMonsterSpawn(539, this.NpcDictionary[39], 196, 207);
@@ -650,6 +635,8 @@ internal class LostTower : BaseMapInitializer
         yield return this.CreateMonsterSpawn(695, this.NpcDictionary[103], 226, 233, Direction.SouthWest);
         yield return this.CreateMonsterSpawn(696, this.NpcDictionary[103], 227, 233, Direction.SouthWest);
         yield return this.CreateMonsterSpawn(697, this.NpcDictionary[103], 228, 233, Direction.SouthWest);
+        yield return this.CreateMonsterSpawn(698, this.NpcDictionary[39], 203, 50);
+        yield return this.CreateMonsterSpawn(699, this.NpcDictionary[39], 236, 127);
     }
 
     /// <inheritdoc/>
@@ -678,10 +665,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 95 },
                 { Stats.AttackRatePvm, 270 },
                 { Stats.DefenseRatePvm, 80 },
-                { Stats.PoisonResistance, 5f / 255 },
-                { Stats.IceResistance, 5f / 255 },
-                { Stats.WaterResistance, 7f / 255 },
-                { Stats.FireResistance, 7f / 255 },
+                { Stats.IceResistance, 5 },
+                { Stats.PoisonResistance, 5 },
+                { Stats.LightningResistance, 7 },
+                { Stats.FireResistance, 7 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -711,10 +698,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 130 },
                 { Stats.AttackRatePvm, 320 },
                 { Stats.DefenseRatePvm, 94 },
-                { Stats.PoisonResistance, 6f / 255 },
-                { Stats.IceResistance, 6f / 255 },
-                { Stats.WaterResistance, 6f / 255 },
-                { Stats.FireResistance, 8f / 255 },
+                { Stats.IceResistance, 6 },
+                { Stats.PoisonResistance, 6 },
+                { Stats.LightningResistance, 6 },
+                { Stats.FireResistance, 8 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -743,10 +730,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 78 },
                 { Stats.AttackRatePvm, 235 },
                 { Stats.DefenseRatePvm, 67 },
-                { Stats.PoisonResistance, 3f / 255 },
-                { Stats.IceResistance, 3f / 255 },
-                { Stats.WaterResistance, 3f / 255 },
-                { Stats.FireResistance, 5f / 255 },
+                { Stats.IceResistance, 3 },
+                { Stats.PoisonResistance, 3 },
+                { Stats.LightningResistance, 3 },
+                { Stats.FireResistance, 5 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -776,10 +763,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 115 },
                 { Stats.AttackRatePvm, 300 },
                 { Stats.DefenseRatePvm, 88 },
-                { Stats.PoisonResistance, 5f / 255 },
-                { Stats.IceResistance, 5f / 255 },
-                { Stats.WaterResistance, 5f / 255 },
-                { Stats.FireResistance, 7f / 255 },
+                { Stats.IceResistance, 5 },
+                { Stats.PoisonResistance, 5 },
+                { Stats.LightningResistance, 5 },
+                { Stats.FireResistance, 7 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -809,10 +796,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 160 },
                 { Stats.AttackRatePvm, 330 },
                 { Stats.DefenseRatePvm, 99 },
-                { Stats.PoisonResistance, 10f / 255 },
-                { Stats.IceResistance, 10f / 255 },
-                { Stats.WaterResistance, 10f / 255 },
-                { Stats.FireResistance, 15f / 255 },
+                { Stats.IceResistance, 10 },
+                { Stats.PoisonResistance, 10 },
+                { Stats.LightningResistance, 10 },
+                { Stats.FireResistance, 15 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -842,10 +829,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 85 },
                 { Stats.AttackRatePvm, 250 },
                 { Stats.DefenseRatePvm, 73 },
-                { Stats.PoisonResistance, 6f / 255 },
-                { Stats.IceResistance, 4f / 255 },
-                { Stats.WaterResistance, 4f / 255 },
-                { Stats.FireResistance, 6f / 255 },
+                { Stats.IceResistance, 6 },
+                { Stats.PoisonResistance, 4 },
+                { Stats.LightningResistance, 4 },
+                { Stats.FireResistance, 6 },
                 { Stats.PoisonDamageMultiplier, 0.03f },
             };
 
@@ -875,10 +862,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 120 },
                 { Stats.AttackRatePvm, 310 },
                 { Stats.DefenseRatePvm, 91 },
-                { Stats.PoisonResistance, 6f / 255 },
-                { Stats.IceResistance, 6f / 255 },
-                { Stats.WaterResistance, 6f / 255 },
-                { Stats.FireResistance, 7f / 255 },
+                { Stats.IceResistance, 6 },
+                { Stats.PoisonResistance, 6 },
+                { Stats.LightningResistance, 6 },
+                { Stats.FireResistance, 7 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -907,10 +894,10 @@ internal class LostTower : BaseMapInitializer
                 { Stats.DefenseBase, 110 },
                 { Stats.AttackRatePvm, 285 },
                 { Stats.DefenseRatePvm, 85 },
-                { Stats.PoisonResistance, 5f / 255 },
-                { Stats.IceResistance, 5f / 255 },
-                { Stats.WaterResistance, 5f / 255 },
-                { Stats.FireResistance, 7f / 255 },
+                { Stats.IceResistance, 5 },
+                { Stats.PoisonResistance, 5 },
+                { Stats.LightningResistance, 5 },
+                { Stats.FireResistance, 7 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);

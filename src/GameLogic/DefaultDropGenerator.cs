@@ -94,7 +94,8 @@ public class DefaultDropGenerator : IDropGenerator
         }
 
         uint money = 0;
-        var (droppedItems, moneyResult) = this.GenerateDrops(monster, gainedExperience);
+        var itemDropRate = 1.0 + (player.Attributes?[Stats.BonusItemDropRate] ?? 0);
+        var (droppedItems, moneyResult) = this.GenerateDrops(monster, gainedExperience, itemDropRate);
         if (moneyResult > 0)
         {
             money = moneyResult;
@@ -106,9 +107,9 @@ public class DefaultDropGenerator : IDropGenerator
     }
 
     /// <inheritdoc/>
-    public Item? GenerateItemDrop(DropItemGroup selectedGroup)
+    public Item? GenerateItemDrop(DropItemGroup group)
     {
-        return this.GenerateItemDrop(selectedGroup, selectedGroup.PossibleItems);
+        return this.GenerateItemDrop(group, group.PossibleItems);
     }
 
     /// <inheritdoc/>
@@ -169,7 +170,7 @@ public class DefaultDropGenerator : IDropGenerator
 
         if (item.Definition.MaximumSockets > 0)
         {
-            item.SocketCount = this._randomizer.NextInt(1, item.Definition.MaximumSockets + 1);
+            item.SocketCount = this.SelectSocketCount(item.Definition, item.Definition.SocketCountTable);
         }
 
         if (item.CanHaveSkill())
@@ -183,8 +184,9 @@ public class DefaultDropGenerator : IDropGenerator
     /// </summary>
     /// <param name="monsterLevel">The monster level, if it's a monster drop.</param>
     /// <param name="possibleItems">The possible items, if the drop is from an item box (e.g. box of kundun).</param>
+    /// <param name="dropGroup">The drop group, which may override the chance and the maximum number of excellent options.</param>
     /// <returns>A random excellent item.</returns>
-    protected Item? GenerateRandomExcellentItem(int monsterLevel = 0, ICollection<ItemDefinition>? possibleItems = null)
+    protected Item? GenerateRandomExcellentItem(int monsterLevel = 0, ICollection<ItemDefinition>? possibleItems = null, DropItemGroup? dropGroup = null)
     {
         if (monsterLevel < this._excellentItemDropLevelDelta && possibleItems is null)
         {
@@ -203,7 +205,7 @@ public class DefaultDropGenerator : IDropGenerator
 
         item.HasSkill = item.CanHaveSkill(); // every excellent item got skill
 
-        this.AddRandomExcOptions(item);
+        this.AddRandomExcOptions(item, dropGroup);
         item.Durability = item.GetMaximumDurabilityOfOnePiece();
         return item;
     }
@@ -280,7 +282,18 @@ public class DefaultDropGenerator : IDropGenerator
         return itemDefinition.MaximumDropLevel is not { } maxDropLevel || monsterLevel <= maxDropLevel;
     }
 
-    private (IList<Item>? Items, uint Money) GenerateDrops(MonsterDefinition monster, int gainedExperience)
+    /// <summary>
+    /// Gets the chance of a drop item group, raised by the item drop rate when it drops items.
+    /// </summary>
+    /// <param name="group">The drop item group.</param>
+    /// <param name="itemDropRate">The item drop rate of the player, 1.0 by default.</param>
+    /// <returns>The chance of the group.</returns>
+    private static double GetChance(DropItemGroup group, double itemDropRate)
+    {
+        return group.ItemType == SpecialItemType.Money ? group.Chance : group.Chance * itemDropRate;
+    }
+
+    private (IList<Item>? Items, uint Money) GenerateDrops(MonsterDefinition monster, int gainedExperience, double itemDropRate)
     {
         uint money = 0;
         List<Item>? droppedItems = null;
@@ -315,12 +328,12 @@ public class DefaultDropGenerator : IDropGenerator
             double totalChance = 0;
             foreach (var group in this._chanceDropGroups)
             {
-                totalChance += group.Chance;
+                totalChance += GetChance(group, itemDropRate);
             }
 
             for (int i = 0; i < remainingDrops; i++)
             {
-                var group = this.SelectRandomGroup(this._chanceDropGroups, totalChance);
+                var group = this.SelectRandomGroup(this._chanceDropGroups, totalChance, itemDropRate);
                 if (group is null)
                 {
                     continue;
@@ -368,7 +381,7 @@ public class DefaultDropGenerator : IDropGenerator
         var item = selectedGroup.ItemType switch
         {
             SpecialItemType.Ancient => this.GenerateRandomAncient(),
-            SpecialItemType.Excellent => this.GenerateRandomExcellentItem(possibleItems: possibleItems),
+            SpecialItemType.Excellent => this.GenerateRandomExcellentItem(possibleItems: possibleItems, dropGroup: selectedGroup),
             _ => this.GenerateRandomItem(possibleItems),
         };
 
@@ -381,6 +394,8 @@ public class DefaultDropGenerator : IDropGenerator
         {
             item.Durability = item.GetMaximumDurabilityOfOnePiece();
         }
+
+        this.ApplySocketCountTableOfGroup(item, selectedGroup);
 
         if (selectedGroup is ItemDropItemGroup itemDropItemGroup)
         {
@@ -478,7 +493,7 @@ public class DefaultDropGenerator : IDropGenerator
         }
     }
 
-    private void AddRandomExcOptions(Item item)
+    private void AddRandomExcOptions(Item item, DropItemGroup? dropGroup)
     {
         var excellentOptions = item.Definition!.PossibleItemOptions.FirstOrDefault(
             o => o.PossibleOptions.Any(p => object.Equals(p.OptionType, ItemOptionTypes.Excellent)));
@@ -488,31 +503,40 @@ public class DefaultDropGenerator : IDropGenerator
             return;
         }
 
+        // A drop source, like a specific level of the Box of Kundun, can override the chance and the
+        // maximum count of its excellent options. Otherwise, the values of the item definition apply.
+        var maximumOptions = Math.Max(0, dropGroup?.ExcellentOptionsMaximumOptionsPerItem ?? excellentOptions.MaximumOptionsPerItem);
+        var addChance = dropGroup?.ExcellentOptionsAddChance ?? excellentOptions.AddChance;
+
         var existingOptionCount = item.ItemOptions.Count(o => object.Equals(o.ItemOption?.OptionType, ItemOptionTypes.Excellent));
 
-        for (int i = existingOptionCount; i < excellentOptions.MaximumOptionsPerItem; i++)
+        for (int i = existingOptionCount; i < maximumOptions; i++)
         {
+            // The drop group may allow more options than the item definition provides. Add each option
+            // only once and stop when there is nothing left, instead of searching forever.
+            var remainingOptions = excellentOptions.PossibleOptions
+                .Where(possibleOption => item.ItemOptions.All(link => !object.Equals(link.ItemOption, possibleOption)))
+                .ToList();
+            if (remainingOptions.Count == 0)
+            {
+                break;
+            }
+
             if (i == 0)
             {
                 // The first option is always added without a chance
-                var newOption = excellentOptions.PossibleOptions.SelectRandom(this._randomizer);
+                var newOption = remainingOptions.SelectRandom(this._randomizer);
                 if (newOption is not null)
                 {
                     item.ItemOptions.Add(new ItemOptionLink { ItemOption = newOption });
-                    existingOptionCount++;
                 }
 
                 continue;
             }
 
-            if (this._randomizer.NextRandomBool(excellentOptions.AddChance))
+            if (this._randomizer.NextRandomBool(addChance))
             {
-                var newOption = excellentOptions.PossibleOptions.SelectRandom(this._randomizer);
-                while (item.ItemOptions.Any(o => object.Equals(o.ItemOption, newOption)))
-                {
-                    newOption = excellentOptions.PossibleOptions.SelectRandom(this._randomizer);
-                }
-
+                var newOption = remainingOptions.SelectRandom(this._randomizer);
                 if (newOption is not null)
                 {
                     item.ItemOptions.Add(new ItemOptionLink { ItemOption = newOption });
@@ -531,6 +555,11 @@ public class DefaultDropGenerator : IDropGenerator
         }
 
         var item = this.GenerateSpecialItem(monster, selectedGroup);
+        if (item is not null)
+        {
+            this.ApplySocketCountTableOfGroup(item, selectedGroup);
+        }
+
         if (item is null && selectedGroup.ItemType == SpecialItemType.Money)
         {
             droppedMoney = (uint)(gainedExperience + BaseMoneyDrop);
@@ -563,14 +592,14 @@ public class DefaultDropGenerator : IDropGenerator
         return selectedGroup.ItemType switch
         {
             SpecialItemType.Ancient => this.GenerateRandomAncient(),
-            SpecialItemType.Excellent => this.GenerateRandomExcellentItem(monsterLevel),
+            SpecialItemType.Excellent => this.GenerateRandomExcellentItem(monsterLevel, dropGroup: selectedGroup),
             SpecialItemType.RandomItem => this.GenerateRandomItem(monsterLevel, false),
             SpecialItemType.SocketItem => this.GenerateRandomItem(monsterLevel, true),
             _ => null,
         };
     }
 
-    private DropItemGroup? SelectRandomGroup(IEnumerable<DropItemGroup> groups, double totalChance)
+    private DropItemGroup? SelectRandomGroup(IEnumerable<DropItemGroup> groups, double totalChance, double itemDropRate = 1.0)
     {
         var remainingThreshold = this._randomizer.NextDouble();
         if (totalChance > 1.0)
@@ -580,9 +609,10 @@ public class DefaultDropGenerator : IDropGenerator
 
         foreach (var group in groups)
         {
-            if (remainingThreshold > group.Chance)
+            var chance = GetChance(group, itemDropRate);
+            if (remainingThreshold > chance)
             {
-                remainingThreshold -= group.Chance;
+                remainingThreshold -= chance;
             }
             else
             {
@@ -591,6 +621,37 @@ public class DefaultDropGenerator : IDropGenerator
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Selects the number of sockets of a dropped socket item.
+    /// </summary>
+    /// <remarks>
+    /// Values of the table above <see cref="ItemDefinition.MaximumSockets"/> are never selected.
+    /// Without a table, or if the table has no selectable value, the number is selected uniformly
+    /// between 1 and <see cref="ItemDefinition.MaximumSockets"/>, so that a socket item never drops without sockets.
+    /// </remarks>
+    private int SelectSocketCount(ItemDefinition definition, WeightedValueTable? table)
+    {
+        if (table?.SelectRandomValue(this._randomizer, 1, definition.MaximumSockets) is { } socketCount)
+        {
+            return socketCount;
+        }
+
+        return this._randomizer.NextInt(1, definition.MaximumSockets + 1);
+    }
+
+    /// <summary>
+    /// Selects the number of sockets of an item again, by the <see cref="DropItemGroup.SocketCountTable"/> of the group
+    /// which dropped it, if it has one.
+    /// </summary>
+    private void ApplySocketCountTableOfGroup(Item item, DropItemGroup group)
+    {
+        if (group.SocketCountTable is { } table
+            && item.Definition is { MaximumSockets: > 0 } definition)
+        {
+            item.SocketCount = this.SelectSocketCount(definition, table);
+        }
     }
 
     private IList<ItemDefinition>? GetPossibleList(int monsterLevel, bool isSocketItem = false)

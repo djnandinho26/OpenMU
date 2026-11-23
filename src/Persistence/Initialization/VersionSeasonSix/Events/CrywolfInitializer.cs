@@ -170,6 +170,9 @@ internal class CrywolfInitializer : InitializerBase
         warpInfo.Costs = 10000;
         warpInfo.LevelRequirement = 190;
         warpInfo.Gate = gate;
+
+        // The original client doesn't offer it in its warp window: Crywolf is reached by walking.
+        warpInfo.IsWarpable = false;
         this.GameConfiguration.WarpList.Add(warpInfo);
     }
 
@@ -224,10 +227,10 @@ internal class CrywolfInitializer : InitializerBase
             { Stats.DefenseBase, defense },
             { Stats.AttackRatePvm, attackRate },
             { Stats.DefenseRatePvm, defenseRate },
-            { Stats.PoisonResistance, resistance / 255f },
-            { Stats.IceResistance, resistance / 255f },
-            { Stats.LightningResistance, resistance / 255f },
-            { Stats.FireResistance, resistance / 255f },
+            { Stats.PoisonResistance, resistance },
+            { Stats.IceResistance, resistance },
+            { Stats.LightningResistance, resistance },
+            { Stats.FireResistance, resistance },
         };
 
         monster.AddAttributes(attributes, this.Context, this.GameConfiguration);

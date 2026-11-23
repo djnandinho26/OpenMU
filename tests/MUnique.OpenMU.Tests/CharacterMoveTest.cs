@@ -10,6 +10,7 @@ using MUnique.OpenMU.AttributeSystem;
 using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.GameLogic.Attributes;
+using MUnique.OpenMU.GameLogic.PlugIns;
 using MUnique.OpenMU.GameLogic.Views.World;
 using MUnique.OpenMU.GameServer;
 using MUnique.OpenMU.GameServer.MessageHandler;
@@ -48,7 +49,6 @@ public class CharacterMoveTest
         Assert.That(count, Is.EqualTo(4));
 
         steps = steps.Slice(0, count);
-        steps.Span.Reverse();
         Assert.That(steps.Span[0].From, Is.EqualTo(StartPoint));
         Assert.That(steps.Span[steps.Length - 1].To, Is.EqualTo(EndPoint));
         for (var index = 0; index < steps.Span.Length; index++)
@@ -56,6 +56,22 @@ public class CharacterMoveTest
             var direction = steps.Span[index];
             Assert.That(direction.From, Is.Not.EqualTo(direction.To));
         }
+    }
+
+    /// <summary>
+    /// Tests if the walk directions are returned in the order in which they are walked.
+    /// </summary>
+    [Test]
+    public async ValueTask TestWalkDirectionsAreInWalkingOrderAsync()
+    {
+        var player = await this.DoTheWalkAsync().ConfigureAwait(false);
+
+        Memory<Direction> directions = new Direction[16];
+        var count = await player.GetDirectionsAsync(directions).ConfigureAwait(false);
+
+        Assert.That(
+            directions[..count].ToArray(),
+            Is.EqualTo(new[] { Direction.SouthEast, Direction.SouthEast, Direction.East, Direction.East }));
     }
 
     /// <summary>
@@ -126,16 +142,17 @@ public class CharacterMoveTest
 
     /// <summary>
     /// Tests if a reported stop position which the current walk doesn't pass through, and which
-    /// isn't next to our position, ends the walk where we are and tells the player, so it can't be used
-    /// to leave the path and the client doesn't stay apart from us.
+    /// is further away than a walk may start from us, ends the walk where we are and tells the player,
+    /// so it can't be used to leave the path and the client doesn't stay apart from us.
     /// </summary>
     [Test]
     public async ValueTask TestStopPositionOutsideOfTheWalkEndsTheWalkAndResynchronizesAsync()
     {
         var player = await this.DoTheSlowWalkAsync().ConfigureAwait(false);
+        var maxAllowedOffset = player.GameContext.FeaturePlugIns.GetPlugIn<SpeedHackDetectPlugIn>()?.Configuration?.MaxAllowedWalkStartOffset ?? 5;
         var walkPoints = await GetWalkPointsAsync(player).ConfigureAwait(false);
         var position = player.Position;
-        var offPathPoint = new Point(position.X, (byte)(position.Y - 2));
+        var offPathPoint = new Point(position.X, (byte)(position.Y + maxAllowedOffset + 1));
         Assert.That(walkPoints, Does.Not.Contain(offPathPoint), "The test needs a position the walk doesn't pass through.");
 
         await HandleStopPacketAsync(player, offPathPoint).ConfigureAwait(false);
@@ -147,6 +164,51 @@ public class CharacterMoveTest
         });
         Mock.Get(player.ViewPlugIns.GetPlugIn<IObjectMovedPlugIn>()!)
             .Verify(p => p.ObjectMovedAsync(player, MoveType.Instant), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests if a reported stop position which the current walk doesn't pass through, and which is
+    /// within the offset a walk may start from us, ends the walk where we are without pulling the
+    /// player back: the difference is plausible with some network lag, and everybody in view would see
+    /// the character slide.
+    /// </summary>
+    [Test]
+    public async ValueTask TestStopPositionOutsideOfTheWalkWithinTheStartOffsetIsToleratedAsync()
+    {
+        var player = await this.DoTheSlowWalkAsync().ConfigureAwait(false);
+        var walkPoints = await GetWalkPointsAsync(player).ConfigureAwait(false);
+        var position = player.Position;
+        var offPathPoint = new Point(position.X, (byte)(position.Y - 3));
+        Assert.That(walkPoints, Does.Not.Contain(offPathPoint), "The test needs a position the walk doesn't pass through.");
+
+        await HandleStopPacketAsync(player, offPathPoint).ConfigureAwait(false);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(player.IsWalking, Is.False);
+            Assert.That(player.Position, Is.EqualTo(position));
+        });
+        Mock.Get(player.ViewPlugIns.GetPlugIn<IObjectMovedPlugIn>()!)
+            .Verify(p => p.ObjectMovedAsync(player, MoveType.Instant), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests if a player standing still isn't told anything when its client reports a position
+    /// up to the offset a walk may start from us: every swing reports the position, and a correction
+    /// would drop the attack animation.
+    /// </summary>
+    [Test]
+    public async ValueTask TestStandingPlayerReportingAPositionWithinTheStartOffsetIsLeftAloneAsync()
+    {
+        var player = await PlayerTestHelper.CreatePlayerAsync().ConfigureAwait(false);
+        player.Position = StartPoint;
+
+        await HandleStopPacketAsync(player, new Point((byte)(StartPoint.X + 3), StartPoint.Y)).ConfigureAwait(false);
+        await HandleStopPacketAsync(player, new Point((byte)(StartPoint.X + 5), StartPoint.Y)).ConfigureAwait(false);
+
+        Assert.That(player.Position, Is.EqualTo(StartPoint));
+        Mock.Get(player.ViewPlugIns.GetPlugIn<IObjectMovedPlugIn>()!)
+            .Verify(p => p.ObjectMovedAsync(player, It.IsAny<MoveType>()), Times.Never);
     }
 
     /// <summary>
@@ -202,7 +264,8 @@ public class CharacterMoveTest
     public async ValueTask TestStopPositionTooFarAwayIsNotTakenAsync()
     {
         var player = await this.DoTheSlowWalkAsync().ConfigureAwait(false);
-        var farAway = new Point((byte)(StartPoint.X + 10), StartPoint.Y);
+        var maxAllowedOffset = player.GameContext.FeaturePlugIns.GetPlugIn<SpeedHackDetectPlugIn>()?.Configuration?.MaxAllowedWalkStartOffset ?? 5;
+        var farAway = new Point((byte)(EndPoint.X + maxAllowedOffset + 1), EndPoint.Y);
         player.Position = farAway;
 
         await HandleStopPacketAsync(player, EndPoint).ConfigureAwait(false);
@@ -218,7 +281,7 @@ public class CharacterMoveTest
 
     /// <summary>
     /// Tests if a player standing still is told where we have it, when its client reports a
-    /// position further away than the next tile.
+    /// position further away than a walk may start from us.
     /// </summary>
     [Test]
     public async ValueTask TestStandingPlayerReportingAnotherPositionIsResynchronizedAsync()
@@ -226,7 +289,7 @@ public class CharacterMoveTest
         var player = await PlayerTestHelper.CreatePlayerAsync().ConfigureAwait(false);
         player.Position = StartPoint;
 
-        await HandleStopPacketAsync(player, new Point((byte)(StartPoint.X + 3), StartPoint.Y)).ConfigureAwait(false);
+        await HandleStopPacketAsync(player, new Point((byte)(StartPoint.X + 6), StartPoint.Y)).ConfigureAwait(false);
 
         Assert.That(player.Position, Is.EqualTo(StartPoint));
         Mock.Get(player.ViewPlugIns.GetPlugIn<IObjectMovedPlugIn>()!)
@@ -308,7 +371,6 @@ public class CharacterMoveTest
         Memory<WalkingStep> steps = new WalkingStep[16];
         var count = await player.GetStepsAsync(steps).ConfigureAwait(false);
         steps = steps[..count];
-        steps.Span.Reverse();
 
         var points = new List<Point> { steps.Span[0].From };
         foreach (var step in steps.Span)
@@ -361,13 +423,16 @@ public class CharacterMoveTest
     {
         var packet = new byte[] { 0xC1, 0x08, (byte)PacketType.Walk, 0x93, 0x78, 0x44, 0x33, 0x44 };
         var player = await PlayerTestHelper.CreatePlayerAsync().ConfigureAwait(false);
+
+        // Moves the player on the map: setting the position of the character leaves the player in the bucket
+        // of its spawn point, and the first move would then drop its observation of itself.
+        await player.MoveAsync(StartPoint).ConfigureAwait(false);
+        Mock.Get(player.ViewPlugIns.GetPlugIn<IObjectMovedPlugIn>()!).Invocations.Clear();
         if (movementSpeedFactor is { } factor)
         {
             player.Attributes!.AddElement(new SimpleElement(factor, AggregateType.AddRaw), Stats.MovementSpeedFactor);
         }
 
-        player.SelectedCharacter!.PositionX = StartPoint.X;
-        player.SelectedCharacter.PositionY = StartPoint.Y;
         var moveHandler = new CharacterWalkHandlerPlugIn();
         await moveHandler.HandlePacketAsync(player, packet).ConfigureAwait(false);
 

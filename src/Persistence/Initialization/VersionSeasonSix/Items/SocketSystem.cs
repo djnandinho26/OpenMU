@@ -49,6 +49,8 @@ public class SocketSystem : InitializerBase
     private ItemOptionDefinition? _bonusArmorOptions;
     private ItemOptionDefinition? _bonusPhysOptions;
     private ItemOptionDefinition? _bonusWizOptions;
+    private WeightedValueTable? _oneHandedSocketCountTable;
+    private WeightedValueTable? _twoHandedSocketCountTable;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SocketSystem"/> class.
@@ -207,15 +209,17 @@ public class SocketSystem : InitializerBase
 
     private void AddSocketsToItems()
     {
-        this.AddWeaponSockets(0, 26, 3); // Flameberge
-        this.AddWeaponSockets(0, 27, 3); // Sword Breaker
-        this.AddWeaponSockets(0, 28, 3); // Imperial Sword
-        this.AddWeaponSockets(2, 16, 3); // Frost Mace
-        this.AddWeaponSockets(2, 17, 3); // Absolute Scepter
-        this.AddWeaponSockets(4, 23, 5); // Stinger Bow
-        this.AddWeaponSockets(5, 20, 3); // Eternal Wing Stick
-        this.AddWeaponSockets(5, 30, 3); // Deadly Staff
-        this.AddWeaponSockets(5, 31, 3); // Imperial Staff
+        (this._oneHandedSocketCountTable, this._twoHandedSocketCountTable) = SocketCountTables.GetOrCreate(this.Context, this.GameConfiguration);
+
+        this.AddWeaponSockets(0, 26); // Flameberge
+        this.AddWeaponSockets(0, 27); // Sword Breaker
+        this.AddWeaponSockets(0, 28); // Imperial Sword
+        this.AddWeaponSockets(2, 16); // Frost Mace
+        this.AddWeaponSockets(2, 17); // Absolute Scepter
+        this.AddWeaponSockets(4, 23); // Stinger Bow
+        this.AddWeaponSockets(5, 20); // Eternal Wing Stick
+        this.AddWeaponSockets(5, 30); // Deadly Staff
+        this.AddWeaponSockets(5, 31); // Imperial Staff
 
         this.AddArmorSockets(6, 17); // Crimson Glory
         this.AddArmorSockets(6, 18); // Salamander Shield
@@ -230,8 +234,8 @@ public class SocketSystem : InitializerBase
         this.AddArmorSockets(7, 53); // Queen Helm
         this.AddArmorSockets(8, 45); // Titan Armor
         this.AddArmorSockets(8, 46); // Brave Armor
-        this.AddArmorSockets(8, 47); // Destory Armor
-        this.AddArmorSockets(8, 48); // Phantom Armor
+        this.AddArmorSockets(8, 47); // Phantom Armor
+        this.AddArmorSockets(8, 48); // Destroy Armor
         this.AddArmorSockets(8, 49); // Seraphim Armor
         this.AddArmorSockets(8, 50); // Faith Armor
         this.AddArmorSockets(8, 51); // Phaewang Armor
@@ -239,8 +243,8 @@ public class SocketSystem : InitializerBase
         this.AddArmorSockets(8, 53); // Queen Armor
         this.AddArmorSockets(9, 45); // Titan Pants
         this.AddArmorSockets(9, 46); // Brave Pants
-        this.AddArmorSockets(9, 47); // Destory Pants
-        this.AddArmorSockets(9, 48); // Phantom Pants
+        this.AddArmorSockets(9, 47); // Phantom Pants
+        this.AddArmorSockets(9, 48); // Destroy Pants
         this.AddArmorSockets(9, 49); // Seraphim Pants
         this.AddArmorSockets(9, 50); // Faith Pants
         this.AddArmorSockets(9, 51); // Phaewang Pants
@@ -248,8 +252,8 @@ public class SocketSystem : InitializerBase
         this.AddArmorSockets(9, 53); // Queen Pants
         this.AddArmorSockets(10, 45); // Titan Gloves
         this.AddArmorSockets(10, 46); // Brave Gloves
-        this.AddArmorSockets(10, 47); // Destory Gloves
-        this.AddArmorSockets(10, 48); // Phantom Gloves
+        this.AddArmorSockets(10, 47); // Phantom Gloves
+        this.AddArmorSockets(10, 48); // Destroy Gloves
         this.AddArmorSockets(10, 49); // Seraphim Gloves
         this.AddArmorSockets(10, 50); // Faith Gloves
         this.AddArmorSockets(10, 51); // Phaewang Gloves
@@ -257,8 +261,8 @@ public class SocketSystem : InitializerBase
         this.AddArmorSockets(10, 53); // Queen Gloves
         this.AddArmorSockets(11, 45); // Titan Boots
         this.AddArmorSockets(11, 46); // Brave Boots
-        this.AddArmorSockets(11, 47); // Destory Boots
-        this.AddArmorSockets(11, 48); // Phantom Boots
+        this.AddArmorSockets(11, 47); // Phantom Boots
+        this.AddArmorSockets(11, 48); // Destroy Boots
         this.AddArmorSockets(11, 49); // Seraphim Boots
         this.AddArmorSockets(11, 50); // Faith Boots
         this.AddArmorSockets(11, 51); // Phaewang Boots
@@ -275,14 +279,15 @@ public class SocketSystem : InitializerBase
             return;
         }
 
-        item.MaximumSockets = 3;
+        item.MaximumSockets = SocketCountTables.MaximumSocketCount;
+        item.SocketCountTable = this._oneHandedSocketCountTable;
         item.PossibleItemOptions.Add(this._waterOptions!);
         item.PossibleItemOptions.Add(this._earthOptions!);
         item.PossibleItemOptions.Add(this._windOptions!);
         item.PossibleItemOptions.Add(this._bonusArmorOptions!);
     }
 
-    private void AddWeaponSockets(byte group, short number, int socketCount)
+    private void AddWeaponSockets(byte group, short number)
     {
         var item = this.GameConfiguration.Items.FirstOrDefault(i => i.Group == group && i.Number == number);
         if (item is null)
@@ -291,7 +296,8 @@ public class SocketSystem : InitializerBase
             return;
         }
 
-        item.MaximumSockets = socketCount;
+        item.MaximumSockets = SocketCountTables.MaximumSocketCount;
+        item.SocketCountTable = SocketCountTables.IsTwoHandedWeapon(item) ? this._twoHandedSocketCountTable : this._oneHandedSocketCountTable;
         item.PossibleItemOptions.Add(this._fireOptions!);
         item.PossibleItemOptions.Add(this._lightningOptions!);
         item.PossibleItemOptions.Add(this._iceOptions!);

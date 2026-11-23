@@ -44,8 +44,8 @@ internal class Aida : BaseMapInitializer
     /// <inheritdoc/>
     protected override IEnumerable<MonsterSpawnArea> CreateNpcSpawns()
     {
-        yield return this.CreateMonsterSpawn(1, this.NpcDictionary[369], 078, 013, Direction.SouthEast); // Osbourne
-        yield return this.CreateMonsterSpawn(2, this.NpcDictionary[370], 086, 014, Direction.SouthWest); // Jerridon
+        yield return this.CreateMonsterSpawn(1, this.NpcDictionary[369], 078, 013, Direction.South); // Osbourne
+        yield return this.CreateMonsterSpawn(2, this.NpcDictionary[370], 086, 013, Direction.SouthWest); // Jerridon
     }
 
     /// <inheritdoc/>
@@ -306,6 +306,11 @@ internal class Aida : BaseMapInitializer
         yield return this.CreateMonsterSpawn(916, this.NpcDictionary[552], 037, 077); // Bloody Witch Queen
         yield return this.CreateMonsterSpawn(917, this.NpcDictionary[552], 046, 054); // Bloody Witch Queen
         yield return this.CreateMonsterSpawn(918, this.NpcDictionary[552], 031, 053); // Bloody Witch Queen
+        yield return this.CreateMonsterSpawn(919, this.NpcDictionary[305], 094, 158); // Blue Golem
+        yield return this.CreateMonsterSpawn(920, this.NpcDictionary[306], 126, 156); // Death Rider
+        yield return this.CreateMonsterSpawn(921, this.NpcDictionary[550], 104, 203); // Bloody Death Rider
+        yield return this.CreateMonsterSpawn(922, this.NpcDictionary[550], 099, 203); // Bloody Death Rider
+        yield return this.CreateMonsterSpawn(923, this.NpcDictionary[550], 075, 228); // Bloody Death Rider
     }
 
     /// <inheritdoc/>
@@ -333,9 +338,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 357 },
                 { Stats.AttackRatePvm, 637 },
                 { Stats.DefenseRatePvm, 230 },
-                { Stats.PoisonResistance, 22f / 255 },
-                { Stats.IceResistance, 22f / 255 },
-                { Stats.FireResistance, 22f / 255 },
+                { Stats.IceResistance, 22 },
+                { Stats.PoisonResistance, 22 },
+                { Stats.LightningResistance, 22 },
+                { Stats.FireResistance, 22 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -364,9 +370,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 277 },
                 { Stats.AttackRatePvm, 507 },
                 { Stats.DefenseRatePvm, 170 },
-                { Stats.PoisonResistance, 21f / 255 },
-                { Stats.IceResistance, 21f / 255 },
-                { Stats.FireResistance, 21f / 255 },
+                { Stats.IceResistance, 21 },
+                { Stats.PoisonResistance, 21 },
+                { Stats.LightningResistance, 21 },
+                { Stats.FireResistance, 21 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -395,9 +402,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 222 },
                 { Stats.AttackRatePvm, 402 },
                 { Stats.DefenseRatePvm, 144 },
-                { Stats.PoisonResistance, 20f / 255 },
-                { Stats.IceResistance, 20f / 255 },
-                { Stats.FireResistance, 20f / 255 },
+                { Stats.IceResistance, 20 },
+                { Stats.PoisonResistance, 20 },
+                { Stats.LightningResistance, 20 },
+                { Stats.FireResistance, 20 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -426,9 +434,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 197 },
                 { Stats.AttackRatePvm, 390 },
                 { Stats.DefenseRatePvm, 127 },
-                { Stats.PoisonResistance, 19f / 255 },
-                { Stats.IceResistance, 19f / 255 },
-                { Stats.FireResistance, 19f / 255 },
+                { Stats.IceResistance, 19 },
+                { Stats.PoisonResistance, 19 },
+                { Stats.LightningResistance, 19 },
+                { Stats.FireResistance, 19 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -457,9 +466,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 187 },
                 { Stats.AttackRatePvm, 362 },
                 { Stats.DefenseRatePvm, 120 },
-                { Stats.PoisonResistance, 18f / 255 },
-                { Stats.IceResistance, 18f / 255 },
-                { Stats.FireResistance, 18f / 255 },
+                { Stats.IceResistance, 18 },
+                { Stats.PoisonResistance, 18 },
+                { Stats.LightningResistance, 18 },
+                { Stats.FireResistance, 18 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -488,9 +498,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 520 },
                 { Stats.AttackRatePvm, 850 },
                 { Stats.DefenseRatePvm, 300 },
-                { Stats.PoisonResistance, 50f / 255 },
-                { Stats.IceResistance, 50f / 255 },
-                { Stats.FireResistance, 50f / 255 },
+                { Stats.IceResistance, 50 },
+                { Stats.PoisonResistance, 50 },
+                { Stats.LightningResistance, 50 },
+                { Stats.FireResistance, 50 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -519,9 +530,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 420 },
                 { Stats.AttackRatePvm, 900 },
                 { Stats.DefenseRatePvm, 820 },
-                { Stats.PoisonResistance, 20f / 255 },
-                { Stats.IceResistance, 20f / 255 },
-                { Stats.FireResistance, 150f / 255 },
+                { Stats.IceResistance, 20 },
+                { Stats.PoisonResistance, 20 },
+                { Stats.LightningResistance, 20 },
+                { Stats.FireResistance, 150 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -550,9 +562,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 460 },
                 { Stats.AttackRatePvm, 1100 },
                 { Stats.DefenseRatePvm, 430 },
-                { Stats.PoisonResistance, 20f / 255 },
-                { Stats.IceResistance, 20f / 255 },
-                { Stats.FireResistance, 150f / 255 },
+                { Stats.IceResistance, 20 },
+                { Stats.PoisonResistance, 20 },
+                { Stats.LightningResistance, 20 },
+                { Stats.FireResistance, 150 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -581,9 +594,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 470 },
                 { Stats.AttackRatePvm, 900 },
                 { Stats.DefenseRatePvm, 960 },
-                { Stats.PoisonResistance, 20f / 255 },
-                { Stats.IceResistance, 20f / 255 },
-                { Stats.FireResistance, 150f / 255 },
+                { Stats.IceResistance, 20 },
+                { Stats.PoisonResistance, 20 },
+                { Stats.LightningResistance, 20 },
+                { Stats.FireResistance, 150 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -612,9 +626,10 @@ internal class Aida : BaseMapInitializer
                 { Stats.DefenseBase, 480 },
                 { Stats.AttackRatePvm, 1100 },
                 { Stats.DefenseRatePvm, 430 },
-                { Stats.PoisonResistance, 20f / 255 },
-                { Stats.IceResistance, 20f / 255 },
-                { Stats.FireResistance, 150f / 255 },
+                { Stats.IceResistance, 20 },
+                { Stats.PoisonResistance, 20 },
+                { Stats.LightningResistance, 20 },
+                { Stats.FireResistance, 150 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);

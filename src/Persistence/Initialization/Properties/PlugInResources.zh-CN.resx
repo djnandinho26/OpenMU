@@ -177,8 +177,8 @@
   <data name="RegenerationsRefactorPlugInBase_Description" xml:space="preserve"><value>修正并调整生命值、魔力值和技能值的部分恢复属性。</value></data>
   <data name="AddDuelConfigurationPlugIn_Name" xml:space="preserve"><value>添加决斗配置</value></data>
   <data name="AddDuelConfigurationPlugIn_Description" xml:space="preserve"><value>添加决斗配置数据。</value></data>
-  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Name" xml:space="preserve"><value>修正血色城堡 7、8 层怪物属性</value></data>
-  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Description" xml:space="preserve"><value>交换血色城堡 7 层（怪物 138–143）和 8 层（怪物 428–433）的属性，使强度按 6、7、8 层递增。</value></data>
+  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Name" xml:space="preserve"><value>第六季血色城堡怪物属性</value></data>
+  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Description" xml:space="preserve"><value>将血色城堡 1 至 8 层怪物的等级、生命值、伤害、防御力、攻击成功率和防御成功率、范围和延迟设为第六季的数据，使难度逐层递增。这些属性的自定义值将被覆盖。</value></data>
   <data name="AddDoppelgangerDataUpdatePlugIn_Name" xml:space="preserve"><value>添加镜像世界数据</value></data>
   <data name="AddDoppelgangerDataUpdatePlugIn_Description" xml:space="preserve"><value>添加镜像世界的副本配置。</value></data>
   <data name="FinishSummonerMasterTreePlugIn_Name" xml:space="preserve"><value>补全召唤术师大师技能树</value></data>
@@ -187,8 +187,6 @@
   <data name="AddMaximumAllianceSizeUpdatePlugInSeason6_Description" xml:space="preserve"><value>为 Season 6 游戏配置添加 MaximumAllianceSize 全局基础属性，默认值为 5。</value></data>
   <data name="FixAncientDiscriminatorsUpdatePlugIn_Name" xml:space="preserve"><value>修正套装物品识别值</value></data>
   <data name="FixAncientDiscriminatorsUpdatePlugIn_Description" xml:space="preserve"><value>修正部分套装物品的识别值。</value></data>
-  <data name="FixMurenRingOfFireBonusPlugIn_Name" xml:space="preserve"><value>修正 Muren 套装火之指环的加成</value></data>
-  <data name="FixMurenRingOfFireBonusPlugIn_Description" xml:space="preserve"><value>将 Muren 古代套装中火之指环的加成由体力修正为智力。</value></data>
   <data name="AddSummonerBuffSkillsPlugIn_Name" xml:space="preserve"><value>添加召唤术师辅助技能</value></data>
   <data name="AddSummonerBuffSkillsPlugIn_Description" xml:space="preserve"><value>添加昏睡术、破御阵、伤害反射和虚弱阵，并修正三代翅膀的完全反射属性。</value></data>
   <data name="WizEnhanceAndRagefighterSkillsUpdatePlugIn_Name" xml:space="preserve"><value>补充魔法师与格斗家技能</value></data>
@@ -355,12 +353,6 @@
   <data name="AddCrywolfEventUpdatePlugIn_Description" xml:space="preserve">
     <value>添加狼魂要塞活动的怪物及其刷新点，使要塞的神狼雕像和护台始终位于地图上，并添加要塞的传送条目和各占领状态的地形。</value>
   </data>
-  <data name="AddSantaVillageInvitationUpdatePlugIn_Name" xml:space="preserve">
-    <value>添加圣诞村邀请函</value>
-  </data>
-  <data name="AddSantaVillageInvitationUpdatePlugIn_Description" xml:space="preserve">
-    <value>此更新添加圣诞村邀请函（可将玩家传送到圣诞村），并在圣诞村添加一个出生点。</value>
-  </data>
   <data name="AddSmallWingsUpdatePlugIn_Name" xml:space="preserve">
     <value>添加小翅膀和小披风</value>
   </data>
@@ -423,6 +415,12 @@
   <data name="AddFreeTicketItemsUpdatePlugIn_Description" xml:space="preserve">
     <value>补充恶魔广场、血色城堡、幻影寺院和赤色要塞的自由入场券，可进入任意等级的活动。包含这些入场券的游戏商城礼包将开始出售。</value>
   </data>
+  <data name="AddGoblinBoxesUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加金箱和银箱</value>
+  </data>
+  <data name="AddGoblinBoxesUpdatePlugIn_Description" xml:space="preserve">
+    <value>补充金钥匙和银钥匙、可在混沌哥布林处用钥匙打开的封印的金箱和封印的银箱，以及丢弃后会获得物品或金币的金箱和银箱。包含钥匙的游戏商城礼包将开始出售。</value>
+  </data>
   <data name="AddKalimaTicketUpdatePlugIn_Name" xml:space="preserve">
     <value>添加卡利玛门票</value>
   </data>
@@ -458,5 +456,93 @@
   </data>
   <data name="AddCraftingTalismansUpdatePlugIn_Description" xml:space="preserve">
     <value>添加幸运符咒（按其耐久度的百分比提高合成成功率）和混沌合成符咒（+10 至 +15 物品强化失败时保留物品）。它们会被加入可使用它们的合成中，包含它们的游戏商城礼包将开始出售。</value>
+  </data>
+  <data name="FixMurenRingOfFireBonusPlugIn_Name" xml:space="preserve"><value>修正 Muren 套装火之指环的加成</value></data>
+  <data name="FixMurenRingOfFireBonusPlugIn_Description" xml:space="preserve"><value>将 Muren 古代套装中火之指环的加成由体力修正为智力。</value></data>
+  <data name="FixDestroyPhantomArmorNamesPlugIn_Name" xml:space="preserve"><value>修正 Phantom 与 Destroy 套装的英文名称</value></data>
+  <data name="FixDestroyPhantomArmorNamesPlugIn_Description" xml:space="preserve"><value>交换 47 号与 48 号铠甲套装及其套装加成的英文名称（47 为 Phantom，48 为 Destroy），并修正拼写错误“Destory”。</value></data>
+  <data name="HideSkillEffectTimesPlugIn_Name" xml:space="preserve"><value>隐藏技能效果的时间</value></data>
+  <data name="HideSkillEffectTimesPlugIn_Description" xml:space="preserve"><value>关闭发送第6季数据曾为其发送持续时间的技能效果：Infinite Arrow 以及 Fire Slash 与 Beast Uppercut 的防御降低效果。原版游戏不显示技能效果的时间。它会覆盖当前设置，包括在效果时间页面上所做的设置。</value></data>
+  <data name="AddSantaVillageInvitationUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加圣诞村邀请函</value>
+  </data>
+  <data name="AddSantaVillageInvitationUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新添加圣诞村邀请函（可将玩家传送到圣诞村），并在圣诞村添加一个出生点。</value>
+  </data>
+  <data name="AddSealItemDropRateUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加印章的物品掉落率</value>
+  </data>
+  <data name="AddSealItemDropRateUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新为财富之印、神圣之印和大师财富之印添加 150% 的物品掉落率，并添加只提高物品掉落率的第二个财富之印（13/116）。</value>
+  </data>
+  <data name="AddHitShockSettingsPlugIn_Name" xml:space="preserve"><value>添加受击硬直设置</value></data>
+  <data name="AddHitShockSettingsPlugIn_Description" xml:space="preserve"><value>添加全局受击硬直概率和伤害阈值设置，以及独角兽标记，使骑乘独角兽的玩家免受受击硬直效果。</value></data>
+  <data name="FixKanturuRuins3LandingUpdatePlugIn_Name" xml:space="preserve"><value>修正坎特鲁废墟 3 的传送落点区域</value></data>
+  <data name="FixKanturuRuins3LandingUpdatePlugIn_Description" xml:space="preserve"><value>将坎特鲁废墟 3 的原始传送落点区域缩小至可行走地形。自定义目的地和无关设置保持不变。</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInSeason6_Name" xml:space="preserve"><value>野外地图的第六季怪物刷新点</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInSeason6_Description" xml:space="preserve"><value>将野外地图的怪物刷新点调整为第六季的数据：冰风谷、仙踪林和幻术园按地图四分之一区域分布的刷新点替换为更小的区域和单个刷新点，并在仙踪林和幻术园加入蜘蛛。补充地下城、失落之塔、天空之城、卡利玛神庙 3、6 和 7、魔炼之地、幽暗森林、狼魂要塞、坎特鲁遗址和巴卡斯兵营缺少的刷新点，并移除多余的刷新点；修正狼魂要塞、巴卡斯兵营、安宁池、囚禁之岛和卡伦特中坐标错误的刷新点。同时移除地下城（254 个）和失落之塔（2 个）中重复的怪物刷新点。冰风谷、仙踪林和幻术园野外怪物的自定义刷新点将被覆盖。</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInBase_Name" xml:space="preserve"><value>野外地图的第六季怪物刷新点</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInBase_Description" xml:space="preserve"><value>将野外地图的怪物刷新点调整为第六季的数据（本版本同样使用）：冰风谷和仙踪林按地图四分之一区域分布的刷新点替换为更小的区域和单个刷新点，不含第六季的蜘蛛。补充地下城、失落之塔和天空之城缺少的刷新点，并移除多余的刷新点。同时移除地下城（254 个）和失落之塔（2 个）中重复的怪物刷新点。冰风谷和仙踪林野外怪物的自定义刷新点将被覆盖。</value></data>
+  <data name="MonsterStatsUpdatePlugInBase_Name" xml:space="preserve"><value>第六季怪物属性</value></data>
+  <data name="MonsterStatsUpdatePlugInBase_Description" xml:space="preserve"><value>将怪物的等级、生命值、伤害、防御力、攻击成功率和防御成功率、范围、延迟和重生时间设为第六季的数据（本版本同样使用）。修正野外怪物、入侵怪物和守卫，以及第六季中赤色要塞 4、7 层和恶魔广场 7 层的怪物。这些属性的自定义值将被覆盖。在第六季中，将卡利玛 7 的怪物 275 由“昆顿幻影 7”更名为“昆顿”。</value></data>
+  <data name="MonsterResistancesUpdatePlugInBase_Name" xml:space="preserve"><value>怪物元素抗性</value></data>
+  <data name="MonsterResistancesUpdatePlugInBase_Description" xml:space="preserve"><value>将怪物的元素抗性转换为抗性判定所需的 0 到 255 的整数；此前怪物仅在约 1% 到 2% 的命中中抵抗冰、毒和雷电效果。修正导入怪物数据时被分配到错误元素的抗性（冰与毒互换、雷电被存为水），并设为第六季的数值。自定义的抗性会换算为新的比例，但不做其他更改。</value></data>
+  <data name="AddProtectionTalismansUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加保护护身符</value>
+  </data>
+  <data name="AddProtectionTalismansUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新添加守护护身符（防止死亡惩罚）和物品保护护身符（保持已装备物品的耐久度）。</value>
+  </data>
+  <data name="FixCrywolfGateTerrainUpdatePlugIn_Name" xml:space="preserve"><value>修正罗兰峡谷通往狼魂要塞的入口</value></data>
+  <data name="FixCrywolfGateTerrainUpdatePlugIn_Description" xml:space="preserve"><value>使罗兰峡谷中狼魂要塞传送门的南侧入口可以行走（攻城战以外的时间玩家使用该入口）。北侧入口及其他所有地块保持不变。</value></data>
+  <data name="AddTalismanOfResurrectionUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加复活护身符</value>
+  </data>
+  <data name="AddTalismanOfResurrectionUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新添加复活护身符，使死亡的玩家在死亡地点复活。包含它的游戏内商城礼包将开始出售。</value>
+  </data>
+  <data name="AddLuckyCoinUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加幸运币</value>
+  </data>
+  <data name="AddLuckyCoinUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新添加幸运币，可在德维亚斯的NPC德尔加多处登记或兑换物品，并打开他的幸运币对话框。</value>
+  </data>
+  <data name="AddGladiatorsHonorUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加角斗士的荣耀</value>
+  </data>
+  <data name="AddGladiatorsHonorUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新添加角斗士的荣耀，在 30 分钟内使囚禁之岛的经验增加 20%。</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugInSeason6_Name" xml:space="preserve"><value>第六季NPC刷新点</value></data>
+  <data name="NpcSpawnsUpdatePlugInSeason6_Description" xml:space="preserve"><value>将NPC调整为第六季的位置和朝向（勇者大陆、冰风谷、仙踪林、竞技场、亚特兰蒂斯、幻术园、幽暗森林、狼魂要塞、罗兰峡谷、卡伦特、坎特鲁和幻影寺院），补充冰风谷缺少的1名幻影导师、仙踪林缺少的2名幻影导师以及冰风谷的黄金弓箭手，并移除第六季没有的NPC：旧版本中仙踪林和失落之塔的药水少女（253）、失落之塔、竞技场和亚特兰蒂斯的安全守卫（240）、勇者大陆114/125处的守卫（247）以及勇者大陆的黄金弓箭手；冰风谷的陆迦德、弟子黛彬和弥拉邱（第六季中只在幻术园和狼魂要塞）；以及罗兰峡谷的第二个王座（216）。会覆盖这些NPC自定义的位置和朝向。</value></data>
+  <data name="IllusionTempleDataUpdatePlugIn_Name" xml:space="preserve">
+    <value>幻影寺院数据</value>
+  </data>
+  <data name="IllusionTempleDataUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新创建幻影寺院活动的配置数据，并将活动对话框分配给 NPC 弥拉邱。如果物品 13/50 和 13/51 的数据被互换（血的卷纸和幻影教药水），则恢复它们的原始数据：名称、尺寸、耐久度、等级和掉落、掉落物品组、寺院门票以及 13/51 的商店物品。如果两者都已是原始名称，但尺寸仍被互换、老板娘莉雅出售 13/51 而不是 13/50，或幻影教药水的掉落物品组包含 13/51 而不是 13/50，则设置它们的原始尺寸，将使用 13/50 的寺院门票改为 13/51，并且只将老板娘莉雅的这些商店物品和幻影教药水的这些掉落物品组从 13/51 改为 13/50。您在幻影教药水旁另外添加的血的卷纸保持不变。如果只有其中一个的名称被互换，则两者都不更改。您自己添加的对这两个物品的引用（合成、任务、物品掉落、插件设置）保持不变：请在更新后检查它们。</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugIn075_Name" xml:space="preserve"><value>0.75版NPC刷新点</value></data>
+  <data name="NpcSpawnsUpdatePlugIn075_Description" xml:space="preserve"><value>将0.75版的NPC调整为第六季数据：移除仙踪林的两名药水少女（253）、失落之塔的药水少女（253）和安全守卫（240）、竞技场和亚特兰蒂斯的安全守卫（240），以及勇者大陆114/125处的守卫（247），并将竞技场的足球和竞技场守卫调整到第六季的位置。</value></data>
+  <data name="NpcSpawnsUpdatePlugIn095d_Name" xml:space="preserve"><value>0.95d版NPC刷新点</value></data>
+  <data name="NpcSpawnsUpdatePlugIn095d_Description" xml:space="preserve"><value>将0.95d版的NPC调整为第六季数据：移除仙踪林的两名药水少女（253）、失落之塔的药水少女（253）和安全守卫（240）、竞技场和亚特兰蒂斯的安全守卫（240），以及勇者大陆114/125处的守卫（247），将竞技场的足球和竞技场守卫调整到第六季的位置，并将黄金弓箭手从勇者大陆移至冰风谷（226/66）。</value></data>
+  <data name="AddSocketCountTablesUpdatePlugIn_Name" xml:space="preserve"><value>镶嵌孔数量表</value></data>
+  <data name="AddSocketCountTablesUpdatePlugIn_Description" xml:space="preserve"><value>镶嵌物品掉落时大多只有一个孔，三个孔（双手武器为五个孔）很少见，而不是以相同几率获得最多孔数以内的任意数量。将镶嵌物品的最大孔数提高到五个，由数量表限制掉落。已有数量表的镶嵌物品保持不变。</value></data>
+  <data name="AddFigurinesAndCharmsUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加雕像和护符</value>
+  </data>
+  <data name="AddFigurinesAndCharmsUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新添加鹰雕像、山羊雕像以及（黄金）橡树和枫树护符，它们在背包中使用时提供加成。</value>
+  </data>
+  <data name="AddLordsMixUpdatePlugIn_Name" xml:space="preserve">
+    <value>领主合成</value>
+  </data>
+  <data name="AddLordsMixUpdatePlugIn_Description" xml:space="preserve">
+    <value>为城堡的长老添加领主合成：每天一次，占领城堡的战盟的盟主可将30个守护宝石、一个祝福宝石组合和一个灵魂宝石组合（各30个宝石）以及1,000,000,000金币合成为一件带有两到四个卓越属性的卓越武器或防具，或一件普通物品。如果还没有限制，则设置每天一次的限制。</value>
+  </data>
+  <data name="AddWornHorseshoeUpdatePlugIn_Name" xml:space="preserve">
+    <value>添加破旧的马蹄铁</value>
+  </data>
+  <data name="AddWornHorseshoeUpdatePlugIn_Description" xml:space="preserve">
+    <value>此更新添加破旧的马蹄铁，在背包中使用时使物品掉落率提高 20%。</value>
   </data>
 </root>

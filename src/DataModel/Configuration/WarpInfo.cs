@@ -5,6 +5,7 @@
 namespace MUnique.OpenMU.DataModel.Configuration;
 
 using MUnique.OpenMU.Annotations;
+using MUnique.OpenMU.DataModel.Configuration.Items;
 
 /// <summary>
 /// Defines a warp list entry.
@@ -31,6 +32,29 @@ public partial class WarpInfo
     /// Gets or sets the level requirement which a character needs to fulfill so that it can warp to the <see cref="Gate"/>.
     /// </summary>
     public int LevelRequirement { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether players can use this warp.
+    /// </summary>
+    /// <remarks>
+    /// When it's <c>false</c>, the warp is only available to game masters: it isn't sent to the warp list of
+    /// the game client, and the warp request of a player is refused. It doesn't affect other ways to get to
+    /// the map, e.g. walking or the move command of a game master. That's the case of the warps which the
+    /// original client doesn't offer in its warp window, like Crywolf, which is reached by walking.
+    /// </remarks>
+    public bool IsWarpable { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the requirements which a character needs to fulfill so that it can use this warp,
+    /// in addition to the <see cref="LevelRequirement"/> and the requirements of the target map.
+    /// </summary>
+    /// <remarks>
+    /// The open source client learns the minimum master level and the minimum number of resets,
+    /// so that it can show which warps the character can't use yet. Requirements of other
+    /// attributes are only checked by the server.
+    /// </remarks>
+    [MemberOfAggregate]
+    public virtual ICollection<AttributeRequirement> Requirements { get; protected set; } = null!;
 
     /// <summary>
     /// Gets or sets the gate.

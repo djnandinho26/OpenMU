@@ -84,6 +84,21 @@ Route `merchants`
 A more comfortable editor for NPC merchants: pick a merchant and edit the items
 it offers with the graphical item storage editor instead of the generic form.
 
+**Export shop** downloads the items of the selected merchant as a JSON file,
+**Import shop** reads such a file back in. The file contains the full state of
+each item: slot, definition, level, durability, skill, sockets, pet experience,
+all options and the ancient sets. Items are referenced by their definition
+group and number, so a file can be applied to another configuration. The import
+is all-or-nothing: if the configuration doesn't know an item, an option or an
+ancient set of the file, or if the items don't fit into the shop, nothing is
+imported and the problems are listed, so the file can be adjusted.
+
+The file contains only the items and no merchant name, so it can be imported
+into any merchant to duplicate a shop. Import replaces all items of the shop;
+the money of the storage is not touched. Like other changes on this page, the
+import is only applied after you save; use "Discard changes" to undo it.
+Export first if you want to keep the previous shop.
+
 ## Character classes
 
 Route `edit-config-grid/…CharacterClass/`
@@ -105,6 +120,34 @@ Route `edit-config-grid/…ItemDefinition/`
 Item definitions with their requirements, level tables, possible options, sockets
 and the classes which may equip them. Items use a dedicated editor with a
 graphical representation instead of the plain generic form.
+
+### Socket count of dropped items
+
+A socket item can have up to its **maximum sockets**. How many sockets a dropped
+instance gets is decided by its **socket count table**, a *weighted value table*
+(`WeightedValueTables` of the game configuration, in the full configuration tree):
+a list of values with relative weights, where a value with a weight of 0 never
+drops. Season 6 has two tables, one for one-handed weapons, shields and armor
+(one socket is common, three are rare, four and five never drop) and one for
+two-handed weapons (up to five, very rare). Without a table, the number is
+selected with the same chance between 1 and the maximum sockets. A drop group
+can override the table for the items it drops, see
+[Item drops](item-drops.md#map-drop-groups).
+
+### Excellent options and sockets of crafted items
+
+The crafting settings of an NPC crafting can have two more weighted value tables
+for their result items. The **result item excellent option count table**
+decides how many excellent options a result item gets, once the
+*result item excellent option chance* hits; without it, each option is added by
+that chance, up to the maximum options per item. The **result item socket count
+table** decides how many sockets a socket result item gets, and such a socket
+result item gets no excellent options, as for drops; without the table, result
+items get no sockets. A result item can also have its own **excellent option
+chance**, instead of the one of the crafting, so that a crafting gives some of
+its results as excellent items and others as normal items. The Lord's Mix of the
+castle siege uses the excellent option count table and the chance per result
+item, see [Castle Siege](../server-features/castle-siege.md#lords-mix).
 
 ### Item prices
 
@@ -232,8 +275,34 @@ configured under [System](#system).
 
 Route `edit-config-grid/…WarpInfo/`
 
-The entries of the in-game warp list: index, name, target gate, level requirement
-and cost.
+The entries of the in-game warp list: index, name, target gate, level requirement,
+cost and requirements.
+
+The [open source client](https://github.com/sven-n/MuMain) gets this list when a
+character enters the game and shows it in its warp window, so changes show up
+there after the next character selection. The original client shows the warp
+list of its data files; a warp which isn't in there can't be selected with it.
+
+*Warpable* only restricts players, and only when it's off: then the warp isn't
+in the list of the open source client, and the server refuses it when a player
+asks for it, e.g. with the move chat command. Game masters can still use it.
+A new season 6 configuration has it off for the warps which the original client
+doesn't offer in its warp window: Crywolf (reached by walking), Loren Market
+(reached through an NPC) and the second LaCleon warp. For an existing
+configuration, the optional update *Restrict warps outside of the original warp
+window* does the same.
+
+*Requirements* are attribute requirements on top of the level requirement, like
+the *Map Requirements* of a map: e.g. a minimum *Master Level* or a minimum
+number of *Resets*. A player who doesn't meet one of them can't use the warp and
+is told which requirement is missing, e.g. "Missing requirement for this warp:
+Master Level 50"; the costs are only paid
+when all requirements are met. They apply to the move chat command, too, and bots
+don't pick such warps. The open source client learns the minimum master level
+and resets of each warp (in the `WarpRequirementsExtended` message, right after
+the warp list) and greys out the warps whose minimum the character doesn't reach
+yet. Requirements of other attributes are only checked by the server. A new
+season 6 configuration has no warp requirements.
 
 ## Jewel mixes
 
@@ -306,6 +375,45 @@ implemented as plugins without such content, for example the chat commands or
 the custom gameplay plugins. Deactivate them on the [Plugins](plugins.md) page
 if they don't fit the season of your server.
 :::
+
+Which magic effects show players their remaining time is set on the
+[Effect times](#effect-times) page; the page links to it.
+
+## Effect times
+
+Route `effect-times`
+
+Whether players see how long a buff or debuff lasts is game design: knowing it
+changes their decisions. So each magic effect has a switch, *Send Duration*,
+which decides whether the server sends its remaining time to the client. The
+Season 6 data switches it on only for the effects of consumed items: the
+original game shows no time for skill effects, also in later seasons. The open
+source client (MuMain) shows a time bar for every effect which sends it. The
+original clients only get the time of consumed items which change the attack
+speed, damage, defense, maximum health or maximum mana. Switching it off for
+such an item doesn't hide its time in MuMain: it gets 0 seconds and then shows
+the duration from its own item data instead.
+
+The page lists all magic effects with this switch and, in the last column, the
+value of the data which the configuration was created from, e.g. Season 6 or
+0.75, for comparison. Several effects can have the same number and name, e.g.
+each ice skill has its own *Iced* effect with its own duration, so the list also
+shows the skills which cause each effect. The list can be narrowed down by a
+search text, which also finds the skills. **All on**
+and **All off** switch all shown effects, and the defaults button (e.g.
+**Season 6 defaults**) sets each shown effect as in that data (effects which it
+doesn't know stay unchanged). The changes are only stored after **Save changes**
+and the confirmation, which names the changed effects; **Discard changes** drops
+them.
+
+The first time the page is opened, that data is created in memory to read its
+defaults, which takes a few seconds; the column fills in afterwards. The list of
+the agents shows these defaults, too. The change is recorded in the
+[audit history](mcp.md#operational-safety-and-audit-history), and agents use the
+same operation through the [MCP tools](mcp.md#configuration-and-offline-character-changes)
+`effect_times_list` and `effect_times_set`. It requires the *Administrator*
+role. The switch is also available as *Send Duration* on the edit page of each
+magic effect.
 
 ## Plugins, chat commands, map editor
 

@@ -53,7 +53,6 @@ internal class Lorencia : BaseMapInitializer
         yield return this.CreateMonsterSpawn(6, this.NpcDictionary[249], 94, 125, Direction.NorthWest);
         yield return this.CreateMonsterSpawn(7, this.NpcDictionary[249], 94, 130, Direction.NorthWest);
         yield return this.CreateMonsterSpawn(8, this.NpcDictionary[249], 131, 148, Direction.SouthWest);
-        yield return this.CreateMonsterSpawn(9, this.NpcDictionary[247], 114, 125, Direction.SouthEast);
         yield return this.CreateMonsterSpawn(10, this.NpcDictionary[250], 183, 137, Direction.South, SpawnTrigger.Wandering);
         yield return this.CreateMonsterSpawn(11, this.NpcDictionary[251], 116, 141, Direction.SouthEast);
         yield return this.CreateMonsterSpawn(12, this.NpcDictionary[253], 127, 86, Direction.South);
@@ -88,7 +87,7 @@ internal class Lorencia : BaseMapInitializer
             bullFighter.ViewRange = 5;
             bullFighter.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
             bullFighter.AttackDelay = new TimeSpan(1600 * TimeSpan.TicksPerMillisecond);
-            bullFighter.RespawnDelay = new TimeSpan(3 * TimeSpan.TicksPerSecond);
+            bullFighter.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
             bullFighter.Attribute = 2;
             bullFighter.NumberOfMaximumItemDrops = 1;
             var bullFighterAttributes = new Dictionary<AttributeDefinition, float>
@@ -151,7 +150,7 @@ internal class Lorencia : BaseMapInitializer
             budgeDragon.ViewRange = 4;
             budgeDragon.MoveDelay = new TimeSpan(400 * TimeSpan.TicksPerMillisecond);
             budgeDragon.AttackDelay = new TimeSpan(2000 * TimeSpan.TicksPerMillisecond);
-            budgeDragon.RespawnDelay = new TimeSpan(3 * TimeSpan.TicksPerSecond);
+            budgeDragon.RespawnDelay = new TimeSpan(10 * TimeSpan.TicksPerSecond);
             budgeDragon.Attribute = 2;
             budgeDragon.NumberOfMaximumItemDrops = 1;
         }
@@ -222,7 +221,7 @@ internal class Lorencia : BaseMapInitializer
                 { Stats.DefenseBase, 14 },
                 { Stats.AttackRatePvm, 62 },
                 { Stats.DefenseRatePvm, 14 },
-                { Stats.FireResistance, 1f / 255 },
+                { Stats.FireResistance, 1 },
             };
             lich.AddAttributes(attributes, this.Context, this.GameConfiguration);
             lich.MoveRange = 3;

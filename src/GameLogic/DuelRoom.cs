@@ -114,7 +114,10 @@ public sealed class DuelRoom : AsyncDisposable
     /// </summary>
     public byte ScoreRequester
     {
-        get => this._scoreRequester;
+        get
+        {
+            return this._scoreRequester;
+        }
         set
         {
             this._scoreRequester = value;
@@ -130,7 +133,10 @@ public sealed class DuelRoom : AsyncDisposable
     /// </summary>
     public byte ScoreOpponent
     {
-        get => this._scoreOpponent;
+        get
+        {
+            return this._scoreOpponent;
+        }
         set
         {
             this._scoreOpponent = value;
@@ -485,5 +491,9 @@ public sealed class DuelRoom : AsyncDisposable
         await this.NotifyDuelFinishedAsync().ConfigureAwait(false);
         await Task.Delay(10000, default).ConfigureAwait(false);
         await this.MovePlayersToExitAsync().ConfigureAwait(false);
+
+        // Like when the duel is stopped, the client needs to be told that the duel ended,
+        // otherwise it keeps showing the duel score until the character is re-selected.
+        await this.AllPlayers.ForEachAsync(player => player.InvokeViewPlugInAsync<IDuelEndedPlugIn>(p => p.DuelEndedAsync())).ConfigureAwait(false);
     }
 }

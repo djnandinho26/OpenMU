@@ -753,8 +753,8 @@
   <data name="BraveArmor" xml:space="preserve">
     <value>Brave Armor</value>
   </data>
-  <data name="DestoryArmor" xml:space="preserve">
-    <value>Destory Armor</value>
+  <data name="DestroyArmor" xml:space="preserve">
+    <value>Destroy Armor</value>
   </data>
   <data name="PhantomArmor" xml:space="preserve">
     <value>Phantom Armor</value>
@@ -924,8 +924,8 @@
   <data name="BravePants" xml:space="preserve">
     <value>Brave Pants</value>
   </data>
-  <data name="DestoryPants" xml:space="preserve">
-    <value>Destory Pants</value>
+  <data name="DestroyPants" xml:space="preserve">
+    <value>Destroy Pants</value>
   </data>
   <data name="PhantomPants" xml:space="preserve">
     <value>Phantom Pants</value>
@@ -1254,8 +1254,8 @@
   <data name="BraveBoots" xml:space="preserve">
     <value>Brave Boots</value>
   </data>
-  <data name="DestoryBoots" xml:space="preserve">
-    <value>Destory Boots</value>
+  <data name="DestroyBoots" xml:space="preserve">
+    <value>Destroy Boots</value>
   </data>
   <data name="PhantomBoots" xml:space="preserve">
     <value>Phantom Boots</value>
@@ -2079,8 +2079,20 @@
   <data name="DoppelgangerFreeTicket" xml:space="preserve">
     <value>Doppelganger Free Ticket</value>
   </data>
-  <data name="InvitationToSantaVillage" xml:space="preserve">
-    <value>Invitation to Santa Village</value>
+  <data name="ResetFruitStrength" xml:space="preserve">
+    <value>Reset Fruit (Strength)</value>
+  </data>
+  <data name="ResetFruitAgility" xml:space="preserve">
+    <value>Reset Fruit (Agility)</value>
+  </data>
+  <data name="ResetFruitVitality" xml:space="preserve">
+    <value>Reset Fruit (Vitality)</value>
+  </data>
+  <data name="ResetFruitEnergy" xml:space="preserve">
+    <value>Reset Fruit (Energy)</value>
+  </data>
+  <data name="ResetFruitCommand" xml:space="preserve">
+    <value>Reset Fruit (Command)</value>
   </data>
   <data name="DevilSquareFreeTicket" xml:space="preserve">
     <value>Devil Square Ticket</value>
@@ -2112,20 +2124,23 @@
   <data name="CursedCastleWater" xml:space="preserve">
     <value>Cursed Castle Water</value>
   </data>
-  <data name="ResetFruitStrength" xml:space="preserve">
-    <value>Reset Fruit (Strength)</value>
+  <data name="SilverKey" xml:space="preserve">
+    <value>Silver Key</value>
   </data>
-  <data name="ResetFruitAgility" xml:space="preserve">
-    <value>Reset Fruit (Agility)</value>
+  <data name="GoldKey" xml:space="preserve">
+    <value>Gold Key</value>
   </data>
-  <data name="ResetFruitVitality" xml:space="preserve">
-    <value>Reset Fruit (Vitality)</value>
+  <data name="SealedGoldenBox" xml:space="preserve">
+    <value>Sealed Golden Box</value>
   </data>
-  <data name="ResetFruitEnergy" xml:space="preserve">
-    <value>Reset Fruit (Energy)</value>
+  <data name="SealedSilverBox" xml:space="preserve">
+    <value>Sealed Silver Box</value>
   </data>
-  <data name="ResetFruitCommand" xml:space="preserve">
-    <value>Reset Fruit (Command)</value>
+  <data name="GoldenBox" xml:space="preserve">
+    <value>Golden Box</value>
+  </data>
+  <data name="SilverBox" xml:space="preserve">
+    <value>Silver Box</value>
   </data>
   <data name="KalimaTicket" xml:space="preserve">
     <value>Kalima Ticket</value>
@@ -2318,5 +2333,44 @@
   </data>
   <data name="TalismanOfChaosAssembly" xml:space="preserve">
     <value>Talisman of Chaos Assembly</value>
+  </data>
+  <data name="InvitationToSantaVillage" xml:space="preserve">
+    <value>Invitation to Santa Village</value>
+  </data>
+  <data name="TalismanOfGuardian" xml:space="preserve">
+    <value>Talisman of Guardian</value>
+  </data>
+  <data name="TalismanOfItemProtection" xml:space="preserve">
+    <value>Talisman of Item Protection</value>
+  </data>
+  <data name="TalismanOfResurrection" xml:space="preserve">
+    <value>Talisman of Resurrection</value>
+  </data>
+  <data name="LuckyCoin" xml:space="preserve">
+    <value>Lucky Coin</value>
+  </data>
+  <data name="GladiatorsHonor" xml:space="preserve">
+    <value>Gladiator's Honor</value>
+  </data>
+  <data name="HawkFigurine" xml:space="preserve">
+    <value>Hawk Figurine</value>
+  </data>
+  <data name="GoatFigurine" xml:space="preserve">
+    <value>Goat Figurine</value>
+  </data>
+  <data name="OakCharm" xml:space="preserve">
+    <value>Oak Charm</value>
+  </data>
+  <data name="MapleCharm" xml:space="preserve">
+    <value>Maple Charm</value>
+  </data>
+  <data name="GoldenOakCharm" xml:space="preserve">
+    <value>Golden Oak Charm</value>
+  </data>
+  <data name="GoldenMapleCharm" xml:space="preserve">
+    <value>Golden Maple Charm</value>
+  </data>
+  <data name="WornHorseshoe" xml:space="preserve">
+    <value>Worn Horseshoe</value>
   </data>
 </root>

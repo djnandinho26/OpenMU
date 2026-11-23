@@ -22,13 +22,11 @@
                 <option value="@map.GetId()" selected=@(object.Equals(this.SelectedMap, map))>@Resources.Map: @map.ToString()</option>
             }
         </select>
-        <button type="button" class="btn btn-secondary text-nowrap" disabled="@this._isExporting" @onclick="@this.ExportMapAsync" title="@Resources.ExportMap">
-            <span class="oi oi-data-transfer-download"></span> @Resources.ExportMap
-        </button>
-        <button type="button" class="btn btn-secondary text-nowrap" disabled="@this._isImporting" @onclick="@this.TriggerFileImportAsync" title="@Resources.ImportMap">
-            <span class="oi oi-data-transfer-upload"></span> @Resources.ImportMap
-        </button>
-        <BlazorInputFile.InputFile OnChange="@ImportFileSelectedAsync" accept=".json" style="display:none" id="import-file-input" />
+        <ExportImport ExportText="@Resources.ExportMap"
+                      ImportText="@Resources.ImportMap"
+                      ExportFileName="@($"map-{this.SelectedMap.Number}-spawns.json")"
+                      ExportContentProvider="@this.BuildExportContent"
+                      OnImport="@this.ImportContentAsync" />
     </div>
 </div>
 
@@ -87,11 +85,7 @@
         @if (this._terrainImageDataUrl is { })
         {
             <div class="map-host-container">
-                <div class="map-host"
-                     @ref="_mapHostRef"
-                     @onwheel="@this.OnWheelAsync"
-                     @onwheel:preventDefault="true"
-                     @onwheel:stopPropagation="true">
+                <div class="map-host" @ref="_mapHostRef">
                     <div class="map-content">
                         <img src="@this._terrainImageDataUrl"
                              draggable="false"
@@ -120,17 +114,13 @@
 
                         @if (this._showGrid)
                         {
-                            <div class="coordinate-grid" style="@this.GetGridStyle()"></div>
+                            <div class="coordinate-grid"></div>
                         }
                     </div>
                 </div>
 
                 <div class="map-coordinates-overlay">
                     <span class="coord-label">X: @this._mouseMapX, Y: @this._mouseMapY</span>
-                </div>
-
-                <div class="map-zoom-display">
-                    <span class="zoom-label">@this.ZoomPercentage%</span>
                 </div>
             </div>
         }
@@ -204,9 +194,9 @@
                 </div>
                 <input class="small form-control"
                        type="search"
-                       autofocus
                        @bind="@this._filterService.SearchFilter"
                        @bind:event="oninput"
+                       onauxclick="event.preventDefault();"
                        placeholder="@Resources.Search ..." />
             </div>
             <div class="map-object-select">

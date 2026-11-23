@@ -216,8 +216,8 @@
   <data name="RegenerationsRefactorPlugInBase_Description" xml:space="preserve"><value>This update fixes and reworks some regeneration attributes (health, mana, ability).</value></data>
   <data name="AddDuelConfigurationPlugIn_Name" xml:space="preserve"><value>Add duel configuration</value></data>
   <data name="AddDuelConfigurationPlugIn_Description" xml:space="preserve"><value>This update adds data for the duel configuration</value></data>
-  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Name" xml:space="preserve"><value>Fix Blood Castle 7/8 Monster Attributes</value></data>
-  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Description" xml:space="preserve"><value>Swaps attribute values between BC7 (monsters 138-143) and BC8 (monsters 428-433) so progression is correct: BC6 → BC7 → BC8.</value></data>
+  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Name" xml:space="preserve"><value>Season 6 Blood Castle monster attributes</value></data>
+  <data name="FixBloodCastleMonsterAttributesUpdatePlugIn_Description" xml:space="preserve"><value>Sets level, health, damage, defense, attack and defense rate, ranges and delays of the monsters of Blood Castle 1 to 8 to the Season 6 data, so the difficulty rises from level to level. Customized values of these stats are overwritten.</value></data>
   <data name="AddDoppelgangerDataUpdatePlugIn_Name" xml:space="preserve"><value>Add Doppelganger data</value></data>
   <data name="AddDoppelgangerDataUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the doppelganger event configuration.</value></data>
   <data name="FinishSummonerMasterTreePlugIn_Name" xml:space="preserve"><value>Finish Summoner Master Tree PlugIn</value></data>
@@ -226,8 +226,6 @@
   <data name="AddMaximumAllianceSizeUpdatePlugInSeason6_Description" xml:space="preserve"><value>Adds the MaximumAllianceSize global base attribute with a default value of 5 to the Season 6 game configuration.</value></data>
   <data name="FixAncientDiscriminatorsUpdatePlugIn_Name" xml:space="preserve"><value>Fix Ancient Discriminators</value></data>
   <data name="FixAncientDiscriminatorsUpdatePlugIn_Description" xml:space="preserve"><value>This update fixes the discriminators of some ancient items.</value></data>
-  <data name="FixMurenRingOfFireBonusPlugIn_Name" xml:space="preserve"><value>Fix Muren Ring of Fire Bonus</value></data>
-  <data name="FixMurenRingOfFireBonusPlugIn_Description" xml:space="preserve"><value>Gives the Ring of Fire of the Muren ancient set its energy bonus, which was initialized as vitality.</value></data>
   <data name="AddSummonerBuffSkillsPlugIn_Name" xml:space="preserve"><value>Add Summoner Buff Skills</value></data>
   <data name="AddSummonerBuffSkillsPlugIn_Description" xml:space="preserve"><value>This update adds the Sleep, Innovation, Damage Reflection and Weakness Summoner buff skills. It also fixes the 3rd wing full reflect option.</value></data>
   <data name="WizEnhanceAndRagefighterSkillsUpdatePlugIn_Name" xml:space="preserve"><value>Some added skills</value></data>
@@ -326,6 +324,8 @@
   <data name="FixDuelArenaSafezoneMapUpdate_Description" xml:space="preserve"><value>Sets the safezone of duel arena to lorencia.</value></data>
   <data name="AddMovementSpeedAttributesPlugInBase_Name" xml:space="preserve"><value>Add Movement Speed Attributes</value></data>
   <data name="AddMovementSpeedAttributesPlugInBase_Description" xml:space="preserve"><value>Adds attribute-based movement speed configuration for players, monsters, items, effects, and underwater maps.</value></data>
+  <data name="AddShieldRatioAttributesPlugIn_Name" xml:space="preserve"><value>Add Shield Ratio Attributes</value></data>
+  <data name="AddShieldRatioAttributesPlugIn_Description" xml:space="preserve"><value>Adds the configurable shield damage ratio and over-shield burst threshold.</value></data>
   <data name="SystemConfigurationAddedPlugInBase_Name" xml:space="preserve"><value>Add System Configuration</value></data>
   <data name="SystemConfigurationAddedPlugInBase_Description" xml:space="preserve"><value>This update adds the new system configuration.</value></data>
   <data name="AddKanturuDataUpdatePlugIn_Name" xml:space="preserve"><value>Add Kanturu data</value></data>
@@ -376,8 +376,6 @@
   <data name="FixFireScreamRequirementsUpdatePlugIn_Description" xml:space="preserve"><value>This update corrects the energy and leadership requirements of the fire scream skill to 150 and 70. They were swapped, so a dark lord with less than 150 leadership could learn the skill but not use it.</value></data>
   <data name="AddCrywolfEventUpdatePlugIn_Name" xml:space="preserve"><value>Add Crywolf event</value></data>
   <data name="AddCrywolfEventUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the monsters of the crywolf event and their spawns, lets the statue and the altars of the fortress always be on the map, adds the warp entry of the fortress and the terrains of the occupation states.</value></data>
-  <data name="AddSantaVillageInvitationUpdatePlugIn_Name" xml:space="preserve"><value>Add invitation to santa village</value></data>
-  <data name="AddSantaVillageInvitationUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the invitation to the santa village, which warps the player to the santa village, and a spawn gate to the santa village.</value></data>
   <data name="AddSmallWingsUpdatePlugIn_Name" xml:space="preserve"><value>Add small wings and capes</value></data>
   <data name="AddSmallWingsUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the missing small wings and capes of the in-game shop: Small Cape of Lord, Small Wing of Curse, Small Wings of Elf, Small Wings of Heaven, Small Wings of Satan and Little Warrior's Cloak. Existing items with the same numbers are left unchanged.</value></data>
   <data name="SetIntroducedGameVersionsPlugInBase_Name" xml:space="preserve"><value>Set the game versions of the content</value></data>
@@ -416,6 +414,8 @@
   <data name="AddResetFruitsUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the reset fruits of strength, agility, vitality, energy and command, which take back invested points of a stat and return them as level up points. The packages of the in-game shop which contain them are put on sale.</value></data>
   <data name="AddFreeTicketItemsUpdatePlugIn_Name" xml:space="preserve"><value>Add free event tickets</value></data>
   <data name="AddFreeTicketItemsUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the free tickets of Devil Square, Blood Castle, Illusion Temple and Chaos Castle, which allow to enter the event of any level. The packages of the in-game shop which contain them are put on sale.</value></data>
+  <data name="AddGoblinBoxesUpdatePlugIn_Name" xml:space="preserve"><value>Add golden and silver boxes</value></data>
+  <data name="AddGoblinBoxesUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the Gold Key and Silver Key, the Sealed Golden Box and Sealed Silver Box, which the keys open at the chaos goblin, and the Golden Box and Silver Box, which give an item or money when they're dropped. The packages of the in-game shop which contain the keys are put on sale.</value></data>
   <data name="AddKalimaTicketUpdatePlugIn_Name" xml:space="preserve"><value>Add kalima ticket</value></data>
   <data name="AddKalimaTicketUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the kalima ticket, which opens a gate to the level of Kalima which fits the level of the character. The packages of the in-game shop which contain it are put on sale.</value></data>
   <data name="AddCashShopJeweleryUpdatePlugIn_Name" xml:space="preserve">
@@ -432,8 +432,82 @@
   <data name="AddElitePotionsUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the elite healing, mana and SD potions of the in-game shop, which recover health, mana or shield immediately. The packages of the in-game shop which contain them are put on sale.</value></data>
   <data name="AddCraftingTalismansUpdatePlugIn_Name" xml:space="preserve"><value>Add crafting talismans</value></data>
   <data name="AddCraftingTalismansUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the Talisman of Luck, which increases the success rate of a crafting by its durability in percent, and the Talisman of Chaos Assembly, which keeps the item of a failed +10 to +15 item upgrade. They are added to the craftings which accept them, and the packages of the in-game shop which contain them are put on sale.</value></data>
+  <data name="FixMurenRingOfFireBonusPlugIn_Name" xml:space="preserve"><value>Fix Muren Ring of Fire Bonus</value></data>
+  <data name="FixMurenRingOfFireBonusPlugIn_Description" xml:space="preserve"><value>Gives the Ring of Fire of the Muren ancient set its energy bonus, which was initialized as vitality.</value></data>
+  <data name="RestrictWarpsOutsideOfOriginalWarpWindowPlugIn_Name" xml:space="preserve"><value>Restrict warps outside of the original warp window</value></data>
+  <data name="RestrictWarpsOutsideOfOriginalWarpWindowPlugIn_Description" xml:space="preserve"><value>Makes the warps which the original client doesn't offer in its warp window (Crywolf, Loren Market and the second LaCleon warp) available to game masters only.</value></data>
+  <data name="FixDestroyPhantomArmorNamesPlugIn_Name" xml:space="preserve"><value>Fix Destroy and Phantom Armor Names</value></data>
+  <data name="FixDestroyPhantomArmorNamesPlugIn_Description" xml:space="preserve"><value>Swaps the names of the Phantom (47) and Destroy (48) armor sets and of their set bonuses, which were initialized with each other's name, and corrects the spelling "Destory".</value></data>
+  <data name="HideSkillEffectTimesPlugIn_Name" xml:space="preserve"><value>Hide Skill Effect Times</value></data>
+  <data name="HideSkillEffectTimesPlugIn_Description" xml:space="preserve"><value>Switches off sending the duration of the skill effects which the Season 6 data sent it for: Infinite Arrow and the defense reductions of Fire Slash and Beast Uppercut. The original game shows no time for skill effects. It overwrites the current setting, also one made on the Effect times page.</value></data>
+  <data name="AddSantaVillageInvitationUpdatePlugIn_Name" xml:space="preserve"><value>Add invitation to santa village</value></data>
+  <data name="AddSantaVillageInvitationUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the invitation to the santa village, which warps the player to the santa village, and a spawn gate to the santa village.</value></data>
   <data name="AddHitShockSettingsPlugIn_Name" xml:space="preserve"><value>Add hit-shock settings</value></data>
   <data name="AddHitShockSettingsPlugIn_Description" xml:space="preserve"><value>Adds the global hit-shock chance and damage threshold settings, and the Uniria marker so Uniria-equipped players are excluded from hit shock.</value></data>
   <data name="FixKanturuRuins3LandingUpdatePlugIn_Name" xml:space="preserve"><value>Fix Kanturu Ruins 3 landing area</value></data>
   <data name="FixKanturuRuins3LandingUpdatePlugIn_Description" xml:space="preserve"><value>Narrows the original Kanturu Ruins 3 warp landing area to walkable terrain. Customized destinations and unrelated settings are kept.</value></data>
+  <data name="AddSealItemDropRateUpdatePlugIn_Name" xml:space="preserve"><value>Add the item drop rate of seals</value></data>
+  <data name="AddSealItemDropRateUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the item drop rate of 150 % to the Seals of Wealth and Divinity and the Master Seal of Wealth, and adds the second Seal of Wealth (13/116), which only raises the item drop rate.</value></data>
+  <data name="AdjustIceArrowFreezeDurationUpdatePlugIn_Name" xml:space="preserve"><value>Adjust Ice Arrow freeze duration</value></data>
+  <data name="AdjustIceArrowFreezeDurationUpdatePlugIn_Description" xml:space="preserve"><value>Extends the default Ice Arrow freeze duration, and adds its reduction on successful hits. Customized durations are left unchanged. Also aligns Ice Arrow Str, Chain Drive Str, Strike of Destruction Str and Poison Str with their base skills magic effects.</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInSeason6_Name" xml:space="preserve"><value>Season 6 monster spawns of the field maps</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInSeason6_Description" xml:space="preserve"><value>Brings the monster spawns of the field maps to the Season 6 data: Devias, Noria and Elvenland get the layout of smaller areas and single spots instead of quarters of the map, with the spiders of Noria and Elvenland. Missing spawns of Dungeon, Lost Tower, Icarus, Kalima 3, 6 and 7, Land of Trials, Aida, Crywolf Fortress, Kanturu Relics and Barracks of Balgass are added and surplus ones removed, spawns with wrong coordinates in Crywolf Fortress, Barracks of Balgass, Swamp of Calmness, Vulcanus and Karutan corrected. Also removes the duplicate monster spawns of Dungeon (254) and Lost Tower (2). Customized spawns of the field monsters of Devias, Noria and Elvenland are overwritten.</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInBase_Name" xml:space="preserve"><value>Season 6 monster spawns of the field maps</value></data>
+  <data name="FieldMonsterSpawnsUpdatePlugInBase_Description" xml:space="preserve"><value>Brings the monster spawns of the field maps to the Season 6 data, which this version uses as well: Devias and Noria get the layout of smaller areas and single spots instead of quarters of the map, without the spiders of Season 6. Missing spawns of Dungeon, Lost Tower and Icarus are added and surplus ones removed. Also removes the duplicate monster spawns of Dungeon (254) and Lost Tower (2). Customized spawns of the field monsters of Devias and Noria are overwritten.</value></data>
+  <data name="MonsterStatsUpdatePlugInBase_Name" xml:space="preserve"><value>Season 6 monster stats</value></data>
+  <data name="MonsterStatsUpdatePlugInBase_Description" xml:space="preserve"><value>Sets level, health, damage, defense, attack and defense rate, ranges, delays and respawn times of the monsters to the Season 6 data, which this version uses as well. It corrects field monsters, invasion monsters and guards and, in Season 6, Chaos Castle 4 and 7 and Devil Square 7. Customized values of these stats are overwritten. In Season 6, renames the monster 275 of Kalima 7 from "Illusion of Kundun 7" to "Kundun".</value></data>
+  <data name="MonsterResistancesUpdatePlugInBase_Name" xml:space="preserve"><value>Monster elemental resistances</value></data>
+  <data name="MonsterResistancesUpdatePlugInBase_Description" xml:space="preserve"><value>Converts the elemental resistances of the monsters to whole numbers from 0 to 255, which the resistance check expects; until now, monsters resisted ice, poison and lightning effects in only about 1 to 2 % of the hits. Corrects the resistances which the import of the monster data assigned to the wrong elements (ice and poison swapped, lightning stored as water) and sets the Season 6 values. Customized resistances are converted to the new scale, but not changed otherwise.</value></data>
+  <data name="AddProtectionTalismansUpdatePlugIn_Name" xml:space="preserve"><value>Add the protection talismans</value></data>
+  <data name="AddProtectionTalismansUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the Talisman of Guardian, which protects from the death penalty, and the Talisman of Item Protection, which keeps the durability of the equipped items.</value></data>
+  <data name="FixCrywolfGateTerrainUpdatePlugIn_Name" xml:space="preserve"><value>Fix the Crywolf entrance in Valley of Loren</value></data>
+  <data name="FixCrywolfGateTerrainUpdatePlugIn_Description" xml:space="preserve"><value>Makes the south entry of the gate to Crywolf Fortress in Valley of Loren walkable, which players use outside of Castle Siege. The north entry and all other tiles are kept.</value></data>
+  <data name="AddTalismanOfResurrectionUpdatePlugIn_Name" xml:space="preserve"><value>Add the Talisman of Resurrection</value></data>
+  <data name="AddTalismanOfResurrectionUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the Talisman of Resurrection, which respawns a dead player at the place of its death. The packages of the in-game shop which contain it are put on sale.</value></data>
+  <data name="AddLuckyCoinUpdatePlugIn_Name" xml:space="preserve"><value>Add the lucky coin</value></data>
+  <data name="AddLuckyCoinUpdatePlugIn_Description" xml:space="preserve"><value>This update adds the lucky coin, which is registered or exchanged for items at the NPC Delgado in Devias, and opens his lucky coin dialog.</value></data>
+  <data name="AddGladiatorsHonorUpdatePlugIn_Name" xml:space="preserve">
+    <value>Add the Gladiator's Honor</value>
+  </data>
+  <data name="AddGladiatorsHonorUpdatePlugIn_Description" xml:space="preserve">
+    <value>This update adds the Gladiator's Honor, which increases the experience in Vulcanus by 20 % for 30 minutes.</value>
+  </data>
+  <data name="AddRentalItemRulesUpdatePlugIn_Name" xml:space="preserve">
+    <value>Sell the rented items of the cash shop</value>
+  </data>
+  <data name="AddRentalItemRulesUpdatePlugIn_Description" xml:space="preserve">
+    <value>This update puts the time-limited pets, rings, necklaces and small wings of the cash shop on sale, which are delivered as items which expire, and lets them be sold to an NPC once they expired, for the small fixed price which the client shows.</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugInSeason6_Name" xml:space="preserve"><value>Season 6 NPC spawns</value></data>
+  <data name="NpcSpawnsUpdatePlugInSeason6_Description" xml:space="preserve"><value>Brings the NPCs to their Season 6 positions and looking directions (Lorencia, Devias, Noria, Arena, Atlans, Elvenland, Aida, Crywolf Fortress, Valley of Loren, Karutan, Kanturu and Illusion Temple), adds the missing Elf Soldier of Devias, the two missing Elf Soldiers of Noria and the Golden Archer of Devias, and removes the NPCs which Season 6 doesn't have: of the older versions the Potion Girls of Noria and Lost Tower, the Safety Guardians of Lost Tower, Arena and Atlans, the guard at 114/125 and the Golden Archer of Lorencia; Lugard, Priest Devin and Mirage of Devias, which Season 6 has only in Elvenland and Crywolf Fortress; and the second Crown of Valley of Loren. Customized positions and directions of these NPCs are overwritten.</value></data>
+  <data name="IllusionTempleDataUpdatePlugIn_Name" xml:space="preserve">
+    <value>Illusion Temple Data</value>
+  </data>
+  <data name="IllusionTempleDataUpdatePlugIn_Description" xml:space="preserve">
+    <value>This update creates the configuration data for the illusion temple event and assigns the event dialog to the Mirage NPC. If the items 13/50 and 13/51 have swapped data (Scroll of Blood and Illusion Sorcerer Covenant), it gives them their original data back: names, sizes, durability, levels and drops, the drop item groups, the temple tickets and the merchant items of 13/51. If both have their original names, but the sizes are still swapped, Lumen the Barmaid sells 13/51 instead of 13/50, or a drop item group of the covenant contains 13/51 instead of 13/50, it sets their original sizes, points the temple tickets of 13/50 at 13/51, and moves only these merchant items of Lumen the Barmaid and drop item groups of the covenant from 13/51 to 13/50. A Scroll of Blood which you added next to the covenant stays. If only one of the two has the swapped name, it changes neither. References to the two items which you added yourself (craftings, quests, item drops, plug-in settings) stay as they are: check them after the update.</value>
+  </data>
+  <data name="NpcSpawnsUpdatePlugIn075_Name" xml:space="preserve"><value>0.75 NPC spawns</value></data>
+  <data name="NpcSpawnsUpdatePlugIn075_Description" xml:space="preserve"><value>Brings the NPCs of 0.75 to the Season 6 data: removes the two Potion Girls of Noria, the Potion Girl and the Safety Guardian of Lost Tower, the Safety Guardians of Arena and Atlans and the Crossbow Guard at 114/125 in Lorencia, and moves the Soccer Ball and the Arena Guard of Arena to their Season 6 positions.</value></data>
+  <data name="NpcSpawnsUpdatePlugIn095d_Name" xml:space="preserve"><value>0.95d NPC spawns</value></data>
+  <data name="NpcSpawnsUpdatePlugIn095d_Description" xml:space="preserve"><value>Brings the NPCs of 0.95d to the Season 6 data: removes the two Potion Girls of Noria, the Potion Girl and the Safety Guardian of Lost Tower, the Safety Guardians of Arena and Atlans and the Crossbow Guard at 114/125 in Lorencia, moves the Soccer Ball and the Arena Guard of Arena to their Season 6 positions and the Golden Archer from Lorencia to Devias (226/66).</value></data>
+  <data name="AddSocketCountTablesUpdatePlugIn_Name" xml:space="preserve"><value>Socket count tables</value></data>
+  <data name="AddSocketCountTablesUpdatePlugIn_Description" xml:space="preserve"><value>Socket items drop with one socket most of the time and with three (five for two-handed weapons) rarely, instead of with any number up to the maximum at the same chance. Raises the maximum sockets of the socket items to five; the tables restrict the drops. Socket items which already have a socket count table keep it.</value></data>
+  <data name="AddFigurinesAndCharmsUpdatePlugIn_Name" xml:space="preserve">
+    <value>Add the figurines and charms</value>
+  </data>
+  <data name="AddFigurinesAndCharmsUpdatePlugIn_Description" xml:space="preserve">
+    <value>This update adds the Hawk and Goat Figurines and the (Golden) Oak and Maple Charms, which give their bonuses while they're used inside the inventory.</value>
+  </data>
+  <data name="AddLordsMixUpdatePlugIn_Name" xml:space="preserve">
+    <value>Lord's Mix</value>
+  </data>
+  <data name="AddLordsMixUpdatePlugIn_Description" xml:space="preserve">
+    <value>Adds the Lord's Mix to the castle senior: once per day, the guild master of the guild which owns the castle mixes 30 Jewels of Guardian, a Packed Jewel of Bless and a Packed Jewel of Soul (30 jewels each) and 1,000,000,000 zen into an excellent weapon or armor with two to four excellent options, or a normal one. Sets the limit of one mix per day, if there's no limit yet.</value>
+  </data>
+  <data name="AddWornHorseshoeUpdatePlugIn_Name" xml:space="preserve">
+    <value>Add the worn horseshoe</value>
+  </data>
+  <data name="AddWornHorseshoeUpdatePlugIn_Description" xml:space="preserve">
+    <value>This update adds the Worn Horseshoe, which increases the item drop rate by 20 % while it's used inside the inventory.</value>
+  </data>
 </root>

@@ -169,16 +169,16 @@ internal class ChaosCastle4 : BaseMapInitializer
             var attributes = new Dictionary<AttributeDefinition, float>
             {
                 { Stats.Level, 65 },
-                { Stats.MaximumHealth, 65000 },
+                { Stats.MaximumHealth, 6500 },
                 { Stats.MinimumPhysBaseDmg, 185 },
                 { Stats.MaximumPhysBaseDmg, 210 },
                 { Stats.DefenseBase, 145 },
                 { Stats.AttackRatePvm, 320 },
                 { Stats.DefenseRatePvm, 110 },
-                { Stats.PoisonResistance, 4f / 255 },
-                { Stats.IceResistance, 4f / 255 },
-                { Stats.FireResistance, 4f / 255 },
-                { Stats.LightningResistance, 4f / 255 },
+                { Stats.IceResistance, 4 },
+                { Stats.PoisonResistance, 4 },
+                { Stats.LightningResistance, 4 },
+                { Stats.FireResistance, 4 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);
@@ -208,10 +208,10 @@ internal class ChaosCastle4 : BaseMapInitializer
                 { Stats.DefenseBase, 160 },
                 { Stats.AttackRatePvm, 350 },
                 { Stats.DefenseRatePvm, 120 },
-                { Stats.PoisonResistance, 4f / 255 },
-                { Stats.IceResistance, 4f / 255 },
-                { Stats.FireResistance, 4f / 255 },
-                { Stats.LightningResistance, 4f / 255 },
+                { Stats.IceResistance, 4 },
+                { Stats.PoisonResistance, 4 },
+                { Stats.LightningResistance, 4 },
+                { Stats.FireResistance, 4 },
             };
 
             monster.AddAttributes(attributes, this.Context, this.GameConfiguration);

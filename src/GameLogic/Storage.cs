@@ -35,7 +35,15 @@ public class Storage : IStorage
     /// <param name="boxOffset">The box offset, which is the first index where the 2-dimensional box starts.</param>
     /// <param name="slotOffset">The slot offset, which means at which <see cref="Item.ItemSlot" /> this instance starts.</param>
     /// <param name="itemStorage">The item storage.</param>
-    public Storage(int numberOfSlots, int boxOffset, int slotOffset, ItemStorage itemStorage)
+    /// <param name="putAsideItemWithoutPlace">
+    /// Is called for each item which finds no free place, e.g. because the size of its definition grew.
+    /// When it returns <c>true</c>, it took the item, and the item is removed from the <paramref name="itemStorage"/>
+    /// afterwards, so it isn't lost when the function throws. When it returns <c>false</c>, the item stays in the
+    /// <paramref name="itemStorage"/>, but not in this storage; then the caller must place or remove it,
+    /// otherwise another item may be placed over it and both are saved at the same place.
+    /// When it's <c>null</c>, such an item throws an <see cref="ArgumentException"/>.
+    /// </param>
+    public Storage(int numberOfSlots, int boxOffset, int slotOffset, ItemStorage itemStorage, Func<Item, bool>? putAsideItemWithoutPlace = null)
     {
         this.ItemArray = new Item?[numberOfSlots];
         this._rows = (numberOfSlots - boxOffset) / InventoryConstants.RowSize;
@@ -78,9 +86,22 @@ public class Storage : IStorage
             }
         }
 
-        if (unfittingItems.Count > 0)
+        if (unfittingItems.Count == 0)
+        {
+            return;
+        }
+
+        if (putAsideItemWithoutPlace is null)
         {
             throw new ArgumentException($"Some items do not fit into the storage: {string.Join(';', unfittingItems)}");
+        }
+
+        foreach (var item in unfittingItems)
+        {
+            if (putAsideItemWithoutPlace(item))
+            {
+                this.ItemStorage.Items.Remove(item);
+            }
         }
     }
 
@@ -141,7 +162,7 @@ public class Storage : IStorage
     }
 
     /// <inheritdoc/>
-    public async ValueTask<bool> AddItemAsync(Item item)
+    public virtual async ValueTask<bool> AddItemAsync(Item item)
     {
         var freeSlot = this.CheckInvSpace(item);
         if (freeSlot is null)
@@ -190,21 +211,20 @@ public class Storage : IStorage
     }
 
     /// <inheritdoc/>
+    public bool FitsAfterRemoval(ItemDefinition definition, ICollection<Item> removedItems)
+    {
+        return this.CanAddItems([new TemporaryItem { Definition = definition }], removedItems);
+    }
+
+    /// <inheritdoc/>
     public byte? CheckInvSpace(Item item)
     {
         item.ThrowNotInitializedProperty(item.Definition is null, nameof(item.Definition));
 
         // Find free Space in the Inventory and return the slot where the Item can be placed
-        // Check every slot if it fits
-        for (byte row = 0; row < this._rows; row++)
+        if (FindPlace(this._usedSlots, item.Definition.Width, item.Definition.Height) is { } place)
         {
-            for (byte column = 0; column < InventoryConstants.RowSize; column++)
-            {
-                if (this.FitsInside(row, column, item.Definition.Width, item.Definition.Height))
-                {
-                    return (byte)((row * InventoryConstants.RowSize) + column + this._boxOffset + this._slotOffset);
-                }
-            }
+            return (byte)((place.Row * InventoryConstants.RowSize) + place.Column + this._boxOffset + this._slotOffset);
         }
 
         foreach (var extension in this.Extensions)
@@ -216,6 +236,12 @@ public class Storage : IStorage
         }
 
         return null;
+    }
+
+    /// <inheritdoc/>
+    public bool CanAddItems(IEnumerable<Item> items, ICollection<Item>? removedItems = null)
+    {
+        return this.TakeWhatFits(items.ToList(), removedItems ?? []).Count == 0;
     }
 
     /// <inheritdoc/>
@@ -291,7 +317,7 @@ public class Storage : IStorage
             {
                 var columnIndex = this.GetColumnIndex(slot);
                 var rowIndex = this.GetRowIndex(slot);
-                this.SetItemUsedSlots(item, columnIndex, rowIndex, false);
+                SetUsedSlots(this._usedSlots, item, columnIndex, rowIndex, false);
             }
 
             this.ItemStorage.Items.Remove(item);
@@ -343,6 +369,31 @@ public class Storage : IStorage
     }
 
     /// <summary>
+    /// Puts an item, which found no free place when this storage or one of its extensions was loaded,
+    /// into the first free place of this storage or its extensions.
+    /// </summary>
+    /// <param name="item">The item, which still belongs to the item storage.</param>
+    /// <returns><c>True</c>, if the item found a place; Otherwise, <c>false</c>.</returns>
+    protected bool TryAddItemWithoutPlace(Item item)
+    {
+        if (this.CheckInvSpace(item) is not { } freeSlot)
+        {
+            return false;
+        }
+
+        var storage = this.ContainsSlot(freeSlot)
+            ? this
+            : this.Extensions.OfType<Storage>().FirstOrDefault(extension => extension.ContainsSlot(freeSlot));
+        if (storage?.AddItemInternal((byte)(freeSlot - storage._slotOffset), item) is not true)
+        {
+            return false;
+        }
+
+        item.ItemSlot = freeSlot;
+        return true;
+    }
+
+    /// <summary>
     /// Adds the item to the internal data structures.
     /// </summary>
     /// <param name="slot">The slot.</param>
@@ -371,13 +422,71 @@ public class Storage : IStorage
         var columnIndex = this.GetColumnIndex(slot);
         var rowIndex = this.GetRowIndex(slot);
         var itemDef = item.Definition;
-        if (!this.FitsInside((byte)rowIndex, (byte)columnIndex, itemDef.Width, itemDef.Height))
+        if (!FitsInside(this._usedSlots, (byte)rowIndex, (byte)columnIndex, itemDef.Width, itemDef.Height))
         {
             return false;
         }
 
         this.ItemArray[slot] = item;
-        this.SetItemUsedSlots(item, columnIndex, rowIndex);
+        SetUsedSlots(this._usedSlots, item, columnIndex, rowIndex, true);
+        return true;
+    }
+
+    private static void SetUsedSlots(bool[,] usedSlots, Item item, int columnIndex, int rowIndex, bool used)
+    {
+        for (int r = rowIndex; r < rowIndex + item.Definition!.Height; r++)
+        {
+            for (int c = columnIndex; c < columnIndex + item.Definition.Width; c++)
+            {
+                if (r < usedSlots.GetLength(0) && c < usedSlots.GetLength(1))
+                {
+                    usedSlots[r, c] = used;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Finds the first place, row by row, where an item of the specified size fits into the used slots.
+    /// </summary>
+    private static (byte Row, byte Column)? FindPlace(bool[,] usedSlots, byte width, byte height)
+    {
+        for (byte row = 0; row < usedSlots.GetLength(0); row++)
+        {
+            for (byte column = 0; column < usedSlots.GetLength(1); column++)
+            {
+                if (FitsInside(usedSlots, row, column, width, height))
+                {
+                    return (row, column);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static bool FitsInside(bool[,] usedSlots, byte row, byte column, byte x, byte y)
+    {
+        int rowCount = usedSlots.GetLength(0);
+        int columnCount = usedSlots.GetLength(1);
+        if ((rowCount >= row + y) && (columnCount >= column + x))
+        {
+            for (byte currentRow = row; currentRow < row + y; currentRow++)
+            {
+                for (byte currentColumn = column; currentColumn < column + x; currentColumn++)
+                {
+                    if (usedSlots[currentRow, currentColumn])
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        else
+        {
+            return false;
+        }
+
         return true;
     }
 
@@ -393,24 +502,66 @@ public class Storage : IStorage
         return result;
     }
 
+    /// <summary>
+    /// Places the items, in their order, where <see cref="CheckInvSpace"/> would find a place for them, without changing
+    /// the storage: an item which fits into this storage takes its place here, the others go to the extensions. The
+    /// cells of the removed items which this storage holds count as free. An item without definition finds no place.
+    /// </summary>
+    /// <remarks>
+    /// An extension which isn't a <see cref="Storage"/> takes all the remaining items or none of them, so items may be
+    /// refused which would fit into it partly, but no item is accepted which finds no place.
+    /// </remarks>
+    /// <param name="items">The items.</param>
+    /// <param name="removedItems">The removed items.</param>
+    /// <returns>The items which find no place.</returns>
+    private List<Item> TakeWhatFits(List<Item> items, ICollection<Item> removedItems)
+    {
+        var usedSlots = (bool[,])this._usedSlots.Clone();
+        for (var slot = this._boxOffset; slot < this.ItemArray.Length; slot++)
+        {
+            if (this.ItemArray[slot] is { } item && removedItems.Contains(item))
+            {
+                SetUsedSlots(usedSlots, item, this.GetColumnIndex(slot), this.GetRowIndex(slot), false);
+            }
+        }
+
+        var leftovers = new List<Item>();
+        foreach (var item in items)
+        {
+            if (item.Definition is { } definition && FindPlace(usedSlots, definition.Width, definition.Height) is { } place)
+            {
+                SetUsedSlots(usedSlots, item, place.Column, place.Row, true);
+            }
+            else
+            {
+                leftovers.Add(item);
+            }
+        }
+
+        foreach (var extension in this.Extensions)
+        {
+            if (leftovers.Count == 0)
+            {
+                break;
+            }
+
+            // Of another storage, e.g. of a plug-in, it's only known whether it takes all the items or not. When it
+            // doesn't, it's assumed to take none of them, so the next extensions must take all of them.
+            leftovers = extension switch
+            {
+                Storage storage => storage.TakeWhatFits(leftovers, removedItems),
+                _ when extension.CanAddItems(leftovers, removedItems) => [],
+                _ => leftovers,
+            };
+        }
+
+        return leftovers;
+    }
+
     private byte GetSlot(int column, int row)
     {
         byte result = (byte)(this._slotOffset + this._boxOffset + column + (row * InventoryConstants.RowSize));
         return result;
-    }
-
-    private void SetItemUsedSlots(Item item, int columnIndex, int rowIndex, bool used = true)
-    {
-        for (int r = rowIndex; r < rowIndex + item.Definition!.Height; r++)
-        {
-            for (int c = columnIndex; c < columnIndex + item.Definition.Width; c++)
-            {
-                if (r < this._rows && c < InventoryConstants.RowSize)
-                {
-                    this._usedSlots[r, c] = used;
-                }
-            }
-        }
     }
 
     private int GetColumnIndex(int slot)
@@ -421,30 +572,5 @@ public class Storage : IStorage
     private int GetRowIndex(int slot)
     {
         return (slot - this._boxOffset) / InventoryConstants.RowSize;
-    }
-
-    private bool FitsInside(byte row, byte column, byte x, byte y)
-    {
-        int rowCount = this._usedSlots.GetLength(0);
-        int columnCount = this._usedSlots.GetLength(1);
-        if ((rowCount >= row + y) && (columnCount >= column + x))
-        {
-            for (byte currentRow = row; currentRow < row + y; currentRow++)
-            {
-                for (byte currentColumn = column; currentColumn < column + x; currentColumn++)
-                {
-                    if (this._usedSlots[currentRow, currentColumn])
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-        else
-        {
-            return false;
-        }
-
-        return true;
     }
 }

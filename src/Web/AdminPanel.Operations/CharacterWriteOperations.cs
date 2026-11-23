@@ -30,9 +30,14 @@ public sealed class CharacterWriteOperations(IPersistenceContextProvider persist
 {
     private static readonly IReadOnlyDictionary<string, AttributeDefinition> EditableStats = new Dictionary<string, AttributeDefinition>(StringComparer.Ordinal)
     {
-        ["level"] = Stats.Level, ["masterLevel"] = Stats.MasterLevel, ["resets"] = Stats.Resets,
-        ["strength"] = Stats.BaseStrength, ["agility"] = Stats.BaseAgility, ["vitality"] = Stats.BaseVitality,
-        ["energy"] = Stats.BaseEnergy, ["leadership"] = Stats.BaseLeadership,
+        ["level"] = Stats.Level,
+        ["masterLevel"] = Stats.MasterLevel,
+        ["resets"] = Stats.Resets,
+        ["strength"] = Stats.BaseStrength,
+        ["agility"] = Stats.BaseAgility,
+        ["vitality"] = Stats.BaseVitality,
+        ["energy"] = Stats.BaseEnergy,
+        ["leadership"] = Stats.BaseLeadership,
     };
 
     /// <summary>Updates level, stats, money or position of an offline character after preview.</summary>
@@ -63,8 +68,10 @@ public sealed class CharacterWriteOperations(IPersistenceContextProvider persist
     {
         ["id"] = character.Id.ToString(),
         ["stats"] = JsonSerializer.SerializeToNode(character.Attributes.OrderBy(a => a.Definition.Id).Select(a => new { id = a.Definition.Id, a.Value })),
-        ["money"] = character.Inventory?.Money, ["mapId"] = character.CurrentMap?.GetId().ToString(),
-        ["x"] = character.PositionX, ["y"] = character.PositionY,
+        ["money"] = character.Inventory?.Money,
+        ["mapId"] = character.CurrentMap?.GetId().ToString(),
+        ["x"] = character.PositionX,
+        ["y"] = character.PositionY,
     };
 
     private static void ValidateStats(JsonObject patch, Character character, GameConfiguration config)
@@ -160,13 +167,18 @@ public sealed class CharacterWriteOperations(IPersistenceContextProvider persist
                 }
 
                 // Use detached storage/items for placement checks: Storage repairs malformed layouts in its constructor.
+                // An item which finds no place, e.g. because its definition grew, waits for space in the inventory
+                // when the storage is loaded in the game, so it takes no place here.
                 var detached = new PreviewStorage(storage);
-                var grid = vault ? new Storage(InventoryConstants.WarehouseSize, detached)
+                Func<Item, bool> ignoreItemWithoutPlace = _ => false;
+                var grid = vault
+                    ? new Storage(InventoryConstants.WarehouseSize, 0, 0, detached, ignoreItemWithoutPlace)
                     : new Storage(
                         InventoryConstants.GetInventorySize(0),
                         InventoryConstants.EquippableSlotsCount,
                         0,
-                        new ItemStorageAdapter(detached, 0, InventoryConstants.GetInventorySize(0)));
+                        new ItemStorageAdapter(detached, 0, InventoryConstants.GetInventorySize(0)),
+                        ignoreItemWithoutPlace);
                 slot = grid.CheckInvSpace(new Item { Definition = definition, Level = level });
                 if (slot is null)
                 {

@@ -131,12 +131,27 @@ public class MoveItemAction
     /// Gets the message to show when the item rules of the item definition don't allow
     /// moving it into the target storage, or <c>null</c> when they do.
     /// </summary>
+    /// <remarks>
+    /// A time-limited item, valid or expired, stays in the inventory of its owner: its remaining time must not
+    /// pass to another player, and it's no crafting ingredient (some crafting rates depend on the item price).
+    /// </remarks>
     private static string? GetRuleBlockingMove(Item item, Storages toStorage)
     {
         var definition = item.Definition;
         if (definition is null)
         {
             return null;
+        }
+
+        if (item.IsTimeLimited() && toStorage != Storages.Inventory)
+        {
+            return toStorage switch
+            {
+                Storages.Trade => nameof(PlayerMessage.ItemCannotBeTraded),
+                Storages.Vault => nameof(PlayerMessage.ItemCannotBeStored),
+                Storages.PersonalStore => nameof(PlayerMessage.ItemCannotBeSoldInPersonalStore),
+                _ => nameof(PlayerMessage.TimeLimitedItemCannotBeMixed),
+            };
         }
 
         return toStorage switch
@@ -170,6 +185,11 @@ public class MoveItemAction
     private async ValueTask<bool> MoveNormalAsync(Player player, Storages fromStorage, byte fromSlot, Storages toStorage, byte toSlot, IStorage fromItemStorage, Item item, IStorage toItemStorage)
     {
         var wasEquipped = fromItemStorage == player.Inventory && fromSlot <= LastEquippableItemSlotIndex;
+
+        // An item which is used inside the inventory, like a charm, stays in use while it's moved inside the inventory.
+        using var keepInventoryUse = fromItemStorage == player.Inventory && toItemStorage == player.Inventory && toSlot > LastEquippableItemSlotIndex
+            ? player.Inventory.AsInventoryStorage?.KeepInventoryUseWhileMoving(item)
+            : null;
         await fromItemStorage.RemoveItemAsync(item).ConfigureAwait(false);
         var wasAdded = await toItemStorage.AddItemAsync(toSlot, item).ConfigureAwait(false);
         if (!wasAdded || (wasEquipped && !this.CompliesWithMapRequirements(player)))
@@ -329,6 +349,13 @@ public class MoveItemAction
                 return Movement.None;
             }
 
+            if (item.IsExpired(DateTime.UtcNow))
+            {
+                // Like the client, which refuses to equip an expired item.
+                await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.YouCantWearThisItem)).ConfigureAwait(false);
+                return Movement.None;
+            }
+
             if (player.CurrentMiniGame is { } miniGame
                 && !miniGame.IsItemAllowedToEquip(item))
             {
@@ -478,7 +505,7 @@ public class MoveItemAction
             Storages.PersonalStore => state == PlayerState.EnteredWorld && !(player.ShopStorage?.StoreOpen ?? true),
             Storages.Vault => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.VaultStorage,
             Storages.Trade => state == PlayerState.TradeOpened,
-            Storages.ChaosMachine => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.ChaosMachine,
+            Storages.ChaosMachine => state == PlayerState.NpcDialogOpened && (openedWindow == NpcWindow.ChaosMachine || openedWindow == NpcWindow.CastleSeniorNPC),
             Storages.PetTrainer => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.PetTrainer,
             Storages.Refinery => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.ElphisRefinery,
             Storages.Smelting => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.RefineStoneMaking,
@@ -489,8 +516,9 @@ public class MoveItemAction
             Storages.SeedSphereCrafting => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.SeedMaster,
             Storages.SeedMountCrafting => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.SeedResearcher,
             Storages.SeedUnmountCrafting => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.SeedResearcher,
-            Storages.LuckyItemTrade => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.CombineLuckyItem,
-            Storages.LuckyItemRefinery => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.CombineLuckyItem,
+
+            // These IDs select dialog operations over one temporary grid; crafting requests select recipes.
+            Storages.LuckyItemTrade or Storages.LuckyItemRefinery => state == PlayerState.NpcDialogOpened && openedWindow == NpcWindow.CombineLuckyItem,
             _ => false,
         };
     }

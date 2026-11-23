@@ -39,6 +39,8 @@ public static class GameConfigurationHelper
         { typeof(ItemOfItemSet), c => c.ItemSetGroups.SelectMany(o => o.Items) },
         { typeof(ItemLevelBonusTable), c => c.ItemLevelBonusTables },
         { typeof(LevelBonus), c => c.ItemLevelBonusTables.SelectMany(i => i.BonusPerLevel) },
+        { typeof(WeightedValueTable), c => c.WeightedValueTables },
+        { typeof(WeightedValue), c => c.WeightedValueTables.SelectMany(t => t.Values) },
         { typeof(ItemStatProfile), c => c.ItemStatProfiles },
         { typeof(ItemStatTerms), c => c.ItemStatProfiles.SelectMany(p => p.StatTerms) },
         { typeof(ItemRequirementFormula), c => c.ItemStatProfiles.SelectMany(p => p.RequirementFormulas) },
@@ -97,6 +99,7 @@ public static class GameConfigurationHelper
                 .Concat(c.Items.SelectMany(item => item.Requirements))
                 .Concat(c.Skills.SelectMany(skill => skill.Requirements))
                 .Concat(c.Skills.SelectMany(skill => skill.ConsumeRequirements))
+                .Concat(c.WarpList.SelectMany(warp => warp.Requirements))
         },
         { typeof(MonsterDefinition), c => c.Monsters },
         { typeof(ItemStorage), c => c.Monsters.Select(m => m.MerchantStore).WhereNotNull() },

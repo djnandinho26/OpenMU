@@ -6451,6 +6451,24 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The maximum amount of Zen a regular player pays to clear the PK status, regardless of the PK count. The default value does not limit the cost..
+        /// </summary>
+        public static string PKClearConfiguration_MaximumZenCost_Description {
+            get {
+                return ResourceManager.GetString("PKClearConfiguration_MaximumZenCost_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum Zen Cost.
+        /// </summary>
+        public static string PKClearConfiguration_MaximumZenCost_Name {
+            get {
+                return ResourceManager.GetString("PKClearConfiguration_MaximumZenCost_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The amount of Zen required to clear one PK count..
         /// </summary>
         public static string PKClearConfiguration_ZenCostPerKill_Description {
@@ -9060,5 +9078,11 @@ namespace MUnique.OpenMU.GameLogic.Properties {
                 return ResourceManager.GetString("WorldChatChatCommandPlugIn_Name", resourceCulture);
             }
         }
+
+        /// <summary>Gets the localized TalismanOfMobilityConsumeHandlerPlugIn_Description text.</summary>
+        public static string TalismanOfMobilityConsumeHandlerPlugIn_Description => ResourceManager.GetString("TalismanOfMobilityConsumeHandlerPlugIn_Description", resourceCulture)!;
+
+        /// <summary>Gets the localized TalismanOfMobilityConsumeHandlerPlugIn_Name text.</summary>
+        public static string TalismanOfMobilityConsumeHandlerPlugIn_Name => ResourceManager.GetString("TalismanOfMobilityConsumeHandlerPlugIn_Name", resourceCulture)!;
     }
 }

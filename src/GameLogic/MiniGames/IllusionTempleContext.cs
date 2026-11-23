@@ -261,6 +261,25 @@ public sealed class IllusionTempleContext : MiniGameContext
     protected override int MinimumPlayerCount => this.Definition.MinimumPlayerCount > 0 ? this.Definition.MinimumPlayerCount : 2;
 
     /// <summary>
+    /// Gets the team of the player.
+    /// </summary>
+    /// <param name="player">The player.</param>
+    /// <returns>The team of the player, or <c>null</c> if the player is not part of any team of this match.</returns>
+    public IllusionTempleTeam? GetTeam(Player player)
+        => this._teams.TryGetValue(player, out var team) ? team : null;
+
+    /// <summary>
+    /// Determines whether the player belongs to the team which currently leads the match.
+    /// Once the match is over, these are the winners.
+    /// </summary>
+    /// <param name="player">The player.</param>
+    /// <returns><c>true</c>, if the player is a member of the leading team; otherwise, <c>false</c>.</returns>
+    public bool IsInWinningTeam(Player player)
+        => this.Score.LeadingTeam is { } leadingTeam
+           && this._teams.TryGetValue(player, out var team)
+           && team == leadingTeam;
+
+    /// <summary>
     /// Gets the spawn gate of the player.
     /// </summary>
     /// <param name="player">The player.</param>
@@ -475,7 +494,7 @@ public sealed class IllusionTempleContext : MiniGameContext
         if (this._claimedRewards.TryAdd(player, true) && this.IsWinner(player))
         {
             var rank = this._winnerRanks.GetValueOrDefault(player, 1);
-            await this.GiveRewardsAndGetBonusScoreAsync(player, rank, reward => !IsExperienceReward(reward)).ConfigureAwait(false);
+            await this.GiveRewardsAndGetBonusScoreAsync(player, rank, this._winnerRanks.Count, reward => !IsExperienceReward(reward)).ConfigureAwait(false);
         }
 
         await this.RemoveRelicFromInventoryAsync(player).ConfigureAwait(false);
@@ -489,10 +508,7 @@ public sealed class IllusionTempleContext : MiniGameContext
     /// as soon as fewer than two of its members remain, which would silently drop the rewards of
     /// everyone but the first winner.
     /// </remarks>
-    protected override bool IsWinner(Player player)
-        => this.Score.LeadingTeam is { } leadingTeam
-           && this._teams.TryGetValue(player, out var team)
-           && team == leadingTeam;
+    protected override bool IsWinner(Player player) => this.IsInWinningTeam(player);
 
     /// <inheritdoc />
     /// <remarks>
@@ -785,7 +801,8 @@ public sealed class IllusionTempleContext : MiniGameContext
     /// </remarks>
     protected override async ValueTask GameEndedAsync(ICollection<Player> finishers)
     {
-        foreach (var winner in finishers.Where(this.IsWinner))
+        var winners = finishers.Where(this.IsWinner).ToList();
+        foreach (var winner in winners)
         {
             var rank = this._winnerRanks.Count + 1;
             this._winnerRanks[winner] = rank;
@@ -795,7 +812,7 @@ public sealed class IllusionTempleContext : MiniGameContext
             // seconds, and the experience itself still runs through the server's experience rates and
             // the maximum level.
             var experienceBefore = winner.SelectedCharacter?.Experience ?? 0;
-            await this.GiveRewardsAndGetBonusScoreAsync(winner, rank, IsExperienceReward).ConfigureAwait(false);
+            await this.GiveRewardsAndGetBonusScoreAsync(winner, rank, winners.Count, IsExperienceReward).ConfigureAwait(false);
             var experienceAfter = winner.SelectedCharacter?.Experience ?? 0;
             this._grantedExperience[winner] = (int)Math.Clamp(experienceAfter - experienceBefore, 0, int.MaxValue);
         }
@@ -1002,7 +1019,14 @@ public sealed class IllusionTempleContext : MiniGameContext
             return;
         }
 
-        var droppedItem = new DroppedItem(relicItem, player.Position, map, player);
+        // Only the participants of the match may pick the relic up, during its whole lifetime on the ground.
+        // Without that, anybody on the map could take it as soon as the owner pickup priority of the
+        // dropped item is over.
+        var participants = this._teams.Keys.Cast<object>().ToList();
+        var droppedItem = new DroppedItem(relicItem, player.Position, map, player, participants)
+        {
+            OwnerOnly = true,
+        };
         await map.AddAsync(droppedItem).ConfigureAwait(false);
         await player.Inventory!.RemoveItemAsync(relicItem).ConfigureAwait(false);
         await player.InvokeViewPlugInAsync<IItemDropResultPlugIn>(p => p.ItemDropResultAsync(relicItem.ItemSlot, true)).ConfigureAwait(false);

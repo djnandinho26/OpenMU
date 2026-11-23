@@ -1,0 +1,30 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    # Executa automaticamente a cada 2 horas
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Permite rodar manualmente pela aba Actions
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do seu fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sincronizar com MUnique/OpenMU (master)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git remote add upstream https://github.com/MUnique/OpenMU.git
+          git fetch upstream
+          git checkout master
+          git merge upstream/master --no-edit
+          git push origin master
